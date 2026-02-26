@@ -1,10 +1,11 @@
-import type { ConnectedAccount, Platform, Post } from "@/types";
+import type { Platform, Post } from "@/types";
+import type { ConnectedAccountWithTokens } from "@/lib/platforms/token-refresh";
 import { fetchTikTokPosts, getTikTokProfile } from "./tiktok";
 import { fetchInstagramPosts, getInstagramProfile } from "./instagram";
 import { fetchYouTubePosts, getYouTubeProfile } from "./youtube";
 
 export async function fetchPostsForPlatform(
-  account: ConnectedAccount,
+  account: ConnectedAccountWithTokens,
   maxPosts = 50
 ): Promise<Post[]> {
   switch (account.platform) {

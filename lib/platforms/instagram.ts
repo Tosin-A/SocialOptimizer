@@ -2,7 +2,8 @@
 // Instagram Graph API — platform adapter
 // ════════════════════════════════════════════════════════════════════════════
 
-import type { Post, ConnectedAccount, ContentType } from "@/types";
+import type { Post, ContentType } from "@/types";
+import type { ConnectedAccountWithTokens as ConnectedAccount } from "@/lib/platforms/token-refresh";
 
 const IG_API_BASE = "https://graph.instagram.com/v21.0";
 

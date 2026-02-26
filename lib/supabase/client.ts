@@ -1,12 +1,12 @@
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "@/types/supabase";
 
-// Singleton pattern — reuse one client instance in the browser
-let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
+// Singleton pattern — reuse one client instance in the browser.
+// Generic omitted intentionally — add <Database> after running `npm run db:generate`.
+let client: ReturnType<typeof createBrowserClient> | null = null;
 
 export function getSupabaseBrowserClient() {
   if (!client) {
-    client = createBrowserClient<Database>(
+    client = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );

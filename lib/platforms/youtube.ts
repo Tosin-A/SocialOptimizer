@@ -2,7 +2,8 @@
 // YouTube Data API v3 — platform adapter
 // ════════════════════════════════════════════════════════════════════════════
 
-import type { Post, ConnectedAccount } from "@/types";
+import type { Post } from "@/types";
+import type { ConnectedAccountWithTokens as ConnectedAccount } from "@/lib/platforms/token-refresh";
 
 const YT_API_BASE = "https://www.googleapis.com/youtube/v3";
 

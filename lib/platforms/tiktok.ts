@@ -2,7 +2,8 @@
 // TikTok Research API — platform adapter
 // ════════════════════════════════════════════════════════════════════════════
 
-import type { Post, ConnectedAccount } from "@/types";
+import type { Post } from "@/types";
+import type { ConnectedAccountWithTokens as ConnectedAccount } from "@/lib/platforms/token-refresh";
 
 const TIKTOK_API_BASE = "https://open.tiktokapis.com/v2";
 

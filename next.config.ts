@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["bull"],
+  serverExternalPackages: ["bull", "stripe"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.cdninstagram.com" },

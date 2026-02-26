@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, ExternalLink, AlertTriangle } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, ExternalLink, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,8 @@ export default function SettingsPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
 
@@ -70,6 +72,36 @@ export default function SettingsPage() {
       toast({ title: "Couldn't disconnect", description: err.message, variant: "destructive" });
     } finally {
       setDisconnecting(null);
+    }
+  };
+
+  const startCheckout = async (targetPlan: string) => {
+    setCheckoutLoading(targetPlan);
+    try {
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: targetPlan }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to start checkout");
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
+      setCheckoutLoading(null);
+    }
+  };
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to open portal");
+      window.location.href = data.url;
+    } catch (err: any) {
+      toast({ title: "Couldn't open billing portal", description: err.message, variant: "destructive" });
+      setPortalLoading(false);
     }
   };
 
@@ -137,12 +169,26 @@ export default function SettingsPage() {
             </p>
           </div>
           {plan === "free" && (
-            <Button size="sm" className="bg-brand-600 hover:bg-brand-500 gap-1.5 flex-shrink-0">
-              Upgrade to Pro <ExternalLink className="w-3.5 h-3.5" />
+            <Button
+              size="sm"
+              className="bg-brand-600 hover:bg-brand-500 gap-1.5 flex-shrink-0"
+              disabled={checkoutLoading === "pro"}
+              onClick={() => startCheckout("pro")}
+            >
+              {checkoutLoading === "pro"
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <ArrowUpRight className="w-3.5 h-3.5" />
+              }
+              Upgrade to Pro
             </Button>
           )}
           {plan !== "free" && (
-            <button className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 disabled:opacity-50"
+              onClick={openBillingPortal}
+              disabled={portalLoading}
+            >
+              {portalLoading && <Loader2 className="w-3 h-3 animate-spin" />}
               Manage billing
             </button>
           )}

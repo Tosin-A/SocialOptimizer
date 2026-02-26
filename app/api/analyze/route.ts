@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { fetchPostsForPlatform } from "@/lib/platforms";
+import { refreshTokenIfNeeded } from "@/lib/platforms/token-refresh";
 import { runAnalysisEngine } from "@/lib/analysis/engine";
 import { z } from "zod";
 
@@ -105,8 +106,11 @@ export async function POST(req: NextRequest) {
     // Here we use a non-blocking Promise and return the job_id immediately.
     (async () => {
       try {
+        // Refresh OAuth token if it's expired or expiring in the next 5 minutes
+        const freshAccount = await refreshTokenIfNeeded(account as any);
+
         // Fetch posts from the platform
-        const posts = await fetchPostsForPlatform(account as any, max_posts);
+        const posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
 
         // Persist posts to DB (upsert)
         if (posts.length > 0) {
@@ -133,7 +137,7 @@ export async function POST(req: NextRequest) {
         // Run analysis engine
         await runAnalysisEngine({
           jobId: job.id,
-          account: account as any,
+          account: freshAccount as any,
           posts: dbPosts ?? [],
           pythonServiceUrl: process.env.PYTHON_SERVICE_URL ?? "http://localhost:8000",
         });
