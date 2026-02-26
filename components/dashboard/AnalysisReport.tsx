@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   CheckCircle2, XCircle, Lightbulb, Map, Hash,
   ThumbsUp, AlertTriangle, BarChart2, TrendingUp, TrendingDown,
-  Minus, ExternalLink, Loader2, Download
+  Minus, ExternalLink, Loader2, Download, RefreshCw
 } from "lucide-react";
 import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } from "@/types";
 import { cn } from "@/lib/utils";
@@ -115,9 +115,9 @@ interface PostRow {
   performance: "top" | "worst" | "average";
 }
 
-interface Props { report: AnalysisReportType; }
+interface Props { report: AnalysisReportType; accountId?: string; }
 
-export default function AnalysisReport({ report }: Props) {
+export default function AnalysisReport({ report, accountId }: Props) {
   const [tab, setTab] = useState<"overview" | "insights" | "roadmap" | "hashtags" | "posts">("overview");
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
@@ -153,15 +153,26 @@ export default function AnalysisReport({ report }: Props) {
               <p className="text-sm text-muted-foreground leading-relaxed">{report.executive_summary}</p>
             </div>
           </div>
-          <a
-            href={`/dashboard/reports/${report.id}/print`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export PDF
-          </a>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {accountId && (
+              <a
+                href={`/dashboard/analyze?account=${accountId}`}
+                className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Re-analyze
+              </a>
+            )}
+            <a
+              href={`/dashboard/reports/${report.id}/print`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export PDF
+            </a>
+          </div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[

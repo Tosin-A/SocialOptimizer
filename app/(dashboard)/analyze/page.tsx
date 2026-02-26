@@ -162,7 +162,7 @@ export default function AnalyzePage() {
       </div>
 
       {/* Report */}
-      {report && <AnalysisReport report={report} />}
+      {report && <AnalysisReport report={report} accountId={selectedAccount} />}
 
       {/* Empty state */}
       {!job && !report && (

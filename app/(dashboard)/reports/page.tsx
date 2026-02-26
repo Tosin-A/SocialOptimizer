@@ -2,6 +2,7 @@ import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabas
 import Link from "next/link";
 import { FileText, TrendingUp, ExternalLink, Printer, BarChart3 } from "lucide-react";
 import { redirect } from "next/navigation";
+import ExportCSVButton from "@/components/dashboard/ExportCSVButton";
 
 const PLATFORM_COLORS: Record<string, string> = {
   tiktok:    "text-[#25F4EE]",
@@ -65,12 +66,15 @@ export default async function ReportsPage() {
             {list.length} report{list.length !== 1 ? "s" : ""} across all connected accounts
           </p>
         </div>
-        <Link
-          href="/dashboard/analyze"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
-        >
-          <BarChart3 className="w-4 h-4" /> Run new analysis
-        </Link>
+        <div className="flex items-center gap-2">
+          {list.length > 0 && <ExportCSVButton reports={list} />}
+          <Link
+            href="/dashboard/analyze"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
+          >
+            <BarChart3 className="w-4 h-4" /> Run new analysis
+          </Link>
+        </div>
       </div>
 
       {/* Empty state */}

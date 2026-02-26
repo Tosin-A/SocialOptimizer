@@ -1,7 +1,8 @@
 "use client";
 import type { User } from "@supabase/supabase-js";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import NotificationsPopover from "./NotificationsPopover";
 
 interface HeaderProps {
   user: User;
@@ -28,9 +29,7 @@ export default function Header({ user, onMenuClick }: HeaderProps) {
       <div className="hidden lg:block" />
 
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-4 h-4" />
-        </Button>
+        <NotificationsPopover />
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center text-xs font-bold select-none">
           {initials}
         </div>

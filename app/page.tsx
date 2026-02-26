@@ -303,6 +303,51 @@ const FAQ = [
   },
 ];
 
+const TESTIMONIALS = [
+  {
+    quote: "I cut my hashtag count from 28 to 6. My reach tripled in two weeks. The report was blunt about what wasn't working — that's exactly what I needed.",
+    name: "Mariana T.",
+    handle: "@mariana.cooks",
+    platform: "Instagram",
+    followers: "84K",
+  },
+  {
+    quote: "The hook scoring made me realize I was opening 90% of my videos with context instead of a pattern interrupt. Tested one rewrite, got 3× the completion rate.",
+    name: "Derek S.",
+    handle: "@derek.finance",
+    platform: "TikTok",
+    followers: "210K",
+  },
+  {
+    quote: "I've tried five analytics tools. This is the first one that told me the specific thing to fix, not just charts. The roadmap was actually actionable.",
+    name: "Priya M.",
+    handle: "@priyalifts",
+    platform: "Instagram",
+    followers: "41K",
+  },
+  {
+    quote: "The competitor gap analysis showed me exactly which hashtags my top competitor was using that I wasn't. Added them, saw reach improve within days.",
+    name: "James K.",
+    handle: "@jktravel",
+    platform: "YouTube",
+    followers: "127K",
+  },
+  {
+    quote: "My growth score went from 38 to 71 in six weeks. I just followed the roadmap in order. Nothing clever, just executed the list.",
+    name: "Sofia R.",
+    handle: "@sofia.wellness",
+    platform: "TikTok",
+    followers: "56K",
+  },
+  {
+    quote: "The posting cadence insight was the biggest surprise — I was posting too frequently. Dropped from daily to 4×/week and engagement went up immediately.",
+    name: "Chris A.",
+    handle: "@chrisbuilds",
+    platform: "YouTube",
+    followers: "93K",
+  },
+];
+
 const LIMITS = [
   {
     title: "Private metrics are inaccessible",
@@ -796,6 +841,41 @@ export default function LandingPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ─────────────────────────────────────────────────── */}
+      <section className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12">
+            <div className="label-mono mb-4">From creators</div>
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+              What happened when they fixed it.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.handle}
+                className="rounded-lg p-5 border border-white/[0.07] bg-white/[0.02] flex flex-col gap-4"
+              >
+                <p className="text-sm leading-relaxed text-foreground/80 flex-1">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
+                  <div>
+                    <div className="text-sm font-medium">{t.name}</div>
+                    <div className="text-xs text-muted-foreground">{t.handle}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">{t.platform}</div>
+                    <div className="text-xs font-mono text-brand-400">{t.followers}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

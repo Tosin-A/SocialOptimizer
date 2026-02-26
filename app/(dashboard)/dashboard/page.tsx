@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import GrowthScoreCard from "@/components/dashboard/GrowthScoreCard";
 import MetricsGrid from "@/components/dashboard/MetricsGrid";
@@ -64,7 +65,13 @@ export default async function DashboardPage() {
 
   if (!dbUser) return null;
 
-  const { accounts, reports, stats, latestReport } = await getDashboardData(dbUser.id);
+  const getCachedDashboardData = unstable_cache(
+    getDashboardData,
+    [`dashboard:${dbUser.id}`],
+    { revalidate: 60, tags: [`dashboard:${dbUser.id}`] }
+  );
+
+  const { accounts, reports, stats, latestReport } = await getCachedDashboardData(dbUser.id);
   const hasAccounts = accounts.length > 0;
   const hasReports = reports.length > 0;
   const isOnboarding = !hasAccounts || !hasReports;
