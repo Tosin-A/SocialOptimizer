@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Deep slate — analytical, not pure black ─────────────────────── */
+    --background:         222 47% 7%;     /* ~#080f1e */
+    --foreground:         213 27% 92%;    /* ~#E5E7EB */
+
+    --card:               222 47% 10%;    /* ~#0f172a */
+    --card-foreground:    213 27% 92%;
+    --popover:            222 47% 10%;
+    --popover-foreground: 213 27% 92%;
+
+    /* ── Indigo primary ──────────────────────────────────────────────── */
+    --primary:            239 84% 67%;    /* ~#6366f1 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary:          222 38% 15%;
+    --secondary-foreground: 213 27% 92%;
+
+    --muted:              222 38% 14%;
+    --muted-foreground:   215 14% 61%;    /* ~#9CA3AF */
+
+    --accent:             222 38% 15%;
+    --accent-foreground:  213 27% 92%;
+
+    --destructive:        0 72% 58%;
+    --destructive-foreground: 213 27% 92%;
+
+    --border:             222 38% 16%;
+    --input:              222 38% 14%;
+    --ring:               239 84% 67%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+
+  h1, h2, h3 {
+    letter-spacing: -0.025em;
+  }
+
+  ::selection {
+    background: rgb(99 102 241 / 0.3);
+    color: #fff;
+  }
+}
+
+@layer utilities {
+  /* ── Card surface ────────────────────────────────────────────────── */
+  .surface {
+    @apply bg-white/[0.03] border border-white/[0.07];
+  }
+
+  .card-elevated {
+    @apply rounded-lg border border-white/[0.08] bg-[#0d1526];
+  }
+
+  /* ── Mono label — indigo tint ────────────────────────────────────── */
+  .label-mono {
+    @apply text-[10px] font-mono uppercase tracking-[0.18em] text-brand-400;
+  }
+
+  /* ── Status helpers ──────────────────────────────────────────────── */
+  .score-high   { color: #22c55e; }
+  .score-medium { color: #eab308; }
+  .score-low    { color: #ef4444; }
+
+  /* ── Shimmer loading effect ──────────────────────────────────────── */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.04) 50%,
+      rgba(255,255,255,0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* ── Dot-grid overlay (apply to a child div) ─────────────────────── */
+  .dot-grid {
+    background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}

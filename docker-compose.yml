@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  # ── Next.js app ───────────────────────────────────────────────────────────────
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - PYTHON_SERVICE_URL=http://python-service:8000
+      - PYTHON_SERVICE_SECRET=${PYTHON_SERVICE_SECRET}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+    depends_on:
+      - redis
+      - python-service
+
+  # ── Python AI service ─────────────────────────────────────────────────────────
+  python-service:
+    build: ./python-service
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PYTHON_SERVICE_SECRET=${PYTHON_SERVICE_SECRET}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - ENV=production
+    volumes:
+      - whisper-cache:/root/.cache/whisper
+      - model-cache:/root/.cache/torch
+
+  # ── Redis ─────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+volumes:
+  redis-data:
+  whisper-cache:
+  model-cache:
