@@ -7,6 +7,7 @@ import ImprovementRoadmap from "@/components/dashboard/ImprovementRoadmap";
 import QuickActions from "@/components/dashboard/QuickActions";
 import OnboardingSteps from "@/components/dashboard/OnboardingSteps";
 import FirstAnalysisPrompt from "@/components/dashboard/FirstAnalysisPrompt";
+import ScoreHistoryChart from "@/components/dashboard/ScoreHistoryChart";
 import type { DashboardStats } from "@/types";
 
 async function getDashboardData(userId: string) {
@@ -111,6 +112,11 @@ export default async function DashboardPage() {
             />
             <MetricsGrid stats={stats} accounts={accounts as any[]} className="lg:col-span-3" />
           </div>
+
+          {/* Score history chart — only shown when there are 2+ reports */}
+          {reports.length >= 2 && (
+            <ScoreHistoryChart reports={reports as any[]} />
+          )}
 
           {/* Bottom row: Roadmap + Recent reports */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

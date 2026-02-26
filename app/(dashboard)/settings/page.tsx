@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, ExternalLink, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,14 +15,23 @@ interface Account {
   is_active: boolean;
 }
 
-const PLAN_LABELS: Record<string, { label: string; color: string }> = {
-  free: { label: "Free", color: "text-muted-foreground" },
-  pro: { label: "Pro", color: "text-brand-400" },
-  agency: { label: "Agency", color: "text-neon-purple" },
+interface UserPlan {
+  plan: string;
+  analyses_used: number;
+  analyses_limit: number;
+  has_billing: boolean;
+}
+
+const PLAN_LABELS: Record<string, { label: string; color: string; description: string }> = {
+  free:    { label: "Free",    color: "text-muted-foreground", description: "1 platform · 3 analyses/month · basic insights" },
+  starter: { label: "Starter", color: "text-slate-300",        description: "2 platforms · 10 analyses/month · all insights" },
+  pro:     { label: "Pro",     color: "text-brand-400",        description: "4 platforms · unlimited analyses · competitor tracking" },
+  agency:  { label: "Agency",  color: "text-neon-purple",      description: "10 accounts · unlimited · white-label reports · API access" },
 };
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [name, setName] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
@@ -40,9 +49,15 @@ export default function SettingsPage() {
         setUser(user);
         setName(user.user_metadata?.full_name ?? "");
       }
-      const res = await fetch("/api/accounts");
-      const data = await res.json();
-      setAccounts(data.data ?? []);
+      const [accountsRes, planRes] = await Promise.all([
+        fetch("/api/accounts"),
+        fetch("/api/users/me"),
+      ]);
+      const accountsData = await accountsRes.json();
+      setAccounts(accountsData.data ?? []);
+      if (planRes.ok) {
+        setUserPlan(await planRes.json());
+      }
     };
     load();
   }, []);
@@ -105,8 +120,12 @@ export default function SettingsPage() {
     }
   };
 
-  const plan = user?.user_metadata?.plan ?? "free";
+  const plan = userPlan?.plan ?? "free";
   const planInfo = PLAN_LABELS[plan] ?? PLAN_LABELS.free;
+  const usagePercent = userPlan
+    ? Math.min(100, Math.round((userPlan.analyses_used / Math.max(1, userPlan.analyses_limit)) * 100))
+    : 0;
+  const isUnlimited = (userPlan?.analyses_limit ?? 0) >= 999999;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -148,54 +167,63 @@ export default function SettingsPage() {
       {/* Plan */}
       <div className="glass rounded-2xl p-6 space-y-4">
         <h2 className="font-semibold flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
-          <CreditCard className="w-4 h-4" /> Plan
+          <CreditCard className="w-4 h-4" /> Plan &amp; Usage
         </h2>
-        <div className="flex items-center justify-between">
+
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className={`font-semibold text-lg ${planInfo.color}`}>{planInfo.label}</span>
-              {plan === "free" && (
-                <span className="text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded-full">
-                  3 analyses/month
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {plan === "free"
-                ? "1 platform, basic insights, 5 content generations/month"
-                : plan === "pro"
-                  ? "4 platforms, unlimited analyses and generations, competitor tracking"
-                  : "Up to 10 accounts, white-label reports, API access"}
-            </p>
+            <span className={`font-semibold text-lg ${planInfo.color}`}>{planInfo.label}</span>
+            <p className="text-sm text-muted-foreground mt-0.5">{planInfo.description}</p>
           </div>
-          {plan === "free" && (
-            <Button
-              size="sm"
-              className="bg-brand-600 hover:bg-brand-500 gap-1.5 flex-shrink-0"
-              disabled={checkoutLoading === "pro"}
-              onClick={() => startCheckout("pro")}
-            >
-              {checkoutLoading === "pro"
-                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                : <ArrowUpRight className="w-3.5 h-3.5" />
-              }
-              Upgrade to Pro
-            </Button>
-          )}
-          {plan !== "free" && (
-            <button
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 disabled:opacity-50"
-              onClick={openBillingPortal}
-              disabled={portalLoading}
-            >
-              {portalLoading && <Loader2 className="w-3 h-3 animate-spin" />}
-              Manage billing
-            </button>
-          )}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {plan === "free" && (
+              <Button
+                size="sm"
+                className="bg-brand-600 hover:bg-brand-500 gap-1.5"
+                disabled={checkoutLoading === "pro"}
+                onClick={() => startCheckout("pro")}
+              >
+                {checkoutLoading === "pro"
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <ArrowUpRight className="w-3.5 h-3.5" />}
+                Upgrade to Pro
+              </Button>
+            )}
+            {plan !== "free" && userPlan?.has_billing && (
+              <button
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 disabled:opacity-50"
+                onClick={openBillingPortal}
+                disabled={portalLoading}
+              >
+                {portalLoading && <Loader2 className="w-3 h-3 animate-spin" />}
+                Manage billing
+              </button>
+            )}
+          </div>
         </div>
-        {plan === "free" && (
-          <div className="pt-2 border-t border-white/5 text-xs text-muted-foreground">
-            Pro is $29/mo. You can cancel any time — no awkward retention flow.
+
+        {/* Usage meter */}
+        {userPlan && (
+          <div className="pt-3 border-t border-white/5 space-y-1.5">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Analyses this month</span>
+              <span className="font-mono">
+                {isUnlimited ? `${userPlan.analyses_used} / ∞` : `${userPlan.analyses_used} / ${userPlan.analyses_limit}`}
+              </span>
+            </div>
+            {!isUnlimited && (
+              <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-brand-500"}`}
+                  style={{ width: `${usagePercent}%` }}
+                />
+              </div>
+            )}
+            {plan === "free" && (
+              <p className="text-xs text-muted-foreground pt-1">
+                Pro is $29/mo. Cancel any time — no awkward retention flow.
+              </p>
+            )}
           </div>
         )}
       </div>
