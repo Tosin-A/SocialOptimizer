@@ -32,7 +32,7 @@ export default function AnalyzePage() {
 
   const pollJob = useCallback(async (jobId: string) => {
     const interval = setInterval(async () => {
-      const res = await fetch(`/api/analyze/status/${jobId}`);
+      const res = await fetch(`/api/analyze?job_id=${jobId}`);
       const data = await res.json();
       setJob(data);
 

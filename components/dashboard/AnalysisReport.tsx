@@ -126,7 +126,7 @@ export default function AnalysisReport({ report }: Props) {
   useEffect(() => {
     if (tab === "posts" && !postsFetched) {
       setPostsLoading(true);
-      fetch(`/api/reports/${report.id}/posts`)
+      fetch(`/api/reports?posts_for=${report.id}`)
         .then((r) => r.json())
         .then((d) => { setPosts(d.data ?? []); setPostsFetched(true); })
         .finally(() => setPostsLoading(false));

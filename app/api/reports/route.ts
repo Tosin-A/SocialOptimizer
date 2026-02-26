@@ -1,4 +1,6 @@
-// GET /api/reports — List analysis reports
+// GET /api/reports                    — List analysis reports
+// GET /api/reports?id=<id>            — Fetch a single report
+// GET /api/reports?posts_for=<id>     — Fetch posts for a report's account
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 
@@ -10,6 +12,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const accountId = searchParams.get("account_id");
   const reportId = searchParams.get("id");
+  const postsFor = searchParams.get("posts_for");
 
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
@@ -20,6 +23,36 @@ export async function GET(req: NextRequest) {
 
   if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // ── Posts for a report ──────────────────────────────────────────────────────
+  if (postsFor) {
+    const { data: report } = await serviceClient
+      .from("analysis_reports")
+      .select("account_id, top_posts, worst_posts")
+      .eq("id", postsFor)
+      .eq("user_id", dbUser.id)
+      .single();
+
+    if (!report) return NextResponse.json({ error: "Report not found" }, { status: 404 });
+
+    const { data: posts } = await serviceClient
+      .from("posts")
+      .select("id, platform_post_id, content_type, caption, hashtags, likes, comments, shares, saves, views, reach, engagement_rate, posted_at, thumbnail_url, media_url, duration_seconds")
+      .eq("account_id", report.account_id)
+      .order("engagement_rate", { ascending: false })
+      .limit(50);
+
+    const topIds = new Set<string>((report.top_posts ?? []).map((p: any) => p.post_id));
+    const worstIds = new Set<string>((report.worst_posts ?? []).map((p: any) => p.post_id));
+
+    return NextResponse.json({
+      data: (posts ?? []).map((p) => ({
+        ...p,
+        performance: topIds.has(p.id) ? "top" : worstIds.has(p.id) ? "worst" : "average",
+      })),
+    });
+  }
+
+  // ── Single report ────────────────────────────────────────────────────────────
   if (reportId) {
     const { data, error } = await serviceClient
       .from("analysis_reports")

@@ -49,14 +49,11 @@ export default function SettingsPage() {
         setUser(user);
         setName(user.user_metadata?.full_name ?? "");
       }
-      const [accountsRes, planRes] = await Promise.all([
-        fetch("/api/accounts"),
-        fetch("/api/users/me"),
-      ]);
+      const accountsRes = await fetch("/api/accounts");
       const accountsData = await accountsRes.json();
       setAccounts(accountsData.data ?? []);
-      if (planRes.ok) {
-        setUserPlan(await planRes.json());
+      if (accountsData.user_plan) {
+        setUserPlan(accountsData.user_plan);
       }
     };
     load();
@@ -93,10 +90,10 @@ export default function SettingsPage() {
   const startCheckout = async (targetPlan: string) => {
     setCheckoutLoading(targetPlan);
     try {
-      const res = await fetch("/api/billing/checkout", {
+      const res = await fetch("/api/billing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: targetPlan }),
+        body: JSON.stringify({ action: "checkout", plan: targetPlan }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to start checkout");
@@ -110,7 +107,11 @@ export default function SettingsPage() {
   const openBillingPortal = async () => {
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const res = await fetch("/api/billing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "portal" }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to open portal");
       window.location.href = data.url;

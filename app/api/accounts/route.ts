@@ -1,5 +1,5 @@
-// GET /api/accounts — List user's connected accounts
-// DELETE /api/accounts?id=<accountId> — Disconnect an account
+// GET /api/accounts              — List user's connected accounts + plan info
+// DELETE /api/accounts?id=<id>   — Disconnect an account (soft-delete)
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 
@@ -41,11 +41,11 @@ export async function GET(req: NextRequest) {
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
     .from("users")
-    .select("id")
+    .select("id, plan, analyses_used, analyses_limit, stripe_customer_id")
     .eq("auth_id", user.id)
     .single();
 
-  if (!dbUser) return NextResponse.json({ data: [] });
+  if (!dbUser) return NextResponse.json({ data: [], user_plan: null });
 
   const { data } = await serviceClient
     .from("connected_accounts")
@@ -54,5 +54,13 @@ export async function GET(req: NextRequest) {
     .eq("is_active", true)
     .order("created_at", { ascending: true });
 
-  return NextResponse.json({ data: data ?? [] });
+  return NextResponse.json({
+    data: data ?? [],
+    user_plan: {
+      plan: dbUser.plan,
+      analyses_used: dbUser.analyses_used,
+      analyses_limit: dbUser.analyses_limit,
+      has_billing: !!dbUser.stripe_customer_id,
+    },
+  });
 }
