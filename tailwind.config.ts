@@ -72,6 +72,8 @@ const config: Config = {
         // ── Neon accents ────────────────────────────────────────────────
         "neon-purple": "#a855f7",   // purple-500 — used in logo gradient, Agency badge
         "neon-green":  "#22c55e",   // green-500  — used for connected/success states
+        "neon-cyan":   "#06b6d4",   // cyan-500   — used in MetricsGrid metric cards
+        "neon-pink":   "#ec4899",   // pink-500   — used in MetricsGrid metric cards
 
         // ── Status colours ──────────────────────────────────────────────
         status: {

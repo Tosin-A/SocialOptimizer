@@ -276,6 +276,33 @@ const CASE_CHANGES = [
   },
 ];
 
+const FAQ = [
+  {
+    q: "Do you need my password or account access?",
+    a: "No. We pull public post data via platform scraping. For private engagement metrics on Instagram and YouTube, you can optionally grant read-only API access through an OAuth flow — no password required.",
+  },
+  {
+    q: "How is this different from the platform's native analytics?",
+    a: "Native analytics show you what happened. We tell you why and what to fix. We score every post against known engagement patterns — hook quality, hashtag specificity, CTA placement — and give you a ranked list ordered by expected impact.",
+  },
+  {
+    q: "How often should I re-analyze?",
+    a: "After making changes, wait 2–3 weeks and run another analysis. That's enough posts for the data to reflect your edits. Running it every day gives noise, not signal.",
+  },
+  {
+    q: "What counts as one 'analysis'?",
+    a: "One analysis = one account × one run. A 90-day scan of your TikTok is one analysis. Running it again next week is a second analysis. Connected accounts don't count against the limit on their own.",
+  },
+  {
+    q: "Can I analyze a competitor's account?",
+    a: "Yes, on Pro and Agency plans. The competitor tracking feature pulls their public data and compares it against yours — follower velocity, posting cadence, hashtag overlap, and engagement gap.",
+  },
+  {
+    q: "What if I cancel Pro mid-month?",
+    a: "You keep Pro access until the end of the billing period. No prorated refunds, no data deletion. Your analysis history stays accessible on the free tier.",
+  },
+];
+
 const LIMITS = [
   {
     title: "Private metrics are inaccessible",
@@ -369,6 +396,7 @@ export default function LandingPage() {
             <Link href="#platforms" className="hover:text-foreground transition-colors">Platforms</Link>
             <Link href="#how"       className="hover:text-foreground transition-colors">How it works</Link>
             <Link href="#case"      className="hover:text-foreground transition-colors">Case study</Link>
+            <Link href="#faq"       className="hover:text-foreground transition-colors">FAQ</Link>
             <Link href="#pricing"   className="hover:text-foreground transition-colors">Pricing</Link>
           </div>
 
@@ -796,6 +824,35 @@ export default function LandingPage() {
                 <div className="font-medium text-sm mb-1.5">{l.title}</div>
                 <p className="text-muted-foreground text-sm leading-relaxed">{l.body}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <section id="faq" className="py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-14 lg:gap-24">
+          <div className="lg:w-72 flex-shrink-0">
+            <div className="label-mono mb-4">FAQ</div>
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">
+              Common questions.
+            </h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Answers to what most people ask before signing up.
+            </p>
+          </div>
+          <div className="flex-1">
+            {FAQ.map((item, i) => (
+              <details
+                key={i}
+                className={`group py-5 border-t border-white/[0.05] ${i === FAQ.length - 1 ? "border-b" : ""}`}
+              >
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none select-none">
+                  <span className="font-medium text-sm">{item.q}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 group-open:rotate-90 transition-transform duration-200" />
+                </summary>
+                <p className="text-muted-foreground text-sm leading-relaxed mt-3 pr-8">{item.a}</p>
+              </details>
             ))}
           </div>
         </div>

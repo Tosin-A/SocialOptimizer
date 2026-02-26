@@ -13,6 +13,7 @@ interface Job { job_id: string; status: string; progress: number; current_step: 
 export default function AnalyzePage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
+  const [maxPosts, setMaxPosts] = useState(50);
   const [job, setJob] = useState<Job | null>(null);
   const [report, setReport] = useState<any>(null);
   const [starting, setStarting] = useState(false);
@@ -59,7 +60,7 @@ export default function AnalyzePage() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account_id: selectedAccount, max_posts: 50 }),
+        body: JSON.stringify({ account_id: selectedAccount, max_posts: maxPosts }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -112,6 +113,28 @@ export default function AnalyzePage() {
             {starting || isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             {isRunning ? "Analyzing..." : "Run Analysis"}
           </Button>
+        </div>
+
+        {/* Posts depth slider */}
+        <div className="mt-5 pt-5 border-t border-white/5">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium">Posts to analyze</label>
+            <span className="font-mono text-sm text-brand-400">{maxPosts} posts</span>
+          </div>
+          <input
+            type="range"
+            min={10}
+            max={100}
+            step={10}
+            value={maxPosts}
+            onChange={(e) => setMaxPosts(parseInt(e.target.value))}
+            disabled={!!isRunning}
+            className="w-full accent-brand-500 disabled:opacity-50"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+            <span>10 (faster)</span>
+            <span>100 (thorough)</span>
+          </div>
         </div>
 
         {/* Job progress */}
