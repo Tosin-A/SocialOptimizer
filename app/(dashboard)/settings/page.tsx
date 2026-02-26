@@ -307,7 +307,17 @@ export default function SettingsPage() {
                 variant="outline"
                 size="sm"
                 className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-                onClick={() => toast({ title: "Account deletion not yet implemented", description: "Contact support to delete your account.", variant: "destructive" })}
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/accounts?delete_user=1", { method: "DELETE" });
+                    if (!res.ok) throw new Error("Deletion failed");
+                    // Sign out and redirect to home
+                    await supabase.auth.signOut();
+                    window.location.href = "/";
+                  } catch {
+                    toast({ title: "Deletion failed", description: "Try again or contact support.", variant: "destructive" });
+                  }
+                }}
               >
                 Yes, delete everything
               </Button>

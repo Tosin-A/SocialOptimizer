@@ -69,6 +69,10 @@ const config: Config = {
           600: "#2563eb",
         },
 
+        // ── Neon accents ────────────────────────────────────────────────
+        "neon-purple": "#a855f7",   // purple-500 — used in logo gradient, Agency badge
+        "neon-green":  "#22c55e",   // green-500  — used for connected/success states
+
         // ── Status colours ──────────────────────────────────────────────
         status: {
           good:    "#22c55e",

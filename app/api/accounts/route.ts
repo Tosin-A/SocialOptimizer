@@ -1,5 +1,6 @@
-// GET /api/accounts              — List user's connected accounts + plan info
-// DELETE /api/accounts?id=<id>   — Disconnect an account (soft-delete)
+// GET /api/accounts                   — List user's connected accounts + plan info
+// DELETE /api/accounts?id=<id>        — Disconnect a platform (soft-delete)
+// DELETE /api/accounts?delete_user=1  — Delete the entire user account
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 
@@ -9,19 +10,29 @@ export async function DELETE(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const accountId = searchParams.get("id");
-  if (!accountId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  const accountId  = searchParams.get("id");
+  const deleteUser = searchParams.get("delete_user");
 
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
     .from("users")
-    .select("id")
+    .select("id, auth_id")
     .eq("auth_id", user.id)
     .single();
 
   if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Soft-delete: set is_active=false so historical reports are preserved
+  // ── Full account deletion ─────────────────────────────────────────────────
+  if (deleteUser === "1") {
+    // Supabase admin.deleteUser cascades deletes via RLS / triggers
+    const { error } = await serviceClient.auth.admin.deleteUser(dbUser.auth_id);
+    if (error) return NextResponse.json({ error: "Failed to delete account" }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  // ── Platform disconnect (soft-delete) ────────────────────────────────────
+  if (!accountId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
   const { error } = await serviceClient
     .from("connected_accounts")
     .update({ is_active: false })

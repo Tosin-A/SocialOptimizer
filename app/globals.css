@@ -56,6 +56,11 @@
 }
 
 @layer utilities {
+  /* ── Glassmorphism card — used across all dashboard components ───── */
+  .glass {
+    @apply bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm;
+  }
+
   /* ── Card surface ────────────────────────────────────────────────── */
   .surface {
     @apply bg-white/[0.03] border border-white/[0.07];
