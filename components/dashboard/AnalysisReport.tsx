@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  CheckCircle2, XCircle, Lightbulb, Map, Hash, Clock,
-  ThumbsUp, AlertTriangle, ChevronRight, BarChart2
+  CheckCircle2, XCircle, Lightbulb, Map, Hash,
+  ThumbsUp, AlertTriangle, BarChart2, TrendingUp, TrendingDown,
+  Minus, ExternalLink, Loader2, Download
 } from "lucide-react";
 import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } from "@/types";
 import { cn } from "@/lib/utils";
@@ -95,30 +96,74 @@ function RoadmapItem({ action, index }: { action: RoadmapAction; index: number }
   );
 }
 
+interface PostRow {
+  id: string;
+  platform_post_id: string;
+  content_type: string;
+  caption: string | null;
+  hashtags: string[];
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  views: number;
+  engagement_rate: number | null;
+  posted_at: string;
+  thumbnail_url: string | null;
+  media_url: string | null;
+  duration_seconds: number | null;
+  performance: "top" | "worst" | "average";
+}
+
 interface Props { report: AnalysisReportType; }
 
 export default function AnalysisReport({ report }: Props) {
-  const [tab, setTab] = useState<"overview" | "insights" | "roadmap" | "hashtags">("overview");
+  const [tab, setTab] = useState<"overview" | "insights" | "roadmap" | "hashtags" | "posts">("overview");
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [postsLoading, setPostsLoading] = useState(false);
+  const [postsFetched, setPostsFetched] = useState(false);
+
+  useEffect(() => {
+    if (tab === "posts" && !postsFetched) {
+      setPostsLoading(true);
+      fetch(`/api/reports/${report.id}/posts`)
+        .then((r) => r.json())
+        .then((d) => { setPosts(d.data ?? []); setPostsFetched(true); })
+        .finally(() => setPostsLoading(false));
+    }
+  }, [tab, report.id, postsFetched]);
 
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "insights", label: `Insights (${(report.strengths?.length ?? 0) + (report.weaknesses?.length ?? 0)})` },
     { id: "roadmap", label: `Roadmap (${report.improvement_roadmap?.length ?? 0})` },
     { id: "hashtags", label: "Hashtags" },
+    { id: "posts", label: "Posts" },
   ] as const;
 
   return (
     <div className="space-y-4">
       {/* Executive summary */}
       <div className="glass rounded-2xl p-5">
-        <div className="flex items-start gap-3">
-          <BarChart2 className="w-5 h-5 text-brand-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-sm mb-1.5">Executive Summary</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{report.executive_summary}</p>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-start gap-3 flex-1">
+            <BarChart2 className="w-5 h-5 text-brand-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-sm mb-1.5">Executive Summary</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{report.executive_summary}</p>
+            </div>
           </div>
+          <a
+            href={`/dashboard/reports/${report.id}/print`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export PDF
+          </a>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Niche", value: report.detected_niche },
             { label: "Avg Engagement", value: `${(report.avg_engagement_rate * 100).toFixed(2)}%` },
@@ -204,6 +249,95 @@ export default function AnalysisReport({ report }: Props) {
               <RoadmapItem key={i} action={action} index={i} />
             ))}
           </div>
+        </div>
+      )}
+
+      {tab === "posts" && (
+        <div className="glass rounded-2xl p-6 space-y-3">
+          <h3 className="font-semibold text-sm mb-1">Post-level performance</h3>
+          <p className="text-xs text-muted-foreground mb-4">Sorted by engagement rate. Top performers are highlighted green, underperformers red.</p>
+
+          {postsLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
+            </div>
+          )}
+
+          {!postsLoading && posts.length === 0 && (
+            <p className="text-muted-foreground text-sm text-center py-8">No post data found for this report.</p>
+          )}
+
+          {!postsLoading && posts.length > 0 && (
+            <div className="space-y-2">
+              {posts.map((post) => {
+                const engPct = ((post.engagement_rate ?? 0) * 100).toFixed(2);
+                const date = new Date(post.posted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                const caption = post.caption?.replace(/\n/g, " ").slice(0, 80) ?? "—";
+
+                return (
+                  <div
+                    key={post.id}
+                    className={cn(
+                      "flex items-center gap-3 rounded-xl p-3 border text-xs transition-all",
+                      post.performance === "top"
+                        ? "border-neon-green/20 bg-neon-green/5"
+                        : post.performance === "worst"
+                        ? "border-red-400/20 bg-red-400/5"
+                        : "border-white/5 bg-white/[0.02]"
+                    )}
+                  >
+                    {/* Performance icon */}
+                    <div className="flex-shrink-0 w-5">
+                      {post.performance === "top" && <TrendingUp className="w-4 h-4 text-neon-green" />}
+                      {post.performance === "worst" && <TrendingDown className="w-4 h-4 text-red-400" />}
+                      {post.performance === "average" && <Minus className="w-4 h-4 text-white/20" />}
+                    </div>
+
+                    {/* Caption + date */}
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-muted-foreground">{caption}</p>
+                      <div className="flex items-center gap-2 mt-0.5 text-white/30">
+                        <span className="capitalize">{post.content_type}</span>
+                        <span>·</span>
+                        <span>{date}</span>
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex-shrink-0 flex items-center gap-4 text-right">
+                      <div>
+                        <p className={cn("font-mono font-semibold",
+                          post.performance === "top" ? "text-neon-green" :
+                          post.performance === "worst" ? "text-red-400" : "text-foreground"
+                        )}>
+                          {engPct}%
+                        </p>
+                        <p className="text-white/30">eng. rate</p>
+                      </div>
+                      <div className="hidden sm:block">
+                        <p className="font-mono">{post.views.toLocaleString()}</p>
+                        <p className="text-white/30">views</p>
+                      </div>
+                      <div className="hidden md:block">
+                        <p className="font-mono">{post.likes.toLocaleString()}</p>
+                        <p className="text-white/30">likes</p>
+                      </div>
+                      {post.media_url && (
+                        <a
+                          href={post.media_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white/20 hover:text-white/60 transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

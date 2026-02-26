@@ -5,6 +5,8 @@ import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import RecentReports from "@/components/dashboard/RecentReports";
 import ImprovementRoadmap from "@/components/dashboard/ImprovementRoadmap";
 import QuickActions from "@/components/dashboard/QuickActions";
+import OnboardingSteps from "@/components/dashboard/OnboardingSteps";
+import FirstAnalysisPrompt from "@/components/dashboard/FirstAnalysisPrompt";
 import type { DashboardStats } from "@/types";
 
 async function getDashboardData(userId: string) {
@@ -64,6 +66,7 @@ export default async function DashboardPage() {
   const { accounts, reports, stats, latestReport } = await getDashboardData(dbUser.id);
   const hasAccounts = accounts.length > 0;
   const hasReports = reports.length > 0;
+  const isOnboarding = !hasAccounts || !hasReports;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -80,12 +83,21 @@ export default async function DashboardPage() {
         <QuickActions hasAccounts={hasAccounts} />
       </div>
 
-      {/* Connect platforms prompt */}
-      {!hasAccounts && (
-        <PlatformConnect />
+      {/* Onboarding progress — shown until first report exists */}
+      {isOnboarding && (
+        <OnboardingSteps hasAccounts={hasAccounts} hasReports={hasReports} />
       )}
 
-      {hasAccounts && (
+      {/* Step 1: No platforms connected */}
+      {!hasAccounts && <PlatformConnect />}
+
+      {/* Step 2: Connected but no analysis yet */}
+      {hasAccounts && !hasReports && (
+        <FirstAnalysisPrompt accounts={accounts as any[]} />
+      )}
+
+      {/* Step 3: Has reports — full dashboard */}
+      {hasAccounts && hasReports && (
         <>
           {/* Top row: Growth score + metrics */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

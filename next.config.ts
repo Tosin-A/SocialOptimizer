@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["bull", "stripe"],
@@ -25,4 +26,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: true,          // suppress build-time output
+  widenClientFileUpload: true,
+  sourcemaps: { disable: true },  // don't ship source maps to the client bundle
+  disableLogger: true,
+});

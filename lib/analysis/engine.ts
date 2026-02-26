@@ -9,6 +9,7 @@ import {
   generateInsightsAndRoadmap,
   analyzeHookStrength,
 } from "@/lib/ai/claude";
+import { sendAnalysisReady } from "@/lib/email";
 import type { Post, Platform, ConnectedAccount } from "@/types";
 
 interface EngineOptions {
@@ -402,6 +403,44 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         completed_at: new Date().toISOString(),
       })
       .eq("id", jobId);
+
+    // ── Send analysis-ready email (non-blocking, best-effort) ──────────────────
+    try {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("auth_id")
+        .eq("id", account.user_id)
+        .single();
+
+      if (userData) {
+        const { createClient } = require("@supabase/supabase-js");
+        const authClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        const { data: authUser } = await authClient.auth.admin.getUserById(userData.auth_id);
+        const email = authUser?.user?.email;
+
+        if (email) {
+          const topInsight =
+            aiInsights.weaknesses?.[0]?.description ??
+            aiInsights.opportunities?.[0]?.description ??
+            "Review your full report for actionable next steps.";
+
+          await sendAnalysisReady({
+            to: email,
+            username: account.username,
+            platform: account.platform,
+            growthScore,
+            niche: nicheResult.niche,
+            topInsight,
+            reportId: report!.id,
+          });
+        }
+      }
+    } catch {
+      // Email failure must never fail the analysis job
+    }
 
     return report!.id;
   } catch (error) {
