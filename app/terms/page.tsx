@@ -1,0 +1,134 @@
+import Link from "next/link";
+import { ArrowLeft, BarChart3 } from "lucide-react";
+
+export const metadata = { title: "Terms of Service — SocialOptimizer" };
+
+export default function TermsPage() {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
+        <div className="max-w-3xl mx-auto px-6 flex items-center justify-between h-14">
+          <Link href="/" className="flex items-center gap-2.5 font-semibold text-sm">
+            <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
+              <BarChart3 className="w-4 h-4 text-white" />
+            </div>
+            SocialOptimizer
+          </Link>
+          <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back
+          </Link>
+        </div>
+      </nav>
+
+      <article className="max-w-3xl mx-auto px-6 py-16 space-y-10">
+        <div>
+          <div className="label-mono mb-4">Legal</div>
+          <h1 className="text-3xl font-semibold tracking-tight mb-2">Terms of Service</h1>
+          <p className="text-sm text-muted-foreground">Last updated: February 27, 2026</p>
+        </div>
+
+        <Section title="1. What SocialOptimizer is">
+          <p>SocialOptimizer is a social media analysis tool. It connects to your TikTok, Instagram, YouTube, and Facebook accounts, fetches post-level performance data, runs it through an AI analysis pipeline, and returns metric-backed growth recommendations.</p>
+          <p>It is not a social media scheduler, content management system, or posting tool. It does not post, edit, or delete anything on your social media accounts. Access is read-only.</p>
+        </Section>
+
+        <Section title="2. Your account">
+          <p>You must provide a valid email address to create an account. You&apos;re responsible for keeping your login credentials secure. If you suspect unauthorized access, change your password immediately and email us.</p>
+          <p>One person, one account. Sharing accounts is not permitted. Agency plans allow multiple connected social media accounts under a single SocialOptimizer login.</p>
+        </Section>
+
+        <Section title="3. Acceptable use">
+          <p>You agree not to:</p>
+          <ul className="list-disc pl-5 space-y-1.5 text-muted-foreground text-sm">
+            <li>Use SocialOptimizer to harass, stalk, or monitor individuals without their consent.</li>
+            <li>Attempt to access other users&apos; data or accounts.</li>
+            <li>Reverse-engineer, scrape, or systematically extract data from our APIs beyond normal product use.</li>
+            <li>Use automated tools (bots, scripts) to interact with the service beyond normal browser usage.</li>
+            <li>Resell or redistribute analysis reports or generated content as a standalone service without an Agency plan.</li>
+          </ul>
+          <p>We reserve the right to suspend or terminate accounts that violate these terms.</p>
+        </Section>
+
+        <Section title="4. Plans and billing">
+          <p><strong>Free plan:</strong> 3 analyses per month, 1 connected platform, 5 content generations. No credit card required.</p>
+          <p><strong>Paid plans (Starter, Pro, Agency):</strong> Billed monthly via Stripe. You can cancel at any time — access continues until the end of the current billing period. No prorated refunds. No retention tricks.</p>
+          <p>We may change pricing with 30 days&apos; notice. Existing subscriptions are honored at the original price until the next renewal after the notice period.</p>
+          <p>If a payment fails, we&apos;ll notify you by email. After 7 days of failed payment, your account reverts to the free plan. Your data is preserved.</p>
+        </Section>
+
+        <Section title="5. What you own">
+          <p><strong>Your data is yours.</strong> Your social media data, analysis reports, and generated content belong to you. We claim no ownership over any content you create or import into SocialOptimizer.</p>
+          <p>You grant us a limited license to process your data solely for the purpose of providing the service — running analyses, generating content, and displaying results in your dashboard. This license ends when you delete your account.</p>
+        </Section>
+
+        <Section title="6. What we own">
+          <p>The SocialOptimizer application, its design, code, scoring algorithms, analysis prompts, and brand are our intellectual property. Your use of the service does not grant you any rights to these beyond normal product access.</p>
+        </Section>
+
+        <Section title="7. AI-generated content">
+          <p>Content produced by our AI generator (hooks, captions, scripts, hashtag sets) is generated by Claude (Anthropic). You&apos;re free to use generated content for any purpose — commercial or personal — without attribution to SocialOptimizer.</p>
+          <p>AI output is not guaranteed to be unique, accurate, or free of errors. You should review and edit generated content before using it. We are not responsible for the performance of content you publish based on our suggestions.</p>
+        </Section>
+
+        <Section title="8. Analysis accuracy">
+          <p>Our analysis scores and recommendations are based on patterns observed across the accounts in our system and general best practices for social media growth. They are not guarantees of specific outcomes.</p>
+          <p>Growth scores, engagement benchmarks, and impact estimates are directionally useful but not precise predictions. Social media performance depends on many factors outside the scope of our analysis — algorithm changes, current events, audience mood, content execution quality.</p>
+          <p>We make no warranty that following our recommendations will produce any specific increase in followers, engagement, or revenue.</p>
+        </Section>
+
+        <Section title="9. Platform compliance">
+          <p>By connecting your accounts, you confirm that you have the authority to grant us read-only access to the data on those accounts. For agency users analyzing client accounts, you confirm you have your client&apos;s authorization.</p>
+          <p>We access platform data through official APIs and comply with each platform&apos;s developer terms. If a platform revokes our API access or changes their terms, features may become temporarily or permanently unavailable. This is not a breach of our terms.</p>
+        </Section>
+
+        <Section title="10. Service availability">
+          <p>We aim for high uptime but do not guarantee uninterrupted service. Planned maintenance, platform API outages, and third-party service issues may cause temporary unavailability. We are not liable for losses resulting from downtime.</p>
+        </Section>
+
+        <Section title="11. Limitation of liability">
+          <p>SocialOptimizer is provided &quot;as is.&quot; To the maximum extent permitted by law, we disclaim all warranties, express or implied. Our total liability for any claim arising from your use of the service is limited to the amount you&apos;ve paid us in the 12 months preceding the claim.</p>
+          <p>We are not liable for indirect, incidental, consequential, or punitive damages — including lost revenue, lost followers, or missed opportunities.</p>
+        </Section>
+
+        <Section title="12. Account termination">
+          <p>You can delete your account at any time from Settings. Deletion is permanent and removes all data.</p>
+          <p>We may terminate or suspend your account if you violate these terms, abuse the service, or fail to pay for a paid plan. We&apos;ll notify you by email before termination unless the violation is severe (e.g., security breach, harassment).</p>
+        </Section>
+
+        <Section title="13. Changes to these terms">
+          <p>We may update these terms. Material changes will be communicated via email at least 14 days before taking effect. Continued use after the effective date constitutes acceptance.</p>
+        </Section>
+
+        <Section title="14. Contact">
+          <p>Questions about these terms: <a href="mailto:hi@socialoptimizer.co" className="text-brand-400 hover:text-brand-300 transition-colors">hi@socialoptimizer.co</a></p>
+        </Section>
+      </article>
+
+      <Footer />
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">{children}</div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-white/[0.05] py-8 px-6">
+      <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
+        <span>SocialOptimizer © 2026</span>
+        <div className="flex gap-6 text-xs">
+          <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link href="/terms" className="text-foreground font-medium">Terms</Link>
+        </div>
+      </div>
+    </footer>
+  );
+}
