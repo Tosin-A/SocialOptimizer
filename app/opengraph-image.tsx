@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "SocialOptimizer — Content analytics for serious creators";
+export const alt = "SocialOptimizer | Content analytics for serious creators";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -142,7 +142,7 @@ export default function OGImage() {
             lineHeight: 1.5,
           }}
         >
-          AI-powered analysis of your TikTok, Instagram, YouTube, and Facebook content — with a ranked fix list, not a generic report.
+          AI-powered analysis of your TikTok, Instagram, YouTube, and Facebook content. Get a ranked fix list, not a generic report.
         </p>
       </div>
     ),

@@ -4,7 +4,13 @@
 
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
 const FROM = process.env.EMAIL_FROM ?? "SocialOptimizer <noreply@socialoptimizer.com>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://socialoptimizer.com";
 
@@ -69,7 +75,7 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
 </body>
 </html>`;
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: opts.to,
     subject: `Your ${opts.platform} analysis is ready — Growth Score: ${opts.growthScore}/100`,
@@ -152,7 +158,7 @@ export async function sendWeeklyDigest(opts: WeeklyDigestOptions) {
 </body>
 </html>`;
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: opts.to,
     subject: `Your weekly SocialOptimizer digest`,

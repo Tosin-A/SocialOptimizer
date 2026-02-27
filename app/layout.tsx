@@ -19,7 +19,7 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SocialOptimizer — Content analytics for serious creators",
+    default: "SocialOptimizer | Content analytics for serious creators",
     template: "%s | SocialOptimizer",
   },
   description:
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "SocialOptimizer — Content analytics for serious creators",
+    title: "SocialOptimizer | Content analytics for serious creators",
     description:
       "Analyze 90 days of your posts across 4 platforms. Get a ranked fix list, not a generic report.",
     siteName: "SocialOptimizer",
