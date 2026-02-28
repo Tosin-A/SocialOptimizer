@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 
-export const metadata = { title: "Privacy Policy — SocialOptimizer" };
+export const metadata = { title: "Privacy Policy | SocialOptimizer" };
 
 export default function PrivacyPage() {
   return (
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         </div>
 
         <Section title="1. What we collect">
-          <p>When you create an account, we store your email address and a hashed password (managed by Supabase Auth). If you sign in with Google, we receive your name, email, and profile picture from Google — nothing else.</p>
+          <p>When you create an account, we store your email address and a hashed password (managed by Supabase Auth). If you sign in with Google, we receive your name, email, and profile picture from Google. Nothing else.</p>
           <p>When you connect a social media platform, we request <strong>read-only</strong> access to your public posts and profile metadata (username, follower count, avatar). We store post-level data (captions, hashtags, engagement metrics) for the duration of the analysis. OAuth access tokens are stored server-side and never exposed to your browser.</p>
         </Section>
 
@@ -47,27 +47,27 @@ export default function PrivacyPage() {
         <Section title="3. Third-party services">
           <p>We use the following services to operate SocialOptimizer:</p>
           <ul className="list-disc pl-5 space-y-1.5 text-muted-foreground text-sm">
-            <li><strong>Supabase</strong> — Authentication and database hosting (PostgreSQL with row-level security).</li>
-            <li><strong>Anthropic (Claude)</strong> — AI analysis and content generation. Post captions and metadata are sent to Claude&apos;s API for processing. Anthropic does not use API inputs to train models.</li>
-            <li><strong>Stripe</strong> — Payment processing. We never see or store your full card number.</li>
-            <li><strong>Resend</strong> — Transactional email delivery (analysis notifications, weekly digests).</li>
-            <li><strong>Vercel</strong> — Application hosting and serverless functions.</li>
-            <li><strong>Sentry</strong> — Error monitoring. No personal data is included in error reports.</li>
+            <li><strong>Supabase</strong>: Authentication and database hosting (PostgreSQL with row-level security).</li>
+            <li><strong>Anthropic (Claude)</strong>: AI analysis and content generation. Post captions and metadata are sent to Claude&apos;s API for processing. Anthropic does not use API inputs to train models.</li>
+            <li><strong>Stripe</strong>: Payment processing. We never see or store your full card number.</li>
+            <li><strong>Resend</strong>: Transactional email delivery (analysis notifications, weekly digests).</li>
+            <li><strong>Vercel</strong>: Application hosting and serverless functions.</li>
+            <li><strong>Sentry</strong>: Error monitoring. No personal data is included in error reports.</li>
           </ul>
         </Section>
 
         <Section title="4. Platform data">
-          <p>When you connect TikTok, Instagram, YouTube, or Facebook, we access your data through their official APIs using OAuth. You can disconnect any platform at any time from Settings, which stops all future data access. We do not scrape private accounts — all analysis uses data you&apos;ve authorized or that is publicly available.</p>
+          <p>When you connect TikTok, Instagram, YouTube, or Facebook, we access your data through their official APIs using OAuth. You can disconnect any platform at any time from Settings, which stops all future data access. We do not scrape private accounts. All analysis uses data you&apos;ve authorized or that is publicly available.</p>
           <p>Competitor tracking uses publicly available profile data only. We cannot access private accounts, direct messages, or any data not visible on the public profile.</p>
         </Section>
 
         <Section title="5. Data retention">
-          <p>Your analysis reports and generated content are retained for as long as your account exists. If you delete your account (Settings → Delete account), all data is permanently removed — connected accounts, posts, reports, generated content, and usage history. This action is irreversible.</p>
+          <p>Your analysis reports and generated content are retained for as long as your account exists. If you delete your account (Settings → Delete account), all data is permanently removed: connected accounts, posts, reports, generated content, and usage history. This action is irreversible.</p>
           <p>OAuth tokens are deleted immediately when you disconnect a platform.</p>
         </Section>
 
         <Section title="6. Security">
-          <p>All data is transmitted over HTTPS. Database access is protected by row-level security — you can only access your own data. OAuth tokens are stored server-side and never returned to the browser. Our API routes validate every request with authentication checks and input validation before processing.</p>
+          <p>All data is transmitted over HTTPS. Database access is protected by row-level security. You can only access your own data. OAuth tokens are stored server-side and never returned to the browser. Our API routes validate every request with authentication checks and input validation before processing.</p>
           <p>Internal services (our Python analysis service) authenticate via shared secrets and are not publicly accessible.</p>
         </Section>
 
@@ -78,10 +78,10 @@ export default function PrivacyPage() {
         <Section title="8. Your rights">
           <p>You can:</p>
           <ul className="list-disc pl-5 space-y-1.5 text-muted-foreground text-sm">
-            <li><strong>Access</strong> your data — all reports, generated content, and account information are visible in your dashboard.</li>
-            <li><strong>Export</strong> your data — use the CSV export on the Reports page or PDF export on individual reports.</li>
-            <li><strong>Delete</strong> your data — delete your entire account from Settings. This is permanent.</li>
-            <li><strong>Disconnect</strong> platforms — revoke our access at any time from Settings.</li>
+            <li><strong>Access</strong> your data. All reports, generated content, and account information are visible in your dashboard.</li>
+            <li><strong>Export</strong> your data. Use the CSV export on the Reports page or PDF export on individual reports.</li>
+            <li><strong>Delete</strong> your data. Delete your entire account from Settings. This is permanent.</li>
+            <li><strong>Disconnect</strong> platforms. Revoke our access at any time from Settings.</li>
           </ul>
           <p>If you have questions about your data, email <a href="mailto:hi@socialoptimizer.co" className="text-brand-400 hover:text-brand-300 transition-colors">hi@socialoptimizer.co</a>.</p>
         </Section>

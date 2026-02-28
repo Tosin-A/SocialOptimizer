@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BarChart3, ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PlatformIcon from "@/components/dashboard/PlatformIcon";
 
 interface Account {
   id: string;
@@ -12,13 +13,6 @@ interface Props {
   accounts: Account[];
 }
 
-const PLATFORM_ICONS: Record<string, string> = {
-  tiktok: "🎵",
-  instagram: "📸",
-  youtube: "▶️",
-  facebook: "👥",
-};
-
 export default function FirstAnalysisPrompt({ accounts }: Props) {
   const firstAccount = accounts[0];
 
@@ -29,7 +23,7 @@ export default function FirstAnalysisPrompt({ accounts }: Props) {
       </div>
 
       <div>
-        <h2 className="text-xl font-bold mb-2">You're connected — now run your first analysis</h2>
+        <h2 className="text-xl font-bold mb-2">You're connected. Now run your first analysis</h2>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
           We'll fetch your last 50 posts, analyze your hooks, hashtags, and engagement patterns, and build your growth score.
         </p>
@@ -49,8 +43,8 @@ export default function FirstAnalysisPrompt({ accounts }: Props) {
         </Button>
         {accounts.length === 1 && (
           <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
-            <Link href="/dashboard/settings">
-              {PLATFORM_ICONS[firstAccount.platform]} {firstAccount.platform} connected
+            <Link href="/dashboard/settings" className="inline-flex items-center gap-1.5">
+              <PlatformIcon platform={firstAccount.platform} size={14} /> {firstAccount.platform} connected
             </Link>
           </Button>
         )}
@@ -58,8 +52,14 @@ export default function FirstAnalysisPrompt({ accounts }: Props) {
 
       {accounts.length > 1 && (
         <p className="text-xs text-muted-foreground">
-          {accounts.length} accounts connected —{" "}
-          {accounts.map((a) => `${PLATFORM_ICONS[a.platform] ?? ""} @${a.username}`).join(", ")}
+          {accounts.length} accounts connected:{" "}
+          {accounts.map((a, i) => (
+            <span key={a.id} className="inline-flex items-center gap-1">
+              {i > 0 && ", "}
+              <PlatformIcon platform={a.platform} size={12} />
+              @{a.username}
+            </span>
+          ))}
         </p>
       )}
     </div>

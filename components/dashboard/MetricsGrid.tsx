@@ -1,10 +1,7 @@
 import { Users, TrendingUp, BarChart2, Zap, Calendar, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardStats, ConnectedAccount } from "@/types";
-
-const PLATFORM_ICONS: Record<string, string> = {
-  tiktok: "🎵", instagram: "📸", youtube: "▶️", facebook: "👥",
-};
+import PlatformIcon from "@/components/dashboard/PlatformIcon";
 
 function MetricCard({
   icon: Icon,
@@ -54,7 +51,7 @@ export default function MetricsGrid({ stats, accounts, className }: Props) {
         <div className="flex flex-wrap gap-2">
           {accounts.map((a) => (
             <div key={a.id} className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-sm">
-              <span>{PLATFORM_ICONS[a.platform] ?? "🌐"}</span>
+              <PlatformIcon platform={a.platform} size={16} />
               <span className="font-medium">@{a.username}</span>
               {a.followers && (
                 <span className="text-muted-foreground text-xs">{formatCount(a.followers)}</span>

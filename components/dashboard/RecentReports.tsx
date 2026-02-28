@@ -1,10 +1,7 @@
 import Link from "next/link";
 import { FileText, ChevronRight, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const PLATFORM_ICONS: Record<string, string> = {
-  tiktok: "🎵", instagram: "📸", youtube: "▶️", facebook: "👥",
-};
+import PlatformIcon from "@/components/dashboard/PlatformIcon";
 
 function ScoreBadge({ score }: { score: number }) {
   return (
@@ -41,7 +38,7 @@ export default function RecentReports({ reports }: Props) {
       <div className="flex-1 divide-y divide-white/5">
         {reports.length === 0 && (
           <div className="p-8 text-center text-sm text-muted-foreground">
-            No reports yet — run your first analysis
+            No reports yet. Run your first analysis
           </div>
         )}
         {reports.map((r, i) => {
@@ -55,7 +52,7 @@ export default function RecentReports({ reports }: Props) {
               href={`/dashboard/analyze?report=${r.id}`}
               className="flex items-center gap-3 p-4 hover:bg-white/5 transition-colors group"
             >
-              <span className="text-xl">{acc ? PLATFORM_ICONS[acc.platform] ?? "🌐" : "🌐"}</span>
+              <PlatformIcon platform={acc?.platform ?? ""} size={20} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
                   {acc ? `@${acc.username}` : "Unknown account"}

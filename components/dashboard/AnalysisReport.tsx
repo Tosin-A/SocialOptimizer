@@ -164,7 +164,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
               </a>
             )}
             <a
-              href={`/dashboard/reports/${report.id}/print`}
+              href={`/reports/${report.id}/print`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
