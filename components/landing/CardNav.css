@@ -1,0 +1,261 @@
+.card-nav-container {
+  position: fixed;
+  top: 1.5em;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 800px;
+  z-index: 99;
+  box-sizing: border-box;
+  transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-nav-container.scrolled {
+  max-width: 560px;
+  top: 0.8em;
+}
+
+.card-nav {
+  display: block;
+  height: 56px;
+  padding: 0;
+  background-color: rgba(13, 7, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  will-change: height;
+  transition: border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-nav-container.scrolled .card-nav {
+  border-radius: 2rem;
+}
+
+.card-nav-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.4rem 0.4rem 1rem;
+  z-index: 2;
+}
+
+.hamburger-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  gap: 5px;
+  padding: 0 0.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+}
+
+.hamburger-menu:hover .hamburger-line {
+  opacity: 0.75;
+}
+
+.hamburger-line {
+  width: 24px;
+  height: 1.5px;
+  background-color: currentColor;
+  transition:
+    transform 0.25s ease,
+    opacity 0.2s ease;
+  transform-origin: 50% 50%;
+}
+
+.hamburger-menu.open .hamburger-line:first-child {
+  transform: translateY(3.25px) rotate(45deg);
+}
+
+.hamburger-menu.open .hamburger-line:last-child {
+  transform: translateY(-3.25px) rotate(-45deg);
+}
+
+.card-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 100%;
+}
+
+.card-nav-signin {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-decoration: none;
+  padding: 0 0.6rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.card-nav-signin:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.card-nav-cta-button {
+  background-color: rgba(99, 102, 241, 1);
+  color: white;
+  border: none;
+  border-radius: calc(0.75rem - 0.25rem);
+  padding: 0 1rem;
+  height: 100%;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.card-nav-container.scrolled .card-nav-cta-button {
+  border-radius: 1.5rem;
+}
+
+.card-nav-cta-button:hover {
+  background-color: rgba(79, 82, 221, 1);
+}
+
+.card-nav-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 56px;
+  padding: 0.5rem;
+  display: flex;
+  gap: 10px;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-nav.open .card-nav-content {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.nav-card {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: calc(0.75rem - 0.2rem);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  gap: 6px;
+  user-select: none;
+}
+
+.nav-card-label {
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: -0.3px;
+  opacity: 0.5;
+}
+
+.nav-card-links {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-card-link {
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: inherit;
+}
+
+.nav-card-link:hover {
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .card-nav-container {
+    width: 92%;
+    top: 1em;
+  }
+
+  .card-nav-container.scrolled {
+    max-width: 92%;
+  }
+
+  .card-nav-top {
+    padding: 0.4rem 0.75rem;
+    justify-content: space-between;
+  }
+
+  .hamburger-menu {
+    order: 2;
+  }
+
+  .card-nav-logo {
+    position: static;
+    transform: none;
+    order: 1;
+  }
+
+  .card-nav-signin {
+    display: none;
+  }
+
+  .card-nav-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 0.5rem;
+    bottom: 0;
+    justify-content: flex-start;
+  }
+
+  .nav-card {
+    flex: 1 1 auto;
+  }
+
+  .nav-card-label {
+    font-size: 16px;
+  }
+
+  .nav-card-link {
+    font-size: 14px;
+  }
+}
