@@ -1,7 +1,7 @@
 // POST /api/webhooks/stripe — Handle Stripe webhook events
 // Raw body is required for signature verification — do NOT use NextResponse.json() before reading body
 import { NextRequest, NextResponse } from "next/server";
-import { stripe, planFromPriceId, analysesLimitForPlan } from "@/lib/stripe";
+import { getStripe, planFromPriceId, analysesLimitForPlan } from "@/lib/stripe";
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
 import type { PlanType } from "@/types";
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
