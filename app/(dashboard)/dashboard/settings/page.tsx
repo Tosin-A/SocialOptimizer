@@ -22,11 +22,11 @@ interface UserPlan {
   has_billing: boolean;
 }
 
-const PLAN_LABELS: Record<string, { label: string; color: string; description: string }> = {
-  free:    { label: "Free",    color: "text-muted-foreground", description: "1 platform · 3 analyses/month · basic insights" },
-  starter: { label: "Starter", color: "text-slate-300",        description: "2 platforms · 10 analyses/month · all insights" },
-  pro:     { label: "Pro",     color: "text-brand-400",        description: "4 platforms · unlimited analyses · competitor tracking" },
-  agency:  { label: "Agency",  color: "text-neon-purple",      description: "10 accounts · unlimited · white-label reports · API access" },
+const PLAN_LABELS: Record<string, { label: string; color: string; description: string; price: string }> = {
+  free:    { label: "Free",    color: "text-muted-foreground", description: "1 platform · 3 analyses/month · basic insights", price: "$0" },
+  starter: { label: "Starter", color: "text-slate-300",        description: "2 platforms · 20 analyses/month · 5 competitors", price: "$29/mo" },
+  pro:     { label: "Pro",     color: "text-brand-400",        description: "4 platforms · unlimited analyses · 20 competitors", price: "$79/mo" },
+  agency:  { label: "Agency",  color: "text-neon-purple",      description: "10 platforms · unlimited analyses · 50 competitors · white-label reports", price: "$199/mo" },
 };
 
 export default function SettingsPage() {
@@ -181,13 +181,40 @@ export default function SettingsPage() {
               <Button
                 size="sm"
                 className="bg-brand-600 hover:bg-brand-500 gap-1.5"
+                disabled={checkoutLoading === "starter"}
+                onClick={() => startCheckout("starter")}
+              >
+                {checkoutLoading === "starter"
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <ArrowUpRight className="w-3.5 h-3.5" />}
+                Upgrade to Starter — $29/mo
+              </Button>
+            )}
+            {plan === "starter" && (
+              <Button
+                size="sm"
+                className="bg-brand-600 hover:bg-brand-500 gap-1.5"
                 disabled={checkoutLoading === "pro"}
                 onClick={() => startCheckout("pro")}
               >
                 {checkoutLoading === "pro"
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   : <ArrowUpRight className="w-3.5 h-3.5" />}
-                Upgrade to Pro
+                Upgrade to Pro — $79/mo
+              </Button>
+            )}
+            {(plan === "starter" || plan === "pro") && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-white/[0.1] gap-1.5"
+                disabled={checkoutLoading === "agency"}
+                onClick={() => startCheckout("agency")}
+              >
+                {checkoutLoading === "agency"
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  : <ArrowUpRight className="w-3.5 h-3.5" />}
+                {plan === "starter" ? "Agency — $199/mo" : "Upgrade to Agency"}
               </Button>
             )}
             {plan !== "free" && userPlan?.has_billing && (
@@ -222,7 +249,7 @@ export default function SettingsPage() {
             )}
             {plan === "free" && (
               <p className="text-xs text-muted-foreground pt-1">
-                Pro is $29/mo. Cancel any time. No awkward retention flow.
+                Starter is $29/mo. Pro is $79/mo. Cancel any time. No awkward retention flow.
               </p>
             )}
           </div>

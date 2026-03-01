@@ -15,7 +15,7 @@ export default function PricingTable() {
           Start free. Upgrade when it&apos;s actually worth it to you.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
           {TIERS.map((tier) => (
             <div
               key={tier.name}
@@ -77,7 +77,7 @@ export default function PricingTable() {
         </div>
 
         <p className="text-xs text-muted-foreground mt-6">
-          Pro cancels any time. No retention flow. No &quot;are you sure?&quot; email.
+          All paid plans cancel any time. No retention flow. No &quot;are you sure?&quot; email.
         </p>
       </div>
     </section>
