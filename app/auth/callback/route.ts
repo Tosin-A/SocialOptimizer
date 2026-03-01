@@ -25,37 +25,52 @@ export async function GET(request: Request) {
 
   const cookieStore = await cookies();
 
+  // Collect cookies that Supabase sets during session exchange so we can
+  // explicitly attach them to the redirect response.
+  const cookiesToSet: { name: string; value: string; options: CookieOptions }[] = [];
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll()               { return cookieStore.getAll(); },
-        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+        getAll() { return cookieStore.getAll(); },
+        setAll(cookies: { name: string; value: string; options: CookieOptions }[]) {
+          cookies.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+          cookiesToSet.push(...cookies);
         },
       },
     }
   );
 
+  let authenticated = false;
+
   // ── PKCE OAuth / email-confirmation code ─────────────────────────────────
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+    if (!error) authenticated = true;
   }
 
   // ── Magic-link / OTP token hash ──────────────────────────────────────────
-  if (tokenHash && type) {
+  if (!authenticated && tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
+    if (!error) authenticated = true;
   }
 
-  // ── Fallback — something went wrong ──────────────────────────────────────
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`);
+  // Build redirect response
+  const redirectUrl = authenticated
+    ? `${origin}${next}`
+    : `${origin}/login?error=auth_callback_failed`;
+
+  const response = NextResponse.redirect(redirectUrl);
+
+  // Explicitly set session cookies on the redirect response so the browser
+  // stores them before hitting the destination (middleware will then see the user).
+  for (const { name, value, options } of cookiesToSet) {
+    response.cookies.set(name, value, options);
+  }
+
+  return response;
 }
