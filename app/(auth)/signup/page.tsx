@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BarChart3, Mail, Lock, User, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,17 @@ import { Label } from "@/components/ui/label";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const VALID_PLANS = ["starter", "pro", "agency"] as const;
+
 export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [name, setName]         = useState("");
@@ -17,8 +27,17 @@ export default function SignupPage() {
   const [emailSent, setEmailSent] = useState(false);
 
   const router   = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const supabase  = getSupabaseBrowserClient();
+
+  const rawPlan = searchParams.get("plan");
+  const selectedPlan = VALID_PLANS.includes(rawPlan as any) ? rawPlan : null;
+
+  // After signup, go to settings with auto-checkout if a paid plan was selected
+  const postSignupPath = selectedPlan
+    ? `/dashboard/settings?checkout=${selectedPlan}`
+    : "/dashboard";
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +52,7 @@ export default function SignupPage() {
 
       if (data.session) {
         // Email confirmation is OFF — session created immediately
-        router.push("/dashboard");
+        router.push(postSignupPath);
         router.refresh();
       } else {
         // Email confirmation is ON — show check-your-email screen
@@ -48,9 +67,12 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
+    const callbackUrl = selectedPlan
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(`/dashboard/settings?checkout=${selectedPlan}`)}`
+      : `${window.location.origin}/auth/callback`;
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     });
   };
 
@@ -94,7 +116,9 @@ export default function SignupPage() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Start growing today</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Free plan · 3 analyses · No card required
+            {selectedPlan
+              ? `Create your account, then complete ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} checkout`
+              : "Free plan · 3 analyses · No card required"}
           </p>
         </div>
 

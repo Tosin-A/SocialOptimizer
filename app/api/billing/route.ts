@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
 
   if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+
   // ── Portal ────────────────────────────────────────────────────────────────────
   if (parsed.data.action === "portal") {
     if (!dbUser.stripe_customer_id) {
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
     const session = await getStripe().billingPortal.sessions.create({
       customer: dbUser.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings`,
+      return_url: `${appUrl}/dashboard/settings`,
     });
     return NextResponse.json({ url: session.url });
   }
@@ -50,7 +52,6 @@ export async function POST(req: NextRequest) {
   }
 
   const planConfig = PLANS[plan];
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
   let customerId = dbUser.stripe_customer_id;
   if (!customerId) {

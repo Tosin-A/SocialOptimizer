@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const { plan } = parsed.data;
   const planConfig = PLANS[plan];
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
 
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
