@@ -33,11 +33,13 @@ const nextConfig: NextConfig = {
 export default withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  silent: true,          // suppress build-time output
+  silent: true,
   widenClientFileUpload: true,
-  sourcemaps: { disable: true },  // don't ship source maps to the client bundle
-  disableLogger: true,
-  autoInstrumentServerFunctions: false,
-  autoInstrumentMiddleware: false,
-  autoInstrumentAppDirectory: true,
+  sourcemaps: { disable: true },
+  webpack: {
+    autoInstrumentServerFunctions: false,
+    autoInstrumentMiddleware: false,
+    autoInstrumentAppDirectory: true,
+    treeshake: { removeDebugLogging: true },
+  },
 });
