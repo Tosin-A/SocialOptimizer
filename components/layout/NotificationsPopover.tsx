@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Bell, BarChart3, Wand2, CreditCard, Mail, Users, Info, Check } from "lucide-react";
 
 interface Notification {
@@ -91,9 +92,24 @@ export default function NotificationsPopover() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, right: 0 });
+
+  // Position the portal-rendered dropdown relative to the bell button
+  useEffect(() => {
+    if (open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
+      });
+    }
+  }, [open]);
+
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={buttonRef}
         onClick={handleOpen}
         className="relative w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
         aria-label="Notifications"
@@ -106,8 +122,11 @@ export default function NotificationsPopover() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-11 w-80 rounded-xl border border-white/10 bg-[#0d1424] shadow-2xl z-50 overflow-hidden">
+      {open && createPortal(
+        <div
+          className="fixed w-80 rounded-xl border border-white/10 bg-[#0d1424] shadow-2xl z-[9999] overflow-hidden"
+          style={{ top: dropdownPos.top, right: dropdownPos.right }}
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
             <span className="text-sm font-semibold">Recent activity</span>
@@ -148,7 +167,8 @@ export default function NotificationsPopover() {
               );
             })}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

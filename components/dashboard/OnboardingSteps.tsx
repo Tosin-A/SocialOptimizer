@@ -21,7 +21,7 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
       label: "Connect a platform",
       description: "Link your TikTok, Instagram, YouTube, or Facebook account",
       done: hasAccounts,
-      href: hasAccounts ? undefined : "/dashboard",
+      href: hasAccounts ? undefined : "/dashboard#connect",
       cta: hasAccounts ? undefined : "Connect now",
     },
     {

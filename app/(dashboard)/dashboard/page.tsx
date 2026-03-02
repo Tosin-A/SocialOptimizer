@@ -97,7 +97,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Step 1: No platforms connected */}
-      {!hasAccounts && <PlatformConnect />}
+      {!hasAccounts && <div id="connect"><PlatformConnect /></div>}
 
       {/* Step 2: Connected but no analysis yet */}
       {hasAccounts && !hasReports && (

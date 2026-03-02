@@ -40,7 +40,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       {/* Logo */}
       <div className="p-5 border-b border-white/5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-110 hover:brightness-125">
             <TrendingUp className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold">SocialOptimizer</span>

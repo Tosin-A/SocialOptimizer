@@ -7,7 +7,7 @@ export default function QuickActions({ hasAccounts }: { hasAccounts: boolean }) 
   if (!hasAccounts) {
     return (
       <Button asChild>
-        <Link href="/dashboard/settings"><Plus className="w-4 h-4 mr-2" />Connect account</Link>
+        <Link href="/dashboard#connect"><Plus className="w-4 h-4 mr-2" />Connect account</Link>
       </Button>
     );
   }

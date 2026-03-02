@@ -8,27 +8,29 @@ import MetricBar from "./MetricBar";
 import ScoreRing from "./ScoreRing";
 import TextPressure from "./TextPressure";
 import GradualBlur from "./GradualBlur";
+import StarBorder from "@/components/ui/StarBorder";
 
 export default function HeroSection() {
   return (
     <section className="pt-32 pb-20 px-6 relative overflow-hidden">
-      {/* Dot-grid background */}
-      <div className="dot-grid absolute inset-0 pointer-events-none" />
-      {/* Bottom blur */}
-      <GradualBlur
-        target="parent"
-        position="bottom"
-        height="7rem"
-        strength={2}
-        divCount={5}
-        curve="bezier"
-        exponential
-        opacity={1}
-      />
+      {/* Dot-grid background with bottom blur fade */}
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <div className="dot-grid absolute inset-0" />
+        <GradualBlur
+          target="parent"
+          position="bottom"
+          height="7rem"
+          strength={2}
+          divCount={5}
+          curve="bezier"
+          exponential
+          opacity={1}
+        />
+      </div>
       {/* Subtle indigo glow behind dashboard */}
       <div className="absolute top-40 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto" style={{ zIndex: 1 }}>
         {/* Platform pill */}
         <div className="inline-flex items-center gap-2 text-xs font-mono text-brand-400 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-1 mb-8">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
@@ -56,15 +58,17 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-wrap items-center gap-4 mb-16">
-          <Button
-            size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
-            asChild
-          >
-            <Link href="/signup">
-              Analyze my account <ArrowRight className="w-4 h-4" />
-            </Link>
-          </Button>
+          <StarBorder as="div" speed="6s">
+            <Button
+              size="lg"
+              className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+              asChild
+            >
+              <Link href="/signup">
+                Analyze my account <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Button>
+          </StarBorder>
           <Button
             size="lg"
             variant="ghost"

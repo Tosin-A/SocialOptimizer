@@ -37,4 +37,7 @@ export default withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   sourcemaps: { disable: true },  // don't ship source maps to the client bundle
   disableLogger: true,
+  autoInstrumentServerFunctions: false,
+  autoInstrumentMiddleware: false,
+  autoInstrumentAppDirectory: true,
 });

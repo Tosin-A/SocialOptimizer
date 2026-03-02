@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TIERS } from "@/lib/data/landing";
+import StarBorder from "@/components/ui/StarBorder";
 
 export default function PricingTable() {
   return (
@@ -61,17 +62,24 @@ export default function PricingTable() {
                 ))}
               </div>
 
-              <Button
-                asChild
-                variant={tier.accent ? "default" : "outline"}
-                className={
-                  tier.accent
-                    ? "bg-brand-500 hover:bg-brand-600 text-white font-semibold w-full"
-                    : "w-full border-white/[0.1] hover:bg-white/[0.04]"
-                }
-              >
-                <Link href={tier.href}>{tier.cta}</Link>
-              </Button>
+              {tier.accent ? (
+                <StarBorder as="div" speed="6s" className="w-full">
+                  <Button
+                    asChild
+                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold w-full"
+                  >
+                    <Link href={tier.href}>{tier.cta}</Link>
+                  </Button>
+                </StarBorder>
+              ) : (
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full border-white/[0.1] hover:bg-white/[0.04]"
+                >
+                  <Link href={tier.href}>{tier.cta}</Link>
+                </Button>
+              )}
             </div>
           ))}
         </div>

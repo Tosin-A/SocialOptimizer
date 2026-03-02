@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StarBorder from "@/components/ui/StarBorder";
 
 export default function BottomCTA() {
   return (
@@ -13,15 +14,17 @@ export default function BottomCTA() {
           The analysis takes 3 minutes. You&apos;ll probably see something you didn&apos;t
           expect. That&apos;s the point.
         </p>
-        <Button
-          size="lg"
-          className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-8 gap-2"
-          asChild
-        >
-          <Link href="/signup">
-            Analyze my account free <ArrowRight className="w-4 h-4" />
-          </Link>
-        </Button>
+        <StarBorder as="div" speed="6s">
+          <Button
+            size="lg"
+            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-8 gap-2"
+            asChild
+          >
+            <Link href="/signup">
+              Analyze my account free <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Button>
+        </StarBorder>
         <p className="text-xs text-muted-foreground mt-4">
           No card required &middot; free plan available
         </p>

@@ -1,4 +1,13 @@
+"use client";
+
 import { FINDINGS } from "@/lib/data/landing";
+import CountUp from "./CountUp";
+
+const FINDING_COUNTS: { to: number; suffix: string }[] = [
+  { to: 3.2, suffix: "\u00d7" },
+  { to: 67, suffix: "%" },
+  { to: 4.1, suffix: "\u00d7" },
+];
 
 export default function FindingsSection() {
   return (
@@ -24,7 +33,11 @@ export default function FindingsSection() {
           >
             <div className="md:w-52 flex-shrink-0">
               <div className="font-mono font-semibold text-5xl text-brand-400 leading-none mb-1 tabular-nums">
-                {f.stat}
+                <CountUp
+                  to={FINDING_COUNTS[i].to}
+                  suffix={FINDING_COUNTS[i].suffix}
+                  duration={2.5}
+                />
               </div>
               <div className="text-xs text-muted-foreground font-mono">{f.unit}</div>
             </div>

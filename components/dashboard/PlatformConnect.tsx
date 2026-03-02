@@ -11,6 +11,7 @@ const PLATFORMS = [
     desc: "Analyze your For You Page performance and viral patterns",
     color: "from-pink-500/20 to-red-500/20 border-pink-500/30",
     btnColor: "bg-pink-500 hover:bg-pink-600",
+    comingSoon: false,
   },
   {
     id: "instagram",
@@ -18,6 +19,7 @@ const PLATFORMS = [
     desc: "Optimize your Reels, Stories, and Posts for maximum reach",
     color: "from-purple-500/20 to-pink-500/20 border-purple-500/30",
     btnColor: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
+    comingSoon: true,
   },
   {
     id: "youtube",
@@ -25,6 +27,7 @@ const PLATFORMS = [
     desc: "Improve retention, CTR, and subscriber growth",
     color: "from-red-500/20 to-orange-500/20 border-red-500/30",
     btnColor: "bg-red-500 hover:bg-red-600",
+    comingSoon: true,
   },
   {
     id: "facebook",
@@ -32,6 +35,7 @@ const PLATFORMS = [
     desc: "Maximize organic reach and engagement on your Page",
     color: "from-blue-500/20 to-blue-700/20 border-blue-500/30",
     btnColor: "bg-blue-600 hover:bg-blue-700",
+    comingSoon: true,
   },
 ];
 
@@ -67,10 +71,12 @@ export default function PlatformConnect() {
             </div>
             <Button
               onClick={() => connect(p.id)}
-              disabled={!!connecting}
-              className={`w-full gap-2 text-white ${p.btnColor}`}
+              disabled={!!connecting || p.comingSoon}
+              className={`w-full gap-2 text-white ${p.comingSoon ? "bg-slate-700 hover:bg-slate-700 cursor-not-allowed opacity-50" : p.btnColor}`}
             >
-              {connecting === p.id ? (
+              {p.comingSoon ? (
+                "Coming soon"
+              ) : connecting === p.id ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Connecting...</>
               ) : (
                 <><Plus className="w-4 h-4" /> Connect {p.name}</>

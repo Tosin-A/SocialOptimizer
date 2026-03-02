@@ -77,7 +77,7 @@ export default function RecentReports({ reports }: Props) {
 
       <div className="p-4 border-t border-white/5">
         <Link
-          href="/dashboard/analyze"
+          href="/dashboard/reports"
           className="text-xs text-brand-400 hover:underline flex items-center gap-1 justify-center"
         >
           View all reports <ChevronRight className="w-3 h-3" />

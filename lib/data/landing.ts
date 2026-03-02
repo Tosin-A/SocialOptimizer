@@ -239,7 +239,7 @@ export const TIERS = [
     missing: ["Unlimited analyses", "White-label reports"],
     cta:    "Get Starter",
     href:   "/signup?plan=starter",
-    accent: false,
+    accent: true,
   },
   {
     name:    "Pro",
@@ -258,7 +258,7 @@ export const TIERS = [
     missing: [],
     cta:    "Get Pro",
     href:   "/signup?plan=pro",
-    accent: true,
+    accent: false,
   },
   {
     name:    "Agency",

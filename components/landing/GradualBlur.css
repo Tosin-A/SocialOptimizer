@@ -7,8 +7,7 @@
 }
 
 .gradual-blur-inner > div {
-  -webkit-backdrop-filter: inherit;
-  backdrop-filter: inherit;
+  /* backdrop-filter values are set via inline styles per div */
 }
 
 .gradual-blur {
