@@ -83,7 +83,12 @@ export default function GrowthScoreCard({ score, delta, niche, lastAnalyzedAt, a
       {/* Last analyzed */}
       {lastAnalyzedAt && (
         <p className="text-xs text-muted-foreground">
-          Analyzed {new Date(lastAnalyzedAt).toLocaleDateString()}
+          Analyzed{" "}
+          {new Date(lastAnalyzedAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
         </p>
       )}
 

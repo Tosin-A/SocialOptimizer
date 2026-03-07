@@ -36,10 +36,15 @@ export async function POST(req: NextRequest) {
 
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Enforce usage limits
-    if (dbUser.plan === "free" && dbUser.analyses_used >= dbUser.analyses_limit) {
+    // Enforce usage limits (all plans have limits)
+    if (dbUser.analyses_used >= dbUser.analyses_limit) {
       return NextResponse.json(
-        { error: "Analysis limit reached. Upgrade to Pro to run unlimited analyses." },
+        {
+          error:
+            dbUser.plan === "free"
+              ? "Analysis limit reached. Upgrade to run more analyses."
+              : `You've used all ${dbUser.analyses_limit} analyses this month. Upgrade for more or wait until next billing cycle.`,
+        },
         { status: 402 }
       );
     }

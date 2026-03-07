@@ -27,7 +27,7 @@ export interface FeatureAccess {
 
 const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
   free: {
-    analyses_per_month: 2,
+    analyses_per_month: 3,
     score_history: "last_only",
     discover: false,
     generate_ideas_per_month: 5,
@@ -49,7 +49,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     competitors_limit: 0,
   },
   pro: {
-    analyses_per_month: -1,
+    analyses_per_month: 20,
     score_history: "full",
     discover: true,
     generate_ideas_per_month: -1,
@@ -60,7 +60,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     competitors_limit: 3,
   },
   agency: {
-    analyses_per_month: -1,
+    analyses_per_month: 50,
     score_history: "full",
     discover: true,
     generate_ideas_per_month: -1,

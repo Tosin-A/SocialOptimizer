@@ -28,7 +28,7 @@ CREATE TABLE users (
   plan            plan_type NOT NULL DEFAULT 'free',
   stripe_customer_id TEXT,
   analyses_used   INT NOT NULL DEFAULT 0,
-  analyses_limit  INT NOT NULL DEFAULT 3,        -- Free: 3/month, Pro: unlimited
+  analyses_limit  INT NOT NULL DEFAULT 3,        -- Free: 3, Starter: 10, Pro: 20, Agency: 50 per month
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

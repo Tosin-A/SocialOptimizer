@@ -2,6 +2,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus } from "lucide-react";
+import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -319,10 +320,13 @@ function SettingsContent() {
         {/* Usage meter */}
         {userPlan && (
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Analyses this month</span>
-              <span className="font-mono">
-                {isUnlimited ? `${userPlan.analyses_used} / ∞` : `${userPlan.analyses_used} / ${userPlan.analyses_limit}`}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Analyses this month</span>
+              <span>
+                <span className="font-mono text-foreground">{userPlan.analyses_used}</span>
+                <span className="text-muted-foreground"> used · </span>
+                <span className="font-mono text-brand-400">{isUnlimited ? "∞" : Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span>
+                <span className="text-muted-foreground"> left</span>
               </span>
             </div>
             {!isUnlimited && (
@@ -441,40 +445,43 @@ function SettingsContent() {
         {accounts.length === 0 ? (
           <div className="text-center py-6">
             <p className="text-muted-foreground text-sm mb-4">No platforms connected yet.</p>
-            <Button size="sm" asChild>
-              <a href="/dashboard">Connect a platform</a>
-            </Button>
+            <PlatformConnect mode="initial" />
           </div>
         ) : (
-          <div className="space-y-3">
-            {accounts.map((a) => (
-              <div key={a.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-neon-green" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium capitalize">{a.platform}</div>
-                    <div className="text-xs text-muted-foreground">
-                      @{a.username}
-                      {a.followers != null && ` · ${a.followers.toLocaleString()} followers`}
+          <>
+            <div className="space-y-3">
+              {accounts.map((a) => (
+                <div key={a.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-neon-green" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium capitalize">{a.platform}</div>
+                      <div className="text-xs text-muted-foreground">
+                        @{a.username}
+                        {a.followers != null && ` · ${a.followers.toLocaleString()} followers`}
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => disconnectAccount(a.id, a.platform)}
+                    disabled={disconnecting === a.id}
+                    className="text-xs text-muted-foreground hover:text-red-400 transition-colors flex items-center gap-1"
+                  >
+                    {disconnecting === a.id
+                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      : <Trash2 className="w-3.5 h-3.5" />
+                    }
+                    Disconnect
+                  </button>
                 </div>
-                <button
-                  onClick={() => disconnectAccount(a.id, a.platform)}
-                  disabled={disconnecting === a.id}
-                  className="text-xs text-muted-foreground hover:text-red-400 transition-colors flex items-center gap-1"
-                >
-                  {disconnecting === a.id
-                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : <Trash2 className="w-3.5 h-3.5" />
-                  }
-                  Disconnect
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className="mt-6 pt-6 border-t border-white/5">
+              <PlatformConnect mode="add" />
+            </div>
+          </>
         )}
       </div>
 

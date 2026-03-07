@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AnalysisReport from "@/components/dashboard/AnalysisReport";
 import CSVImportUpload from "@/components/dashboard/CSVImportUpload";
+import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 
@@ -21,8 +22,11 @@ export default function AnalyzePage() {
   );
 }
 
+interface UserPlan { plan: string; analyses_used: number; analyses_limit: number; has_billing?: boolean; }
+
 function AnalyzePageInner() {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [userPlan, setUserPlan] = useState<UserPlan | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string>("");
   const [maxPosts, setMaxPosts] = useState(50);
   const [job, setJob] = useState<Job | null>(null);
@@ -32,20 +36,25 @@ function AnalyzePageInner() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
+  const fetchAccounts = useCallback(() => {
+    fetch("/api/accounts")
+      .then((r) => r.json())
+      .then((d) => {
+        setAccounts(d.data ?? []);
+        setUserPlan(d.user_plan ?? null);
+        const preSelected = searchParams.get("account");
+        if (preSelected) setSelectedAccount(preSelected);
+        else if (d.data?.[0]) setSelectedAccount(d.data[0].id);
+      });
+  }, [searchParams]);
+
   useEffect(() => () => {
     pollCleanupRef.current?.();
   }, []);
 
   useEffect(() => {
-    fetch("/api/accounts")
-      .then((r) => r.json())
-      .then((d) => {
-        setAccounts(d.data ?? []);
-        const preSelected = searchParams.get("account");
-        if (preSelected) setSelectedAccount(preSelected);
-        else if (d.data?.[0]) setSelectedAccount(d.data[0].id);
-      });
-  }, []);
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const pollJob = useCallback(
     (jobId: string) => {
@@ -78,6 +87,7 @@ function AnalyzePageInner() {
               const reportData = await reportRes.json();
               setReport(reportData.data);
             }
+            fetchAccounts(); // refresh usage count
             return true;
           }
           if (data.status === "failed") {
@@ -98,7 +108,7 @@ function AnalyzePageInner() {
       }, 1000);
       return () => clearInterval(interval);
     },
-    [toast]
+    [toast, fetchAccounts]
   );
 
   const startAnalysis = async () => {
@@ -127,11 +137,19 @@ function AnalyzePageInner() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-brand-400" /> Content Analysis
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">Deep AI analysis of your posts, hashtags, and engagement patterns</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-brand-400" /> Content Analysis
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">Deep AI analysis of your posts, hashtags, and engagement patterns</p>
+        </div>
+        {userPlan && (
+          <div className="text-sm text-muted-foreground">
+            <span className="font-mono text-foreground">{userPlan.analyses_used}</span> used ·{" "}
+            <span className="font-mono text-brand-400">{Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span> left
+          </div>
+        )}
       </div>
 
       {/* Control panel */}
@@ -218,7 +236,7 @@ function AnalyzePageInner() {
       {/* Report */}
       {report && <AnalysisReport report={report} accountId={selectedAccount} />}
 
-      {/* CSV Import */}
+      {/* CSV Import & Connect account */}
       {!job && !report && (
         <>
           <div className="relative">
@@ -232,7 +250,6 @@ function AnalyzePageInner() {
           <CSVImportUpload
             onImportComplete={(result) => {
               setAccounts((prev) => {
-                // Re-fetch accounts to include the new CSV import
                 fetch("/api/accounts")
                   .then((r) => r.json())
                   .then((d) => {
@@ -243,6 +260,17 @@ function AnalyzePageInner() {
               });
             }}
           />
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/5" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-3 text-xs text-muted-foreground">Or connect with OAuth</span>
+            </div>
+          </div>
+          <div className="mt-6">
+            <PlatformConnect mode="add" />
+          </div>
         </>
       )}
 

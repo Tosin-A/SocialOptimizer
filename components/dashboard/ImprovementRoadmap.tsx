@@ -25,7 +25,7 @@ export default function ImprovementRoadmap({ roadmap, className }: Props) {
           <Map className="w-4 h-4 text-brand-400" /> Growth Roadmap
         </h3>
         {roadmap.length > 5 && (
-          <Link href="/dashboard/analyze" className="text-xs text-brand-400 hover:underline flex items-center gap-1">
+          <Link href="/dashboard/roadmap" className="text-xs text-brand-400 hover:underline flex items-center gap-1">
             View all {roadmap.length} <ChevronRight className="w-3 h-3" />
           </Link>
         )}

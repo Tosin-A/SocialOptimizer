@@ -40,7 +40,7 @@ export const PLANS: Record<Exclude<PlanType, "free">, PlanConfig> = {
   pro: {
     label: "Pro",
     price_monthly: 4900,
-    analyses_limit: -1,
+    analyses_limit: 20,
     platforms_limit: 4,
     competitors_limit: 3,
     stripe_price_id: process.env.STRIPE_PRICE_ID_PRO!,
@@ -48,7 +48,7 @@ export const PLANS: Record<Exclude<PlanType, "free">, PlanConfig> = {
   agency: {
     label: "Agency",
     price_monthly: 19900,
-    analyses_limit: -1,
+    analyses_limit: 50,
     platforms_limit: 10,
     competitors_limit: 50,
     stripe_price_id: process.env.STRIPE_PRICE_ID_AGENCY!,
@@ -63,9 +63,9 @@ export function planFromPriceId(priceId: string): PlanType | null {
   return null;
 }
 
-// Analyses limit for a given plan (-1 = store as very large number for DB)
+// Analyses limit per month for a given plan
 export function analysesLimitForPlan(plan: PlanType): number {
-  if (plan === "free") return 2;
+  if (plan === "free") return 3;
   const config = PLANS[plan as Exclude<PlanType, "free">];
-  return config.analyses_limit === -1 ? 999999 : config.analyses_limit;
+  return config.analyses_limit;
 }

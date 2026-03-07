@@ -39,7 +39,12 @@ const PLATFORMS = [
   },
 ];
 
-export default function PlatformConnect() {
+interface PlatformConnectProps {
+  /** "initial" = first-time setup, "add" = adding another when user already has accounts */
+  mode?: "initial" | "add";
+}
+
+export default function PlatformConnect({ mode = "initial" }: PlatformConnectProps) {
   const [connecting, setConnecting] = useState<string | null>(null);
 
   const connect = (platform: string) => {
@@ -47,12 +52,18 @@ export default function PlatformConnect() {
     window.location.href = `/api/connect/${platform}`;
   };
 
+  const isAdd = mode === "add";
+
   return (
     <div className="glass rounded-2xl p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-xl font-bold mb-2">Connect your social media account</h2>
+      <div className={`${isAdd ? "mb-6" : "text-center mb-8"}`}>
+        <h2 className={`font-bold mb-2 ${isAdd ? "text-base" : "text-xl"}`}>
+          {isAdd ? "Connect another platform" : "Connect your social media account"}
+        </h2>
         <p className="text-muted-foreground text-sm">
-          Connect at least one account to start your first analysis
+          {isAdd
+            ? "Link TikTok, Instagram, YouTube, or Facebook for live data and deeper analysis"
+            : "Connect at least one account to start your first analysis"}
         </p>
       </div>
 

@@ -6,6 +6,7 @@ import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import RecentReports from "@/components/dashboard/RecentReports";
 import ImprovementRoadmap from "@/components/dashboard/ImprovementRoadmap";
 import QuickActions from "@/components/dashboard/QuickActions";
+import AnalysisUsageBadge from "@/components/dashboard/AnalysisUsageBadge";
 import OnboardingSteps from "@/components/dashboard/OnboardingSteps";
 import FirstAnalysisPrompt from "@/components/dashboard/FirstAnalysisPrompt";
 import ScoreHistoryChart from "@/components/dashboard/ScoreHistoryChart";
@@ -79,16 +80,19 @@ export default async function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {hasReports
-              ? `Last analyzed: ${new Date(stats.last_analysis_at!).toLocaleDateString()}`
+              ? `Last analyzed: ${new Date(stats.last_analysis_at!).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
               : "Connect a platform to get started"}
           </p>
         </div>
-        <QuickActions hasAccounts={hasAccounts} />
+        <div className="flex items-center gap-2">
+          <AnalysisUsageBadge />
+          <QuickActions hasAccounts={hasAccounts} />
+        </div>
       </div>
 
       {/* Onboarding progress — shown until first report exists */}
@@ -97,7 +101,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Step 1: No platforms connected */}
-      {!hasAccounts && <div id="connect"><PlatformConnect /></div>}
+      {!hasAccounts && <div id="connect"><PlatformConnect mode="initial" /></div>}
 
       {/* Step 2: Connected but no analysis yet */}
       {hasAccounts && !hasReports && (
