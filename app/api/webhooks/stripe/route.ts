@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         .from("users")
         .update({
           plan: "free",
-          analyses_limit: 3,
+          analyses_limit: analysesLimitForPlan("free"),
           analyses_used: 0,
         })
         .eq("id", userId);

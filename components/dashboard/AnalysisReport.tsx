@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } from "@/types";
 import { cn } from "@/lib/utils";
+import RankedFixList from "./RankedFixList";
+import PlatformSignals from "./PlatformSignals";
 
 const SCORE_ITEMS = [
   { key: "content_quality_score", label: "Content Quality" },
@@ -118,7 +120,7 @@ interface PostRow {
 interface Props { report: AnalysisReportType; accountId?: string; }
 
 export default function AnalysisReport({ report, accountId }: Props) {
-  const [tab, setTab] = useState<"overview" | "insights" | "roadmap" | "hashtags" | "posts">("overview");
+  const [tab, setTab] = useState<"overview" | "fixes" | "signals" | "insights" | "roadmap" | "hashtags" | "posts">("overview");
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsFetched, setPostsFetched] = useState(false);
@@ -135,6 +137,8 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
   const tabs = [
     { id: "overview", label: "Overview" },
+    { id: "fixes", label: `Fixes (${report.fix_list?.length ?? 0})` },
+    { id: "signals", label: "Signals" },
     { id: "insights", label: `Insights (${(report.strengths?.length ?? 0) + (report.weaknesses?.length ?? 0)})` },
     { id: "roadmap", label: `Roadmap (${report.improvement_roadmap?.length ?? 0})` },
     { id: "hashtags", label: "Hashtags" },
@@ -223,6 +227,17 @@ export default function AnalysisReport({ report, accountId }: Props) {
             </div>
           </div>
         </div>
+      )}
+
+      {tab === "fixes" && (
+        <RankedFixList fixes={report.fix_list ?? []} />
+      )}
+
+      {tab === "signals" && (
+        <PlatformSignals
+          signals={report.platform_signal_weights ?? []}
+          platform={(report as any).connected_accounts?.platform ?? "tiktok"}
+        />
       )}
 
       {tab === "insights" && (

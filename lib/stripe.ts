@@ -31,18 +31,18 @@ export interface PlanConfig {
 export const PLANS: Record<Exclude<PlanType, "free">, PlanConfig> = {
   starter: {
     label: "Starter",
-    price_monthly: 2900,
-    analyses_limit: 20,
+    price_monthly: 1900,
+    analyses_limit: 10,
     platforms_limit: 2,
-    competitors_limit: 5,
+    competitors_limit: 0,
     stripe_price_id: process.env.STRIPE_PRICE_ID_STARTER!,
   },
   pro: {
     label: "Pro",
-    price_monthly: 7900,
+    price_monthly: 4900,
     analyses_limit: -1,
     platforms_limit: 4,
-    competitors_limit: 20,
+    competitors_limit: 3,
     stripe_price_id: process.env.STRIPE_PRICE_ID_PRO!,
   },
   agency: {
@@ -65,7 +65,7 @@ export function planFromPriceId(priceId: string): PlanType | null {
 
 // Analyses limit for a given plan (-1 = store as very large number for DB)
 export function analysesLimitForPlan(plan: PlanType): number {
-  if (plan === "free") return 3;
+  if (plan === "free") return 2;
   const config = PLANS[plan as Exclude<PlanType, "free">];
   return config.analyses_limit === -1 ? 999999 : config.analyses_limit;
 }

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/utils";
+import UpgradeGate from "@/components/dashboard/UpgradeGate";
 
 type Platform = "tiktok" | "instagram" | "youtube" | "facebook";
 type ImpactLevel = "high" | "medium" | "low";
@@ -242,6 +243,8 @@ export default function CompetitorsPage() {
         </Button>
       </div>
 
+      <UpgradeGate feature="competitors">
+
       {/* Add form */}
       {showForm && (
         <form onSubmit={addCompetitor} className="glass rounded-2xl p-6 space-y-4">
@@ -435,6 +438,8 @@ export default function CompetitorsPage() {
           Data is pulled from public profiles. Engagement rates are estimated from visible interactions. Refreshed every 24h.
         </p>
       )}
+
+      </UpgradeGate>
     </div>
   );
 }

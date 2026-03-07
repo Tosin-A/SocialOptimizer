@@ -8,6 +8,11 @@ import type {
   ContentTheme,
   HashtagAnalysis,
   Platform,
+  FixListItem,
+  PlatformSignalWeight,
+  PersonalizedIdea,
+  ScoredHook,
+  StructuredCaption,
 } from "@/types";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -273,7 +278,441 @@ Hook scoring rubric:
   return JSON.parse(extractJSON(text));
 }
 
+// ─── Competitor analysis AI functions ─────────────────────────────────────────
+
+export async function analyzeHashtagGap(
+  userHashtags: string[],
+  competitorHashtags: string[],
+  niche: string,
+  platform: Platform
+): Promise<Array<{ hashtag: string; competitor_uses: boolean; user_uses: boolean; recommendation: string; rationale: string }>> {
+  const userSet = new Set(userHashtags.map((h) => h.toLowerCase()));
+  const compSet = new Set(competitorHashtags.map((h) => h.toLowerCase()));
+
+  // Find gaps
+  const compOnly = [...compSet].filter((h) => !userSet.has(h));
+  const userOnly = [...userSet].filter((h) => !compSet.has(h));
+  const shared = [...userSet].filter((h) => compSet.has(h));
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze the hashtag gap between a user and their competitor in the ${niche} niche on ${platform}.
+
+Competitor uses but user doesn't: ${compOnly.slice(0, 20).join(", ")}
+User uses but competitor doesn't: ${userOnly.slice(0, 20).join(", ")}
+Both use: ${shared.slice(0, 20).join(", ")}
+
+For the top 10 most impactful hashtags, return JSON array:
+[
+  {
+    "hashtag": "#tag",
+    "competitor_uses": true/false,
+    "user_uses": true/false,
+    "recommendation": "adopt" | "ignore" | "already_using",
+    "rationale": "specific reason to adopt or ignore this hashtag"
+  }
+]
+
+Focus on hashtags that would meaningfully improve reach in the ${niche} niche.`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+export async function analyzeCompetitorOutliers(
+  competitorPosts: Array<{ caption: string | null; engagement_rate: number; content_type: string }>,
+  avgEngagement: number,
+  niche: string,
+  platform: Platform
+): Promise<Array<{ caption: string | null; engagement_rate: number; multiplier: number; what_worked: string }>> {
+  const outliers = competitorPosts
+    .filter((p) => p.engagement_rate > avgEngagement * 3)
+    .sort((a, b) => b.engagement_rate - a.engagement_rate)
+    .slice(0, 5);
+
+  if (outliers.length === 0) return [];
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze these competitor outlier posts in the ${niche} niche on ${platform}.
+Average competitor engagement: ${(avgEngagement * 100).toFixed(2)}%
+
+Outlier posts:
+${JSON.stringify(outliers.map((o) => ({
+  caption_preview: o.caption?.slice(0, 200),
+  engagement_rate: `${(o.engagement_rate * 100).toFixed(2)}%`,
+  multiplier: `${(o.engagement_rate / avgEngagement).toFixed(1)}x`,
+  type: o.content_type,
+})), null, 2)}
+
+For each post, explain what worked and how the user could apply the same pattern.
+
+Return JSON array:
+[
+  {
+    "caption": "short caption preview",
+    "engagement_rate": 0.0,
+    "multiplier": 3.5,
+    "what_worked": "specific explanation"
+  }
+]`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+// ─── Discover module AI functions ─────────────────────────────────────────────
+
+export async function detectOutlierPatterns(
+  outliers: Array<{ caption: string | null; engagement_rate: number; multiplier: number; content_type: string }>,
+  avgEngagement: number,
+  niche: string,
+  platform: Platform
+): Promise<Array<{ pattern_tags: string[]; what_worked: string }>> {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze these outlier posts (${multiplierLabel(outliers)} avg engagement) for a ${niche} creator on ${platform}.
+
+Average engagement rate: ${(avgEngagement * 100).toFixed(2)}%
+
+Outlier posts:
+${JSON.stringify(outliers.slice(0, 10).map((o) => ({
+  caption_preview: o.caption?.slice(0, 200),
+  engagement_multiplier: `${o.multiplier}x`,
+  type: o.content_type,
+})), null, 2)}
+
+For each post, return JSON array:
+[
+  {
+    "pattern_tags": ["tag1", "tag2"],
+    "what_worked": "specific explanation of why this post overperformed"
+  }
+]
+
+Pattern tags should be reusable categories like "question-hook", "controversial-take", "personal-story", "trend-riding", "specific-number", "before-after", etc.`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+function multiplierLabel(outliers: Array<{ multiplier: number }>): string {
+  const min = Math.min(...outliers.map((o) => o.multiplier));
+  const max = Math.max(...outliers.map((o) => o.multiplier));
+  return `${min}–${max}x`;
+}
+
+export async function analyzeNicheSaturation(
+  niche: string,
+  platform: Platform,
+  benchmarkData?: { avg_engagement_rate?: number; creator_count?: number }
+): Promise<{
+  active_creators: number;
+  avg_engagement_rate: number;
+  trend_direction: "growing" | "stable" | "declining";
+  verdict: string;
+}> {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Assess the saturation level of the "${niche}" niche on ${platform}.
+
+${benchmarkData ? `Known data: ~${benchmarkData.creator_count ?? "unknown"} creators, avg engagement ${benchmarkData.avg_engagement_rate ? (benchmarkData.avg_engagement_rate * 100).toFixed(2) + "%" : "unknown"}` : "No benchmark data available — estimate based on your knowledge."}
+
+Return JSON:
+{
+  "active_creators": estimated_number,
+  "avg_engagement_rate": 0.0-1.0,
+  "trend_direction": "growing" | "stable" | "declining",
+  "verdict": "2-3 sentence assessment: is this niche oversaturated, has opportunity, or is emerging? Be specific about why."
+}`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+export async function extractFormatPatterns(
+  posts: Array<{ content_type: string; engagement_rate: number | null; caption: string | null }>,
+  niche: string,
+  platform: Platform
+): Promise<Array<{
+  format: string;
+  count: number;
+  avg_engagement_rate: number;
+  pct_of_total: number;
+  recommendation: string;
+}>> {
+  // Compute format stats
+  const formatMap: Record<string, { count: number; totalEng: number }> = {};
+  for (const post of posts) {
+    const fmt = post.content_type;
+    if (!formatMap[fmt]) formatMap[fmt] = { count: 0, totalEng: 0 };
+    formatMap[fmt].count++;
+    formatMap[fmt].totalEng += post.engagement_rate ?? 0;
+  }
+
+  const total = posts.length;
+  const stats = Object.entries(formatMap).map(([format, data]) => ({
+    format,
+    count: data.count,
+    avg_engagement_rate: data.count > 0 ? data.totalEng / data.count : 0,
+    pct_of_total: total > 0 ? data.count / total : 0,
+  }));
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze this content format distribution for a ${niche} creator on ${platform}.
+
+Format stats:
+${JSON.stringify(stats, null, 2)}
+
+For each format, add a specific "recommendation" field explaining what to do (increase, decrease, or maintain this format and why).
+
+Return JSON array:
+${JSON.stringify(stats.map((s) => ({ ...s, recommendation: "specific recommendation" })), null, 2)}`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+// ─── Ranked fix list ──────────────────────────────────────────────────────────
+
+export async function generateFixList(analysisData: {
+  platform: Platform;
+  niche: string;
+  growth_score: number;
+  hook_strength_score: number;
+  cta_score: number;
+  hashtag_score: number;
+  engagement_score: number;
+  consistency_score: number;
+  branding_score: number;
+  avg_engagement_rate: number;
+  avg_hook_score: number;
+  cta_usage_rate: number;
+  avg_posts_per_week: number;
+  platform_signal_weights: PlatformSignalWeight[];
+}): Promise<FixListItem[]> {
+  const signalSummary = analysisData.platform_signal_weights
+    .map((sw) => `${sw.signal}: ${sw.current_score}/100 (benchmark: ${sw.benchmark}, weight: ${sw.weight})`)
+    .join("\n");
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Generate a ranked fix list (max 6 items) for this ${analysisData.platform} creator in the ${analysisData.niche} niche.
+
+Current scores:
+- Growth score: ${analysisData.growth_score}/100
+- Hook strength: ${analysisData.hook_strength_score}/100
+- CTA usage: ${analysisData.cta_score}/100
+- Hashtag effectiveness: ${analysisData.hashtag_score}/100
+- Engagement: ${analysisData.engagement_score}/100
+- Consistency: ${analysisData.consistency_score}/100
+- Branding: ${analysisData.branding_score}/100
+- Avg engagement rate: ${(analysisData.avg_engagement_rate * 100).toFixed(2)}%
+- Avg hook score: ${(analysisData.avg_hook_score * 100).toFixed(0)}/100
+- CTA usage rate: ${(analysisData.cta_usage_rate * 100).toFixed(0)}%
+- Posts per week: ${analysisData.avg_posts_per_week}
+
+Platform signal weights:
+${signalSummary}
+
+Return a JSON array of max 6 items, ranked by expected impact (highest first):
+[
+  {
+    "rank": 1,
+    "problem": "specific problem statement referencing a metric",
+    "why_it_matters": "concise explanation of why this hurts growth on ${analysisData.platform}",
+    "action": "specific, concrete action to take (not 'improve hooks' but 'rewrite first sentence to open with a question or surprising stat')",
+    "impact": "high" | "medium" | "low",
+    "metric_reference": "the specific metric backing this (e.g. 'hook score 23/100 vs benchmark 55')"
+  }
+]
+
+Rules:
+- Every item must reference a specific score or metric
+- Actions must be concrete enough to execute today
+- Rank by which fix will move the growth score the most (weight × gap from benchmark)
+- No motivational filler. No hedging language.`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
 // ─── Content generation ───────────────────────────────────────────────────────
+
+export async function generatePersonalizedIdeas(
+  context: {
+    outlierPatterns: string[];
+    trendNames: string[];
+    niche: string;
+    platform: Platform;
+    topThemes: string[];
+  }
+): Promise<PersonalizedIdea[]> {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: GENERATION_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Generate 10 personalized content ideas for a ${context.niche} creator on ${context.platform}.
+
+Context:
+- Outlier patterns that worked: ${context.outlierPatterns.join(", ") || "none detected"}
+- Current trends: ${context.trendNames.join(", ") || "none available"}
+- Top content themes: ${context.topThemes.join(", ")}
+
+Each idea should be directly inspired by either an outlier pattern, a current trend, or a gap in their niche coverage.
+
+Return JSON array:
+[
+  {
+    "title": "specific video/post title",
+    "angle": "unique perspective or hook angle",
+    "source": "outlier" | "trend" | "niche_gap",
+    "source_reference": "which specific pattern/trend inspired this",
+    "why_it_works": "psychological or algorithmic reason",
+    "format": "video" | "reel" | "short" | "post" | "story",
+    "estimated_engagement": "high" | "medium" | "low"
+  }
+]`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+export async function generateScoredHooks(
+  topic: string,
+  niche: string,
+  platform: Platform
+): Promise<ScoredHook[]> {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: GENERATION_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Generate 10 hooks for a ${platform} post about "${topic}" in the ${niche} niche.
+
+Score each hook on:
+1. Overall score (0-100) — how likely this hook grabs attention
+2. Pattern interrupt score (0-100) — how much it breaks the scroll pattern
+
+Mark the top 2 hooks as "ab_recommended: true" for A/B testing.
+
+Return JSON array:
+[
+  {
+    "text": "the hook text",
+    "score": 0-100,
+    "type": "question" | "statement" | "stat" | "story" | "controversial",
+    "pattern_interrupt_score": 0-100,
+    "ab_recommended": true/false,
+    "psychology": "why this hook works"
+  }
+]
+
+Sort by score descending.`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+export async function generateStructuredCaption(
+  topic: string,
+  niche: string,
+  platform: Platform
+): Promise<StructuredCaption> {
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: GENERATION_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Generate a structured 3-part caption for a ${platform} post about "${topic}" in the ${niche} niche.
+
+The caption must have exactly 3 sections:
+1. Hook — the opening line that stops the scroll
+2. Body — the value/story/insight
+3. CTA — the specific ask
+
+Score each section individually and provide feedback.
+
+Return JSON:
+{
+  "sections": [
+    { "label": "hook", "text": "...", "score": 0-100, "feedback": "why this works or how to improve" },
+    { "label": "body", "text": "...", "score": 0-100, "feedback": "..." },
+    { "label": "cta", "text": "...", "score": 0-100, "feedback": "..." }
+  ],
+  "overall_score": 0-100,
+  "hashtags": ["#tag1", "#tag2", ...up to 15 relevant hashtags],
+  "character_count": total_characters
+}`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
 
 export async function generateContent(
   request: GenerateRequest,

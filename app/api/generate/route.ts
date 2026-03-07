@@ -1,12 +1,19 @@
 // POST /api/generate — AI content generation
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
-import { generateContent } from "@/lib/ai/claude";
+import {
+  generateContent,
+  generateScoredHooks,
+  generateStructuredCaption,
+  generatePersonalizedIdeas,
+} from "@/lib/ai/claude";
 import { z } from "zod";
+import { getFeatureAccess } from "@/lib/plans/feature-gate";
+import type { PlanType } from "@/types";
 
 const GenerateSchema = z.object({
   platform: z.enum(["tiktok", "instagram", "youtube", "facebook"]),
-  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan"]),
+  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan", "scored_hook", "structured_caption", "personalized_idea"]),
   niche: z.string().min(2).max(100),
   topic: z.string().min(3).max(200),
   tone: z.enum(["educational", "entertaining", "inspirational", "controversial", "storytelling"]).optional(),
@@ -36,6 +43,15 @@ export async function POST(req: NextRequest) {
 
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    // Feature gating for enhanced generators
+    const access = getFeatureAccess(dbUser.plan as PlanType);
+    if (parsed.data.content_type === "scored_hook" && !access.hook_writer) {
+      return NextResponse.json({ error: "Hook writer requires a Starter plan or above. Upgrade at /dashboard/settings." }, { status: 403 });
+    }
+    if (parsed.data.content_type === "structured_caption" && !access.caption_builder) {
+      return NextResponse.json({ error: "Caption builder requires a Starter plan or above. Upgrade at /dashboard/settings." }, { status: 403 });
+    }
+
     // Get user context from latest report if account_id provided
     let userContext: { niche: string; top_themes: string[]; avg_engagement: number } | undefined;
 
@@ -58,8 +74,46 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Generate content
-    const output = await generateContent(parsed.data, userContext);
+    // Generate content — dispatch by type
+    let output: any;
+
+    if (parsed.data.content_type === "scored_hook") {
+      output = await generateScoredHooks(parsed.data.topic, parsed.data.niche, parsed.data.platform);
+    } else if (parsed.data.content_type === "structured_caption") {
+      output = await generateStructuredCaption(parsed.data.topic, parsed.data.niche, parsed.data.platform);
+    } else if (parsed.data.content_type === "personalized_idea") {
+      // Get outlier patterns and trends for context
+      let outlierPatterns: string[] = [];
+      let trendNames: string[] = [];
+      let topThemes: string[] = userContext?.top_themes ?? [];
+
+      if (parsed.data.account_id) {
+        const { data: outliers } = await serviceClient
+          .from("outlier_posts")
+          .select("pattern_tags")
+          .eq("user_id", dbUser.id)
+          .limit(10);
+        outlierPatterns = (outliers ?? []).flatMap((o: any) => o.pattern_tags ?? []);
+
+        const { data: trends } = await serviceClient
+          .from("trends")
+          .select("name")
+          .eq("platform", parsed.data.platform)
+          .order("velocity_score", { ascending: false })
+          .limit(5);
+        trendNames = (trends ?? []).map((t: any) => t.name);
+      }
+
+      output = await generatePersonalizedIdeas({
+        outlierPatterns: [...new Set(outlierPatterns)].slice(0, 10),
+        trendNames,
+        niche: parsed.data.niche,
+        platform: parsed.data.platform,
+        topThemes,
+      });
+    } else {
+      output = await generateContent(parsed.data as Parameters<typeof generateContent>[0], userContext);
+    }
 
     // Save generated content to DB
     const { data: saved } = await serviceClient

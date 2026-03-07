@@ -6,7 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import type { Platform, GeneratedContentOutput } from "@/types";
+import ScoredHookList from "@/components/dashboard/ScoredHookList";
+import StructuredCaptionCard from "@/components/dashboard/StructuredCaptionCard";
+import PersonalizedIdeaList from "@/components/dashboard/PersonalizedIdeaList";
+import PostingTimeGrid from "@/components/dashboard/PostingTimeGrid";
+import type { Platform, GeneratedContentOutput, ScoredHook, StructuredCaption, PersonalizedIdea, PostingTimeRecommendation } from "@/types";
+import UpgradeGate from "@/components/dashboard/UpgradeGate";
 
 interface SavedItem {
   id: string;
@@ -35,7 +40,7 @@ const TONES = [
 ];
 
 export default function GeneratePage() {
-  const [tab, setTab] = useState<"generate" | "history">("generate");
+  const [tab, setTab] = useState<"generate" | "scored_hooks" | "structured_caption" | "ideas" | "posting_times" | "history">("generate");
   const [platform, setPlatform] = useState<Platform>("tiktok");
   const [contentType, setContentType] = useState("hook");
   const [niche, setNiche] = useState("");
@@ -48,7 +53,27 @@ export default function GeneratePage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyPage, setHistoryPage] = useState(1);
   const [historyHasMore, setHistoryHasMore] = useState(false);
+
+  // Enhanced generators state
+  const [scoredHooks, setScoredHooks] = useState<ScoredHook[]>([]);
+  const [structuredCaption, setStructuredCaption] = useState<StructuredCaption | null>(null);
+  const [personalizedIdeas, setPersonalizedIdeas] = useState<PersonalizedIdea[]>([]);
+  const [postingTimes, setPostingTimes] = useState<PostingTimeRecommendation[]>([]);
+  const [enhancedLoading, setEnhancedLoading] = useState(false);
+  const [accounts, setAccounts] = useState<Array<{ id: string; platform: string; username: string }>>([]);
+  const [selectedAccount, setSelectedAccount] = useState("");
+
   const { toast } = useToast();
+
+  useEffect(() => {
+    fetch("/api/accounts")
+      .then((r) => r.json())
+      .then((d) => {
+        const accts = d.data ?? [];
+        setAccounts(accts);
+        if (accts[0]) setSelectedAccount(accts[0].id);
+      });
+  }, []);
 
   const loadHistory = useCallback(async (page = 1) => {
     setHistoryLoading(true);
@@ -110,23 +135,25 @@ export default function GeneratePage() {
           </p>
         </div>
         {/* Tab switcher */}
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 self-start sm:self-auto">
-          <button
-            onClick={() => setTab("generate")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-              tab === "generate" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Wand2 className="w-3.5 h-3.5" /> Generate
-          </button>
-          <button
-            onClick={() => setTab("history")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-              tab === "history" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <History className="w-3.5 h-3.5" /> History
-          </button>
+        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 self-start sm:self-auto flex-wrap">
+          {([
+            { id: "generate", label: "Generate", icon: Wand2 },
+            { id: "scored_hooks", label: "Hooks", icon: Wand2 },
+            { id: "structured_caption", label: "Caption", icon: Wand2 },
+            { id: "ideas", label: "Ideas", icon: Wand2 },
+            { id: "posting_times", label: "Times", icon: Clock },
+            { id: "history", label: "History", icon: History },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                tab === t.id ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -311,6 +338,198 @@ export default function GeneratePage() {
       )}
 
       </> /* end generate tab */}
+
+      {/* ── Scored Hooks tab ──────────────────────────────────────────── */}
+      {tab === "scored_hooks" && (
+        <UpgradeGate feature="hook_writer">
+        <div className="space-y-4">
+          <div className="glass rounded-2xl p-6 grid sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Topic</Label>
+              <Input placeholder="e.g. morning routine, budget meals" value={topic} onChange={(e) => setTopic(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Niche</Label>
+              <Input placeholder="e.g. fitness, personal finance" value={niche} onChange={(e) => setNiche(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Platform</Label>
+              <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="sm:col-span-3">
+              <Button
+                onClick={async () => {
+                  if (!topic || !niche) { toast({ title: "Fill in topic and niche", variant: "destructive" }); return; }
+                  setEnhancedLoading(true);
+                  try {
+                    const res = await fetch("/api/generate", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ platform, content_type: "scored_hook", niche, topic }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error);
+                    setScoredHooks(data.data ?? []);
+                  } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : "Failed";
+                    toast({ title: "Hook generation failed", description: message, variant: "destructive" });
+                  } finally { setEnhancedLoading(false); }
+                }}
+                disabled={enhancedLoading}
+                className="gap-2"
+              >
+                {enhancedLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                Generate scored hooks
+              </Button>
+            </div>
+          </div>
+          <ScoredHookList hooks={scoredHooks} />
+        </div>
+        </UpgradeGate>
+      )}
+
+      {/* ── Structured Caption tab ─────────────────────────────────────── */}
+      {tab === "structured_caption" && (
+        <UpgradeGate feature="caption_builder">
+        <div className="space-y-4">
+          <div className="glass rounded-2xl p-6 grid sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Topic</Label>
+              <Input placeholder="e.g. how to save $1000 in 30 days" value={topic} onChange={(e) => setTopic(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Niche</Label>
+              <Input placeholder="e.g. personal finance" value={niche} onChange={(e) => setNiche(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Platform</Label>
+              <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="youtube">YouTube</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="sm:col-span-3">
+              <Button
+                onClick={async () => {
+                  if (!topic || !niche) { toast({ title: "Fill in topic and niche", variant: "destructive" }); return; }
+                  setEnhancedLoading(true);
+                  try {
+                    const res = await fetch("/api/generate", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ platform, content_type: "structured_caption", niche, topic }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error);
+                    setStructuredCaption(data.data ?? null);
+                  } catch (err: unknown) {
+                    const message = err instanceof Error ? err.message : "Failed";
+                    toast({ title: "Caption generation failed", description: message, variant: "destructive" });
+                  } finally { setEnhancedLoading(false); }
+                }}
+                disabled={enhancedLoading}
+                className="gap-2"
+              >
+                {enhancedLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                Generate structured caption
+              </Button>
+            </div>
+          </div>
+          <StructuredCaptionCard caption={structuredCaption} />
+        </div>
+        </UpgradeGate>
+      )}
+
+      {/* ── Personalized Ideas tab ─────────────────────────────────────── */}
+      {tab === "ideas" && (
+        <div className="space-y-4">
+          <div className="glass rounded-2xl p-6 space-y-4">
+            <p className="text-xs text-muted-foreground">
+              Ideas are generated from your outlier patterns, current trends, and niche gaps.
+              Run outlier detection first for best results.
+            </p>
+            <Button
+              onClick={async () => {
+                setEnhancedLoading(true);
+                try {
+                  const res = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ platform, content_type: "personalized_idea", niche: niche || "general", topic: topic || "content ideas", account_id: selectedAccount }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error);
+                  setPersonalizedIdeas(data.data ?? []);
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : "Failed";
+                  toast({ title: "Idea generation failed", description: message, variant: "destructive" });
+                } finally { setEnhancedLoading(false); }
+              }}
+              disabled={enhancedLoading}
+              className="gap-2"
+            >
+              {enhancedLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+              Generate personalized ideas
+            </Button>
+          </div>
+          <PersonalizedIdeaList ideas={personalizedIdeas} />
+        </div>
+      )}
+
+      {/* ── Posting Times tab ─────────────────────────────────────────── */}
+      {tab === "posting_times" && (
+        <div className="space-y-4">
+          <div className="glass rounded-2xl p-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Account</Label>
+              <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                <SelectTrigger className="w-full sm:w-72"><SelectValue placeholder="Select account..." /></SelectTrigger>
+                <SelectContent>
+                  {accounts.map((a) => (
+                    <SelectItem key={a.id} value={a.id}>
+                      <span className="capitalize">{a.platform}</span> @{a.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={async () => {
+                if (!selectedAccount) return;
+                setEnhancedLoading(true);
+                try {
+                  const res = await fetch(`/api/discover/posting-times?account_id=${selectedAccount}`);
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error);
+                  setPostingTimes(data.data ?? []);
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : "Failed";
+                  toast({ title: "Failed to compute posting times", description: message, variant: "destructive" });
+                } finally { setEnhancedLoading(false); }
+              }}
+              disabled={!selectedAccount || enhancedLoading}
+              className="gap-2"
+            >
+              {enhancedLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
+              Calculate best times
+            </Button>
+          </div>
+          <PostingTimeGrid recommendations={postingTimes} loading={enhancedLoading && postingTimes.length === 0} />
+        </div>
+      )}
 
       {/* ── History tab ────────────────────────────────────────────────── */}
       {tab === "history" && (

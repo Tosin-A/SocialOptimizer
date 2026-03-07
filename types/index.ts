@@ -64,6 +64,24 @@ export interface Post {
   posted_at: string;
 }
 
+// ─── Platform Signal Weights ──────────────────────────────────────────────────
+
+export interface PlatformSignalWeight {
+  signal: string;
+  weight: number;           // 0–1, sums to 1.0 for a platform
+  current_score: number;    // 0–100
+  benchmark: number;        // platform median 0–100
+}
+
+export interface FixListItem {
+  rank: number;             // 1–6
+  problem: string;
+  why_it_matters: string;
+  action: string;
+  impact: ImpactLevel;
+  metric_reference: string;
+}
+
 // ─── Analysis ─────────────────────────────────────────────────────────────────
 
 export interface AnalysisJob {
@@ -171,6 +189,10 @@ export interface AnalysisReport {
   top_posts: Array<{ post_id: string; reason: string; metric: string }>;
   worst_posts: Array<{ post_id: string; reason: string; metric: string }>;
 
+  // Platform-specific signal weights and ranked fix list
+  fix_list: FixListItem[];
+  platform_signal_weights: PlatformSignalWeight[];
+
   created_at: string;
 }
 
@@ -208,6 +230,32 @@ export interface CompetitorComparison {
   hook_style_differences: string;
   caption_length_diff: number;
   tactical_actions: Array<{ action: string; priority: ImpactLevel; rationale: string }>;
+}
+
+// ─── Competitor Expansion ─────────────────────────────────────────────────────
+
+export interface CompetitorOutlier {
+  username: string;
+  caption: string | null;
+  engagement_rate: number;
+  multiplier: number;
+  what_worked: string;
+}
+
+export interface HashtagGapAnalysis {
+  hashtag: string;
+  competitor_uses: boolean;
+  user_uses: boolean;
+  recommendation: "adopt" | "ignore" | "already_using";
+  rationale: string;
+}
+
+export interface CadenceComparison {
+  metric: string;
+  user_value: number;
+  competitor_value: number;
+  gap: number;
+  recommendation: string;
 }
 
 // ─── Content Generation ───────────────────────────────────────────────────────
@@ -251,6 +299,151 @@ export interface GeneratedContentOutput {
   scripts?: GeneratedScript[];
   video_ideas?: Array<{ title: string; angle: string; why_it_works: string; format: ContentType }>;
   hashtag_sets?: Array<{ name: string; tags: string[]; strategy: string }>;
+}
+
+// ─── Discover Module ─────────────────────────────────────────────────────────
+
+export interface OutlierPost {
+  id: string;
+  user_id: string;
+  post_id: string | null;
+  competitor_post_id: string | null;
+  source: "own" | "competitor";
+  multiplier: number;           // e.g. 3.5x avg engagement
+  pattern_tags: string[];
+  what_worked: string;
+  is_saved: boolean;
+  platform: Platform;
+  caption: string | null;
+  engagement_rate: number;
+  views: number;
+  likes: number;
+  posted_at: string;
+  created_at: string;
+}
+
+export interface TrendItem {
+  id: string;
+  platform: Platform;
+  trend_type: "sound" | "hashtag" | "format" | "topic";
+  name: string;
+  velocity_score: number;       // 0–100
+  saturation: "low" | "medium" | "high";
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface NicheSaturation {
+  id: string;
+  platform: Platform;
+  niche: string;
+  active_creators: number;
+  avg_engagement_rate: number;
+  trend_direction: "growing" | "stable" | "declining";
+  verdict: string;
+  created_at: string;
+}
+
+export interface FormatPattern {
+  format: ContentType;
+  count: number;
+  avg_engagement_rate: number;
+  pct_of_total: number;
+  recommendation: string;
+}
+
+// ─── Track Module ────────────────────────────────────────────────────────────
+
+export type ExperimentStatus = "draft" | "running" | "completed" | "cancelled";
+
+export interface Experiment {
+  id: string;
+  user_id: string;
+  account_id: string;
+  name: string;
+  hypothesis: string;
+  platform: Platform;
+  start_date: string;
+  end_date: string | null;
+  status: ExperimentStatus;
+  baseline_metrics: Record<string, number>;
+  result_metrics: Record<string, number>;
+  tagged_post_ids: string[];
+  outcome: string | null;
+  created_at: string;
+}
+
+export interface WinLibraryEntry {
+  id: string;
+  user_id: string;
+  outlier_post_id: string | null;
+  source: string;
+  platform: Platform;
+  tag: string;
+  notes: string;
+  created_at: string;
+}
+
+export interface ScoreAnnotation {
+  id: string;
+  user_id: string;
+  report_id: string;
+  experiment_id: string | null;
+  annotation_type: "analysis" | "experiment_start" | "experiment_end";
+  label: string;
+  date: string;
+  created_at: string;
+}
+
+// ─── Generate Enhancements ───────────────────────────────────────────────────
+
+export interface PersonalizedIdea {
+  title: string;
+  angle: string;
+  source: "outlier" | "trend" | "niche_gap";
+  source_reference: string;
+  why_it_works: string;
+  format: ContentType;
+  estimated_engagement: "high" | "medium" | "low";
+}
+
+export interface ScoredHook {
+  text: string;
+  score: number;             // 0–100
+  type: "question" | "statement" | "stat" | "story" | "controversial";
+  pattern_interrupt_score: number;  // 0–100
+  ab_recommended: boolean;
+  psychology: string;
+}
+
+export interface CaptionSection {
+  label: "hook" | "body" | "cta";
+  text: string;
+  score: number;             // 0–100
+  feedback: string;
+}
+
+export interface StructuredCaption {
+  sections: CaptionSection[];
+  overall_score: number;
+  hashtags: string[];
+  character_count: number;
+}
+
+export interface PostingTimeRecommendation {
+  day: string;               // "Monday", "Tuesday", etc.
+  hour: number;              // 0–23 UTC
+  score: number;             // 0–100 engagement prediction
+  label: string;             // "Best", "Good", "OK"
+}
+
+// ─── CSV Import ──────────────────────────────────────────────────────────────
+
+export interface CSVImportResult {
+  posts_imported: number;
+  posts_skipped: number;
+  errors: string[];
+  account_id: string;
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

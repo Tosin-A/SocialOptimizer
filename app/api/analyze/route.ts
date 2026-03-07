@@ -60,16 +60,31 @@ export async function POST(req: NextRequest) {
     // Check for in-progress job for this account
     const { data: existingJob } = await serviceClient
       .from("analysis_jobs")
-      .select("id, status")
+      .select("id, status, started_at, created_at")
       .eq("account_id", account_id)
       .in("status", ["pending", "processing"])
       .single();
 
     if (existingJob) {
-      return NextResponse.json(
-        { error: "Analysis already in progress", job_id: existingJob.id },
-        { status: 409 }
-      );
+      const startedAt = existingJob.started_at ?? existingJob.created_at;
+      const ageMs = startedAt ? Date.now() - new Date(startedAt).getTime() : 0;
+      const STALE_MS = 15 * 60 * 1000; // 15 minutes
+
+      if (ageMs > STALE_MS) {
+        await serviceClient
+          .from("analysis_jobs")
+          .update({
+            status: "failed",
+            error_message: "Job timed out or was superseded",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", existingJob.id);
+      } else {
+        return NextResponse.json(
+          { error: "Analysis already in progress", job_id: existingJob.id },
+          { status: 409 }
+        );
+      }
     }
 
     // Create job record
@@ -107,43 +122,65 @@ export async function POST(req: NextRequest) {
     // Here we use a non-blocking Promise and return the job_id immediately.
     (async () => {
       try {
-        // Refresh OAuth token if it's expired or expiring in the next 5 minutes
-        const freshAccount = await refreshTokenIfNeeded(account as any);
+        const isCsvImport = account.access_token === "csv_import" || account.platform_user_id?.startsWith("csv_");
+        let dbPosts: any[] = [];
 
-        // Fetch posts from the platform
-        const posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
+        if (isCsvImport) {
+          // CSV imports: posts already in DB, skip platform fetch
+          const { data } = await serviceClient
+            .from("posts")
+            .select("*")
+            .eq("account_id", account_id)
+            .order("posted_at", { ascending: false })
+            .limit(max_posts);
+          dbPosts = data ?? [];
+        } else {
+          // OAuth accounts: refresh token and fetch from platform
+          const freshAccount = await refreshTokenIfNeeded(account as any);
+          const posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
 
-        // Persist posts to DB (upsert)
-        if (posts.length > 0) {
-          await serviceClient.from("posts").upsert(
-            posts.map((p) => ({ ...p, account_id })),
-            { onConflict: "account_id,platform_post_id", ignoreDuplicates: false }
-          );
+          if (posts.length > 0) {
+            await serviceClient.from("posts").upsert(
+              posts.map((p) => ({ ...p, account_id })),
+              { onConflict: "account_id,platform_post_id", ignoreDuplicates: false }
+            );
+          }
+
+          const { data } = await serviceClient
+            .from("posts")
+            .select("*")
+            .eq("account_id", account_id)
+            .order("posted_at", { ascending: false })
+            .limit(max_posts);
+          dbPosts = data ?? [];
         }
 
-        // Update job with fetched count
         await serviceClient
           .from("analysis_jobs")
-          .update({ posts_fetched: posts.length })
+          .update({ posts_fetched: dbPosts.length })
           .eq("id", job.id);
 
-        // Fetch full post records (with DB-assigned IDs)
-        const { data: dbPosts } = await serviceClient
-          .from("posts")
-          .select("*")
-          .eq("account_id", account_id)
-          .order("posted_at", { ascending: false })
-          .limit(max_posts);
+        if (dbPosts.length === 0) {
+          throw new Error("No posts found. Import more data or connect your account.");
+        }
 
-        // Run analysis engine
+        const freshAccount = isCsvImport ? account : await refreshTokenIfNeeded(account as any);
         await runAnalysisEngine({
           jobId: job.id,
           account: freshAccount as any,
-          posts: dbPosts ?? [],
+          posts: dbPosts,
           pythonServiceUrl: process.env.PYTHON_SERVICE_URL ?? "http://localhost:8000",
         });
       } catch (err) {
         console.error(`Analysis job ${job.id} failed:`, err);
+        await serviceClient
+          .from("analysis_jobs")
+          .update({
+            status: "failed",
+            error_message: err instanceof Error ? err.message : "Analysis failed",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", job.id);
       }
     })();
 

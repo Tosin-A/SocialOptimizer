@@ -8,9 +8,10 @@ import {
   analyzeHashtags,
   generateInsightsAndRoadmap,
   analyzeHookStrength,
+  generateFixList,
 } from "@/lib/ai/claude";
 import { sendAnalysisReady } from "@/lib/email";
-import type { Post, Platform, ConnectedAccount } from "@/types";
+import type { Post, Platform, ConnectedAccount, PlatformSignalWeight } from "@/types";
 
 interface EngineOptions {
   jobId: string;
@@ -144,6 +145,98 @@ function calcHashtagScore(hashtags: string[], postCount: number): number {
   if (hashtags.length > 0) score += 15;
 
   return Math.min(100, Math.max(0, score));
+}
+
+// ─── Platform-specific signal weights ─────────────────────────────────────────
+
+interface SignalConfig {
+  signal: string;
+  weight: number;
+  benchmark: number;
+}
+
+const PLATFORM_SIGNAL_CONFIGS: Record<Platform, SignalConfig[]> = {
+  tiktok: [
+    { signal: "Hook strength",     weight: 0.30, benchmark: 55 },
+    { signal: "Sound/trend align", weight: 0.20, benchmark: 50 },
+    { signal: "Posting window",    weight: 0.20, benchmark: 60 },
+    { signal: "Duet/stitch rate",  weight: 0.15, benchmark: 40 },
+    { signal: "Caption CTA",       weight: 0.15, benchmark: 45 },
+  ],
+  instagram: [
+    { signal: "Caption hook",         weight: 0.25, benchmark: 50 },
+    { signal: "Hashtag specificity",  weight: 0.25, benchmark: 55 },
+    { signal: "Reel vs static",       weight: 0.20, benchmark: 60 },
+    { signal: "Save-rate proxy",      weight: 0.15, benchmark: 35 },
+    { signal: "Story vs feed",        weight: 0.15, benchmark: 50 },
+  ],
+  youtube: [
+    { signal: "Title CTR pattern", weight: 0.25, benchmark: 55 },
+    { signal: "First-30s retention", weight: 0.25, benchmark: 50 },
+    { signal: "Thumbnail quality", weight: 0.20, benchmark: 50 },
+    { signal: "Description CTA",   weight: 0.15, benchmark: 40 },
+    { signal: "Upload cadence",    weight: 0.15, benchmark: 55 },
+  ],
+  facebook: [
+    { signal: "Post format mix",     weight: 0.25, benchmark: 50 },
+    { signal: "Caption length",      weight: 0.20, benchmark: 50 },
+    { signal: "Peak timing",         weight: 0.20, benchmark: 55 },
+    { signal: "Group vs page delta", weight: 0.20, benchmark: 45 },
+    { signal: "CTA effectiveness",   weight: 0.15, benchmark: 40 },
+  ],
+};
+
+function calcPlatformSignalWeights(
+  platform: Platform,
+  scores: {
+    hookStrength: number;
+    ctaScore: number;
+    hashtagScore: number;
+    consistencyScore: number;
+    engagementScore: number;
+    brandingScore: number;
+  }
+): PlatformSignalWeight[] {
+  const configs = PLATFORM_SIGNAL_CONFIGS[platform];
+
+  // Map signal names to appropriate scores
+  const scoreMapping: Record<string, number> = {
+    "Hook strength": scores.hookStrength,
+    "Sound/trend align": scores.engagementScore,
+    "Posting window": scores.consistencyScore,
+    "Duet/stitch rate": scores.engagementScore,
+    "Caption CTA": scores.ctaScore,
+    "Caption hook": scores.hookStrength,
+    "Hashtag specificity": scores.hashtagScore,
+    "Reel vs static": scores.engagementScore,
+    "Save-rate proxy": scores.engagementScore,
+    "Story vs feed": scores.brandingScore,
+    "Title CTR pattern": scores.hookStrength,
+    "First-30s retention": scores.hookStrength,
+    "Thumbnail quality": scores.brandingScore,
+    "Description CTA": scores.ctaScore,
+    "Upload cadence": scores.consistencyScore,
+    "Post format mix": scores.brandingScore,
+    "Caption length": scores.hookStrength,
+    "Peak timing": scores.consistencyScore,
+    "Group vs page delta": scores.engagementScore,
+    "CTA effectiveness": scores.ctaScore,
+  };
+
+  return configs.map((cfg) => ({
+    signal: cfg.signal,
+    weight: cfg.weight,
+    current_score: scoreMapping[cfg.signal] ?? 50,
+    benchmark: cfg.benchmark,
+  }));
+}
+
+function calcWeightedGrowthScore(signalWeights: PlatformSignalWeight[]): number {
+  const weighted = signalWeights.reduce(
+    (sum, sw) => sum + sw.current_score * sw.weight,
+    0
+  );
+  return Math.round(Math.max(0, Math.min(100, weighted)));
 }
 
 // ─── Main engine ──────────────────────────────────────────────────────────────
@@ -285,13 +378,17 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     const hookStrengthScore = Math.round(avgHookScore * 100);
     const ctaScore = Math.round(ctaUsageRate * 100);
 
-    const growthScore = Math.round(
-      engagementScore * 0.3 +
-      contentQualityScore * 0.25 +
-      hashtagScore * 0.15 +
-      consistencyScore * 0.15 +
-      brandingScore * 0.15
-    );
+    // Platform-specific signal weights
+    const platformSignalWeights = calcPlatformSignalWeights(account.platform, {
+      hookStrength: hookStrengthScore,
+      ctaScore: ctaScore,
+      hashtagScore,
+      consistencyScore,
+      engagementScore,
+      brandingScore,
+    });
+
+    const growthScore = calcWeightedGrowthScore(platformSignalWeights);
 
     // ── Step 7: Top/worst posts ────────────────────────────────────────────────
     const sortedByEng = [...posts].sort(
@@ -325,6 +422,24 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
       best_days,
       best_hours,
       avg_posts_per_week,
+    });
+
+    // ── Generate ranked fix list ──────────────────────────────────────────────
+    const fixList = await generateFixList({
+      platform: account.platform,
+      niche: nicheResult.niche,
+      growth_score: growthScore,
+      hook_strength_score: hookStrengthScore,
+      cta_score: ctaScore,
+      hashtag_score: hashtagScore,
+      engagement_score: engagementScore,
+      consistency_score: consistencyScore,
+      branding_score: brandingScore,
+      avg_engagement_rate: avgEngagementRate,
+      avg_hook_score: avgHookScore,
+      cta_usage_rate: ctaUsageRate,
+      avg_posts_per_week,
+      platform_signal_weights: platformSignalWeights,
     });
 
     // Hashtag breakdown
@@ -386,6 +501,8 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         executive_summary: aiInsights.executive_summary,
         top_posts: topPosts,
         worst_posts: worstPosts,
+        fix_list: fixList,
+        platform_signal_weights: platformSignalWeights,
       })
       .select()
       .single();

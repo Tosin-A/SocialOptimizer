@@ -65,13 +65,20 @@ export async function GET(req: NextRequest) {
     .eq("is_active", true)
     .order("created_at", { ascending: true });
 
-  return NextResponse.json({
-    data: data ?? [],
-    user_plan: {
-      plan: dbUser.plan,
-      analyses_used: dbUser.analyses_used,
-      analyses_limit: dbUser.analyses_limit,
-      has_billing: !!dbUser.stripe_customer_id,
+  return NextResponse.json(
+    {
+      data: data ?? [],
+      user_plan: {
+        plan: dbUser.plan,
+        analyses_used: dbUser.analyses_used,
+        analyses_limit: dbUser.analyses_limit,
+        has_billing: !!dbUser.stripe_customer_id,
+      },
     },
-  });
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+      },
+    }
+  );
 }

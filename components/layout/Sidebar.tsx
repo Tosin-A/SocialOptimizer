@@ -4,17 +4,29 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3, Home, Users, Wand2, Settings,
   TrendingUp, ChevronRight, LogOut, FileText, X,
+  Compass, Target, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+import type { FeatureAccess } from "@/lib/plans/feature-gate";
 
-const NAV = [
+interface NavItem {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  gate?: keyof FeatureAccess;
+}
+
+const NAV: NavItem[] = [
   { href: "/dashboard",             icon: Home,      label: "Dashboard" },
   { href: "/dashboard/analyze",     icon: BarChart3,  label: "Analyze" },
   { href: "/dashboard/reports",     icon: FileText,   label: "Reports" },
-  { href: "/dashboard/competitors", icon: Users,      label: "Competitors" },
+  { href: "/dashboard/discover",    icon: Compass,    label: "Discover",     gate: "discover" },
+  { href: "/dashboard/competitors", icon: Users,      label: "Competitors",  gate: "competitors" },
   { href: "/dashboard/generate",    icon: Wand2,      label: "Generate" },
+  { href: "/dashboard/track",       icon: Target,     label: "Track",        gate: "track" },
   { href: "/dashboard/settings",    icon: Settings,   label: "Settings" },
 ];
 
@@ -28,6 +40,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
   const supabase = getSupabaseBrowserClient();
+  const { access } = useFeatureAccess();
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -59,8 +72,9 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1">
-        {NAV.map(({ href, icon: Icon, label }) => {
+        {NAV.map(({ href, icon: Icon, label, gate }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
+          const locked = gate ? !access[gate] : false;
           return (
             <Link
               key={href}
@@ -75,7 +89,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             >
               <Icon className={cn("w-4 h-4", active ? "text-brand-400" : "")} />
               {label}
-              {active && <ChevronRight className="w-3 h-3 ml-auto text-brand-400" />}
+              {locked && <Lock className="w-3 h-3 ml-auto text-slate-500" />}
+              {active && !locked && <ChevronRight className="w-3 h-3 ml-auto text-brand-400" />}
             </Link>
           );
         })}

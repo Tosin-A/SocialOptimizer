@@ -22,11 +22,39 @@ export async function POST(req: NextRequest) {
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
     .from("users")
-    .select("id")
+    .select("id, plan")
     .eq("auth_id", user.id)
     .single();
 
   if (!dbUser) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Enforce plan-based competitor limits
+  const competitorLimits: Record<string, number> = {
+    free: 0,
+    starter: 0,
+    pro: 3,
+    agency: 50,
+  };
+  const limit = competitorLimits[dbUser.plan] ?? 0;
+
+  if (limit === 0) {
+    return NextResponse.json(
+      { error: `Competitor tracking requires a Pro plan. Upgrade at /dashboard/settings.` },
+      { status: 403 }
+    );
+  }
+
+  const { count: currentCount } = await serviceClient
+    .from("competitors")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", dbUser.id);
+
+  if ((currentCount ?? 0) >= limit) {
+    return NextResponse.json(
+      { error: `You've reached the ${limit} competitor limit for your ${dbUser.plan} plan.` },
+      { status: 403 }
+    );
+  }
 
   // Fetch competitor data via Python service
   let competitorData: any = {

@@ -1,0 +1,55 @@
+"use client";
+
+import { Lock } from "lucide-react";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { canAccess, requiredPlanFor, type FeatureAccess } from "@/lib/plans/feature-gate";
+import Link from "next/link";
+
+interface Props {
+  feature: keyof FeatureAccess;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  starter: "Starter",
+  pro: "Pro",
+  agency: "Agency",
+};
+
+export default function UpgradeGate({ feature, children, fallback }: Props) {
+  const { plan, loading } = useFeatureAccess();
+
+  if (loading) return null;
+
+  if (canAccess(plan, feature)) {
+    return <>{children}</>;
+  }
+
+  const required = requiredPlanFor(feature);
+
+  if (fallback) return <>{fallback}</>;
+
+  return (
+    <div className="relative rounded-xl border border-slate-700/50 bg-slate-900/50 p-8 text-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="rounded-full bg-slate-800 p-3">
+          <Lock className="h-5 w-5 text-slate-400" />
+        </div>
+        <h3 className="text-sm font-semibold text-slate-200">
+          {PLAN_LABELS[required]} plan required
+        </h3>
+        <p className="text-xs text-slate-400 max-w-sm">
+          This feature is available on the {PLAN_LABELS[required]} plan and above.
+        </p>
+        <Link
+          href="/dashboard/settings"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white hover:bg-brand-500 transition-colors"
+        >
+          Upgrade to {PLAN_LABELS[required]}
+        </Link>
+      </div>
+    </div>
+  );
+}

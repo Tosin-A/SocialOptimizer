@@ -33,47 +33,49 @@ const ALL_PLANS = [
     cadence: "forever",
     color: "text-muted-foreground",
     features: [
-      "3 analyses / month",
+      "2 analyses / month",
       "1 connected platform",
       "5 content generations",
-      "Basic growth score",
+      "Basic growth score + fix list",
     ],
-    missing: ["Competitor tracking", "Unlimited analyses", "Multi-platform"],
+    missing: ["Discover module", "Track module", "Competitors"],
     accent: false,
   },
   {
     key: "starter",
     label: "Starter",
-    price: "$29",
+    badge: "Most Popular",
+    price: "$19",
     cadence: "/month",
-    color: "text-slate-300",
+    color: "text-brand-400",
     features: [
-      "20 analyses / month",
+      "10 analyses / month",
       "2 connected platforms",
-      "5 competitor profiles",
-      "Content generation",
-      "Full growth score breakdown",
+      "Discover (outliers, trends)",
+      "50 content generations / month",
+      "Hook writer + caption builder",
+      "Track (experiments, win library)",
     ],
-    missing: ["Unlimited analyses", "White-label reports"],
-    accent: false,
+    missing: ["Competitors", "Unlimited analyses"],
+    accent: true,
   },
   {
     key: "pro",
     label: "Pro",
-    price: "$79",
+    price: "$49",
     cadence: "/month",
-    color: "text-brand-400",
+    color: "text-slate-300",
     features: [
       "Unlimited analyses",
       "4 platforms simultaneously",
-      "20 competitor profiles",
-      "Competitor gap analysis",
+      "Up to 3 competitor profiles",
+      "Competitor gap + outliers",
       "Unlimited content generation",
-      "Full ranked fix roadmap",
+      "All Discover & Track features",
       "Email support",
     ],
     missing: [],
-    accent: true,
+    accent: false,
   },
   {
     key: "agency",
@@ -118,7 +120,10 @@ function SettingsContent() {
   const autoCheckoutTriggered = useRef(false);
 
   const fetchPlanData = async (): Promise<UserPlan | null> => {
-    const accountsRes = await fetch("/api/accounts");
+    const accountsRes = await fetch("/api/accounts", {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    });
     const accountsData = await accountsRes.json();
     setAccounts(accountsData.data ?? []);
     if (accountsData.user_plan) {
@@ -341,12 +346,21 @@ function SettingsContent() {
             return (
               <div
                 key={tier.key}
-                className={`rounded-lg p-4 flex flex-col border ${
+                className={`rounded-lg p-4 flex flex-col border relative ${
                   isCurrent
                     ? "border-brand-500/40 bg-brand-950/20"
+                    : tier.accent
+                    ? "border-brand-500/30 bg-brand-950/10 ring-1 ring-brand-500/20"
                     : "border-white/[0.07] bg-white/[0.02]"
                 }`}
               >
+                {"badge" in tier && tier.badge && !isCurrent && (
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                    <span className="text-[10px] font-semibold text-white bg-brand-500 rounded-full px-2.5 py-0.5 whitespace-nowrap">
+                      {tier.badge}
+                    </span>
+                  </div>
+                )}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1">
                     <span className={`font-semibold text-sm ${tier.color}`}>{tier.label}</span>

@@ -148,7 +148,7 @@ export default async function ReportsPage() {
                     </span>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/dashboard/analyze?account=${account?.id}`}
+                        href={`/dashboard/reports/${r.id}`}
                         className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition-colors"
                       >
                         <ExternalLink className="w-3 h-3" /> View

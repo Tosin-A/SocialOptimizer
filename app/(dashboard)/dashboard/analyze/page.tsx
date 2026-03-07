@@ -1,11 +1,14 @@
 "use client";
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { BarChart3, Loader2, CheckCircle2, XCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AnalysisReport from "@/components/dashboard/AnalysisReport";
+import CSVImportUpload from "@/components/dashboard/CSVImportUpload";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 interface Account { id: string; platform: string; username: string; avatar_url: string | null; }
 interface Job { job_id: string; status: string; progress: number; current_step: string | null; report_id: string | null; error_message: string | null; }
@@ -25,8 +28,13 @@ function AnalyzePageInner() {
   const [job, setJob] = useState<Job | null>(null);
   const [report, setReport] = useState<any>(null);
   const [starting, setStarting] = useState(false);
+  const pollCleanupRef = useRef<(() => void) | null>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  useEffect(() => () => {
+    pollCleanupRef.current?.();
+  }, []);
 
   useEffect(() => {
     fetch("/api/accounts")
@@ -39,26 +47,59 @@ function AnalyzePageInner() {
       });
   }, []);
 
-  const pollJob = useCallback(async (jobId: string) => {
-    const interval = setInterval(async () => {
-      const res = await fetch(`/api/analyze?job_id=${jobId}`);
-      const data = await res.json();
-      setJob(data);
+  const pollJob = useCallback(
+    (jobId: string) => {
+      let polling = false;
+      const poll = async (): Promise<boolean> => {
+        if (polling) return false;
+        polling = true;
+        try {
+          const res = await fetch(`/api/analyze?job_id=${jobId}`);
+          const data = await res.json();
+          setJob(data);
 
-      if (data.status === "completed") {
-        clearInterval(interval);
-        if (data.report_id) {
-          const reportRes = await fetch(`/api/reports?id=${data.report_id}`);
-          const reportData = await reportRes.json();
-          setReport(reportData.data);
+          if (data.status === "completed") {
+            const reportId = data.report_id;
+            toast({
+              title: "Analysis complete",
+              description: "Your report is ready.",
+              action: reportId ? (
+                <ToastAction asChild altText="View report">
+                  <Link href={`/dashboard/reports/${reportId}`}>View report</Link>
+                </ToastAction>
+              ) : (
+                <ToastAction asChild altText="Go to reports">
+                  <Link href="/dashboard/reports">View reports</Link>
+                </ToastAction>
+              ),
+            });
+            if (reportId) {
+              const reportRes = await fetch(`/api/reports?id=${reportId}`);
+              const reportData = await reportRes.json();
+              setReport(reportData.data);
+            }
+            return true;
+          }
+          if (data.status === "failed") {
+            toast({ title: "Analysis failed", description: data.error_message ?? "Unknown error", variant: "destructive" });
+            return true;
+          }
+          return false;
+        } finally {
+          polling = false;
         }
-      } else if (data.status === "failed") {
-        clearInterval(interval);
-        toast({ title: "Analysis failed", description: data.error_message, variant: "destructive" });
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [toast]);
+      };
+
+      poll(); // immediate first poll
+      const interval = setInterval(() => {
+        poll().then((done) => {
+          if (done) clearInterval(interval);
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    },
+    [toast]
+  );
 
   const startAnalysis = async () => {
     if (!selectedAccount) return;
@@ -73,7 +114,8 @@ function AnalyzePageInner() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setJob({ job_id: data.job_id, status: "pending", progress: 0, current_step: "Starting...", report_id: null, error_message: null });
-      pollJob(data.job_id);
+      pollCleanupRef.current?.();
+      pollCleanupRef.current = pollJob(data.job_id);
     } catch (err: any) {
       toast({ title: "Failed to start analysis", description: err.message, variant: "destructive" });
     } finally {
@@ -154,15 +196,19 @@ function AnalyzePageInner() {
                 {job.status === "failed" && <XCircle className="w-4 h-4 text-destructive" />}
                 {isRunning && <Loader2 className="w-4 h-4 animate-spin text-brand-400" />}
                 {job.status === "processing" && <AlertCircle className="w-4 h-4 text-yellow-400" />}
-                <span className="capitalize">{job.status}</span>
-                {job.current_step && <span className="text-muted-foreground">&middot; {job.current_step}</span>}
+                <span className="capitalize">
+                  {job.status === "completed" ? "Complete" : job.status}
+                </span>
+                {job.current_step && isRunning && (
+                  <span className="text-muted-foreground">&middot; {job.current_step}</span>
+                )}
               </div>
-              <span className="font-mono text-brand-400">{job.progress}%</span>
+              <span className="font-mono text-brand-400">{job.progress ?? 0}%</span>
             </div>
             <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-500 to-neon-purple rounded-full transition-all duration-500"
-                style={{ width: `${job.progress}%` }}
+                className="h-full bg-gradient-to-r from-brand-500 to-neon-purple rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${Math.min(100, job.progress ?? 0)}%` }}
               />
             </div>
           </div>
@@ -172,13 +218,41 @@ function AnalyzePageInner() {
       {/* Report */}
       {report && <AnalysisReport report={report} accountId={selectedAccount} />}
 
-      {/* Empty state */}
+      {/* CSV Import */}
       {!job && !report && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/5" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="bg-background px-3 text-xs text-muted-foreground">Or import from CSV</span>
+            </div>
+          </div>
+          <CSVImportUpload
+            onImportComplete={(result) => {
+              setAccounts((prev) => {
+                // Re-fetch accounts to include the new CSV import
+                fetch("/api/accounts")
+                  .then((r) => r.json())
+                  .then((d) => {
+                    setAccounts(d.data ?? []);
+                    setSelectedAccount(result.account_id);
+                  });
+                return prev;
+              });
+            }}
+          />
+        </>
+      )}
+
+      {/* Empty state */}
+      {!job && !report && accounts.length === 0 && (
         <div className="glass rounded-2xl p-12 text-center">
           <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-semibold text-lg mb-2">No analysis yet</h3>
           <p className="text-muted-foreground text-sm">
-            Select an account above and run your first analysis to get a complete growth breakdown.
+            Connect an account above or import a CSV to run your first analysis.
           </p>
         </div>
       )}
