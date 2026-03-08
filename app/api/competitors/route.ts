@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
     content_formats: [],
   };
 
+  let scrapePartial = false;
   try {
     const pyRes = await fetch(
       `${process.env.PYTHON_SERVICE_URL}/scrape/profile`,
@@ -86,10 +87,19 @@ export async function POST(req: NextRequest) {
       }
     );
     if (pyRes.ok) {
-      competitorData = { ...competitorData, ...(await pyRes.json()) };
+      const scraped = await pyRes.json();
+      competitorData = { ...competitorData, ...scraped };
+      // Check if scraper returned meaningful data
+      if (!scraped.followers && !scraped.display_name) {
+        scrapePartial = true;
+      }
+    } else {
+      console.error(`Scrape failed with status ${pyRes.status} for ${parsed.data.platform}/${parsed.data.username}`);
+      scrapePartial = true;
     }
-  } catch {
-    // Python service unavailable — store with minimal data
+  } catch (err) {
+    console.error(`Python service unavailable for scrape: ${err}`);
+    scrapePartial = true;
   }
 
   const { data: competitor, error } = await serviceClient
@@ -120,7 +130,7 @@ export async function POST(req: NextRequest) {
     metadata: { platform: parsed.data.platform, username: parsed.data.username },
   });
 
-  return NextResponse.json({ data: competitor }, { status: 201 });
+  return NextResponse.json({ data: competitor, scrapePartial }, { status: 201 });
 }
 
 export async function GET(req: NextRequest) {

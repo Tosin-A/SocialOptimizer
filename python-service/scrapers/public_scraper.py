@@ -497,9 +497,25 @@ class PublicProfileScraper:
 
     async def _scrape_instagram(self, username: str) -> dict:
         """
-        Instagram heavily restricts scraping.
-        Extract what we can from public page meta tags.
+        Instagram requires JS rendering to get profile data.
+        Strategy: try httpx meta tags first, fall back to Playwright.
         """
+        # Phase 1: Try httpx (fast, works if meta tags have data)
+        result = await self._scrape_instagram_httpx(username)
+        if result.get("followers") is not None:
+            return result
+
+        # Phase 2: Fall back to Playwright for JS-rendered content
+        logger.info(f"Instagram httpx returned no followers for {username}, trying Playwright")
+        pw_result = await self._scrape_instagram_playwright(username)
+        if pw_result.get("followers") is not None:
+            return pw_result
+
+        # Return whatever httpx got (may have display_name/avatar at least)
+        return result
+
+    async def _scrape_instagram_httpx(self, username: str) -> dict:
+        """Extract what we can from Instagram public page meta tags."""
         try:
             resp = await self.client.get(f"https://www.instagram.com/{username}/")
             if resp.status_code != 200:
@@ -546,5 +562,69 @@ class PublicProfileScraper:
                 "followers": followers,
             }
         except Exception as e:
-            logger.debug(f"Instagram scrape failed: {e}")
+            logger.debug(f"Instagram httpx scrape failed: {e}")
+            return self._empty_profile(username)
+
+    async def _scrape_instagram_playwright(self, username: str) -> dict:
+        """Use Playwright to render Instagram profile and extract data from JS-rendered DOM."""
+        try:
+            from playwright.async_api import async_playwright
+
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                context = await browser.new_context(
+                    user_agent=_HEADERS["User-Agent"],
+                    locale="en-US",
+                )
+                page = await context.new_page()
+
+                await page.goto(
+                    f"https://www.instagram.com/{username}/",
+                    wait_until="domcontentloaded",
+                    timeout=15000,
+                )
+                # Wait for profile content to render
+                await page.wait_for_timeout(3000)
+
+                html = await page.content()
+                await browser.close()
+
+            soup = BeautifulSoup(html, "lxml")
+
+            # Extract followers from rendered page text
+            followers = None
+            # Instagram renders follower counts in various formats in the page text
+            page_text = soup.get_text()
+
+            # Pattern: "1,234 followers" or "1.2M followers" or "12K followers"
+            follower_match = re.search(
+                r"([\d,.]+[KMB]?)\s*followers",
+                page_text,
+                re.IGNORECASE,
+            )
+            if follower_match:
+                followers = self._parse_count(follower_match.group(1))
+
+            # Display name from title
+            display_name = username
+            title_tag = soup.find("title")
+            if title_tag and title_tag.string:
+                title_match = re.match(r"^(.+?)\s*\(", title_tag.string)
+                if title_match:
+                    display_name = title_match.group(1).strip()
+
+            # Avatar from og:image
+            avatar_url = None
+            og_image = soup.find("meta", attrs={"property": "og:image"})
+            if og_image:
+                avatar_url = og_image.get("content")
+
+            return {
+                **self._empty_profile(username),
+                "display_name": display_name,
+                "avatar_url": avatar_url,
+                "followers": followers,
+            }
+        except Exception as e:
+            logger.warning(f"Instagram Playwright scrape failed: {e}")
             return self._empty_profile(username)

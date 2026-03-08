@@ -184,7 +184,14 @@ export default function CompetitorsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to add competitor");
-      toast({ title: "Competitor added", description: `@${username} is now being tracked.` });
+      if (data.scrapePartial) {
+        toast({
+          title: "Competitor added — limited data",
+          description: `@${username} was added but profile data couldn't be fully scraped. Try refreshing later.`,
+        });
+      } else {
+        toast({ title: "Competitor added", description: `@${username} is now being tracked.` });
+      }
       setUsername("");
       setShowForm(false);
       loadCompetitors();
