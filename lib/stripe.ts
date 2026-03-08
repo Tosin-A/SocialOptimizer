@@ -65,7 +65,7 @@ export function planFromPriceId(priceId: string): PlanType | null {
 
 // Analyses limit per month for a given plan
 export function analysesLimitForPlan(plan: PlanType): number {
-  if (plan === "free") return 3;
+  if (plan === "free") return 1;
   const config = PLANS[plan as Exclude<PlanType, "free">];
   return config.analyses_limit;
 }

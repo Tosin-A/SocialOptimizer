@@ -214,7 +214,7 @@ export const TIERS = [
     cadence: "forever",
     note:    "Test whether this is useful before committing",
     features: [
-      "2 analyses / month",
+      "1 analysis / month",
       "1 connected platform",
       "5 content generations",
       "Basic growth score + fix list",

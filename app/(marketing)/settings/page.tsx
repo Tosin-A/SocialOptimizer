@@ -36,7 +36,7 @@ const PLANS = [
   {
     name: "Free",
     price: "$0",
-    features: ["1 platform", "3 analyses/month", "Basic insights"],
+    features: ["1 platform", "1 analysis/month", "Basic insights"],
     color: "text-muted-foreground",
   },
   {

@@ -4,6 +4,9 @@ FastAPI service for compute-heavy tasks: transcription, NLP, scraping
 """
 import os
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware

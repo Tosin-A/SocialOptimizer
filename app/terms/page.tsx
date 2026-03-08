@@ -51,7 +51,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="4. Plans and billing">
-          <p><strong>Free plan:</strong> 3 analyses per month, 1 connected platform, 5 content generations. No credit card required.</p>
+          <p><strong>Free plan:</strong> 1 analysis per month, 1 connected platform, 5 content generations. No credit card required.</p>
           <p><strong>Paid plans (Starter, Pro, Agency):</strong> Billed monthly via Stripe. You can cancel at any time. Access continues until the end of the current billing period. No prorated refunds. No retention tricks.</p>
           <p>We may change pricing with 30 days&apos; notice. Existing subscriptions are honored at the original price until the next renewal after the notice period.</p>
           <p>If a payment fails, we&apos;ll notify you by email. After 7 days of failed payment, your account reverts to the free plan. Your data is preserved.</p>

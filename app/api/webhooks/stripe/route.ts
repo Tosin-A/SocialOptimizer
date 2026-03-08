@@ -41,7 +41,6 @@ export async function POST(req: NextRequest) {
         .update({
           plan,
           analyses_limit: analysesLimitForPlan(plan),
-          analyses_used: 0, // reset usage on upgrade
           stripe_customer_id: session.customer as string,
         })
         .eq("id", userId);

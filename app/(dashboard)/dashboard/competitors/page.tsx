@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   Users, Plus, TrendingUp, TrendingDown, Minus, Loader2,
   BarChart2, Hash, Clock, X, GitCompareArrows, AlertCircle,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -154,6 +154,7 @@ export default function CompetitorsPage() {
   const [comparisons, setComparisons] = useState<Record<string, ComparisonResult | null>>({});
   const [comparing, setComparing] = useState<string | null>(null);
   const [expandedComparisons, setExpandedComparisons] = useState<Set<string>>(new Set());
+  const [refreshing, setRefreshing] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -214,6 +215,29 @@ export default function CompetitorsPage() {
       });
     } finally {
       setComparing(null);
+    }
+  };
+
+  const refreshCompetitor = async (competitorId: string) => {
+    setRefreshing(competitorId);
+    try {
+      const res = await fetch(`/api/competitors/${competitorId}/refresh`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Refresh failed");
+      const updated = data.data as Competitor;
+      // Replace the competitor entirely with the fresh DB row
+      setCompetitors((prev) =>
+        prev.map((c) => (c.id === competitorId ? updated : c))
+      );
+      toast({ title: "Data refreshed", description: `@${updated.username} profile updated.` });
+    } catch (err: unknown) {
+      toast({
+        title: "Refresh failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setRefreshing(null);
     }
   };
 
@@ -338,6 +362,17 @@ export default function CompetitorsPage() {
                         {new Date(c.last_analyzed_at).toLocaleDateString()}
                       </div>
                     )}
+                    {/* Refresh button */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => refreshCompetitor(c.id)}
+                      disabled={refreshing === c.id}
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${refreshing === c.id ? "animate-spin" : ""}`} />
+                      {refreshing === c.id ? "Refreshing..." : "Refresh"}
+                    </Button>
                     {/* Compare button */}
                     {hasComparison ? (
                       <Button
@@ -414,9 +449,19 @@ export default function CompetitorsPage() {
 
                 {/* No analysis warning */}
                 {!c.avg_engagement_rate && !c.followers && (
-                  <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground bg-white/5 rounded-lg px-3 py-2">
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                    Profile data unavailable. The scraper may be offline. Comparison will use available data.
+                  <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground bg-white/5 rounded-lg px-3 py-2">
+                    <span className="flex items-center gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                      Profile data unavailable. Hit Refresh to pull latest data.
+                    </span>
+                    <button
+                      onClick={() => refreshCompetitor(c.id)}
+                      disabled={refreshing === c.id}
+                      className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 ml-3 flex-shrink-0"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${refreshing === c.id ? "animate-spin" : ""}`} />
+                      {refreshing === c.id ? "Refreshing..." : "Refresh now"}
+                    </button>
                   </div>
                 )}
 

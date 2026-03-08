@@ -27,7 +27,7 @@ export interface FeatureAccess {
 
 const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
   free: {
-    analyses_per_month: 3,
+    analyses_per_month: 1,
     score_history: "last_only",
     discover: false,
     generate_ideas_per_month: 5,

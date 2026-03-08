@@ -34,7 +34,7 @@ const ALL_PLANS = [
     cadence: "forever",
     color: "text-muted-foreground",
     features: [
-      "2 analyses / month",
+      "1 analysis / month",
       "1 connected platform",
       "5 content generations",
       "Basic growth score + fix list",
