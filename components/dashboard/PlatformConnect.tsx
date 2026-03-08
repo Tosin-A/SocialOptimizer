@@ -19,7 +19,7 @@ const PLATFORMS = [
     desc: "Optimize your Reels, Stories, and Posts for maximum reach",
     color: "from-purple-500/20 to-pink-500/20 border-purple-500/30",
     btnColor: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     id: "youtube",
@@ -55,7 +55,7 @@ export default function PlatformConnect({ mode = "initial" }: PlatformConnectPro
   const isAdd = mode === "add";
 
   return (
-    <div className="glass rounded-2xl p-8">
+    <div className="glass rounded-2xl p-4 sm:p-6 lg:p-8">
       <div className={`${isAdd ? "mb-6" : "text-center mb-8"}`}>
         <h2 className={`font-bold mb-2 ${isAdd ? "text-base" : "text-xl"}`}>
           {isAdd ? "Connect another platform" : "Connect your social media account"}
@@ -71,7 +71,7 @@ export default function PlatformConnect({ mode = "initial" }: PlatformConnectPro
         {PLATFORMS.map((p) => (
           <div
             key={p.id}
-            className={`bg-gradient-to-br ${p.color} border rounded-xl p-5 space-y-3`}
+            className={`bg-gradient-to-br ${p.color} border rounded-xl p-3 sm:p-5 space-y-3`}
           >
             <div className="flex items-center gap-3">
               <PlatformIcon platform={p.id} size={24} />

@@ -5,9 +5,9 @@ import StarBorder from "@/components/ui/StarBorder";
 
 export default function BottomCTA() {
   return (
-    <section className="py-24 px-6">
+    <section className="py-14 sm:py-18 lg:py-24 px-6">
       <div className="max-w-lg mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-4">
           Your next post goes out either way.
         </h2>
         <p className="text-muted-foreground mb-8 leading-relaxed">

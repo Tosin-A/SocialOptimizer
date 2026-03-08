@@ -148,7 +148,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
   return (
     <div className="space-y-4">
       {/* Executive summary */}
-      <div className="glass rounded-2xl p-5">
+      <div className="glass rounded-2xl p-3 sm:p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-start gap-3 flex-1">
             <BarChart2 className="w-5 h-5 text-brand-400 flex-shrink-0 mt-0.5" />
@@ -194,13 +194,13 @@ export default function AnalysisReport({ report, accountId }: Props) {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+      <div className="flex gap-1 bg-white/5 rounded-xl p-1 overflow-x-auto">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
-              "flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+              "flex-1 py-2 px-2 sm:px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0",
               tab === t.id ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -211,7 +211,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
       {/* Tab content */}
       {tab === "overview" && (
-        <div className="glass rounded-2xl p-6 space-y-4">
+        <div className="glass rounded-2xl p-4 sm:p-6 space-y-4">
           <h3 className="font-semibold text-sm">Score Breakdown</h3>
           <div className="space-y-3">
             {SCORE_ITEMS.map(({ key, label }) => (
@@ -242,20 +242,20 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
       {tab === "insights" && (
         <div className="space-y-4">
-          <div className="glass rounded-2xl p-5 space-y-3">
+          <div className="glass rounded-2xl p-3 sm:p-5 space-y-3">
             <h3 className="font-semibold text-sm flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-neon-green" /> What you're doing well
             </h3>
             {report.strengths?.map((s, i) => <InsightCard key={i} insight={s} type="strength" />)}
           </div>
-          <div className="glass rounded-2xl p-5 space-y-3">
+          <div className="glass rounded-2xl p-3 sm:p-5 space-y-3">
             <h3 className="font-semibold text-sm flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-red-400" /> What you need to fix
             </h3>
             {report.weaknesses?.map((w, i) => <InsightCard key={i} insight={w} type="weakness" />)}
           </div>
           {report.opportunities?.length > 0 && (
-            <div className="glass rounded-2xl p-5 space-y-3">
+            <div className="glass rounded-2xl p-3 sm:p-5 space-y-3">
               <h3 className="font-semibold text-sm flex items-center gap-2">
                 <Lightbulb className="w-4 h-4 text-yellow-400" /> Growth opportunities
               </h3>
@@ -266,7 +266,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "roadmap" && (
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-4 sm:p-6">
           <h3 className="font-semibold text-sm flex items-center gap-2 mb-6">
             <Map className="w-4 h-4 text-brand-400" /> Your prioritized growth roadmap
           </h3>
@@ -279,7 +279,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "posts" && (
-        <div className="glass rounded-2xl p-6 space-y-3">
+        <div className="glass rounded-2xl p-4 sm:p-6 space-y-3">
           <h3 className="font-semibold text-sm mb-1">Post-level performance</h3>
           <p className="text-xs text-muted-foreground mb-4">Sorted by engagement rate. Top performers are highlighted green, underperformers red.</p>
 
@@ -368,7 +368,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "hashtags" && (
-        <div className="glass rounded-2xl p-6 space-y-5">
+        <div className="glass rounded-2xl p-4 sm:p-6 space-y-5">
           <div>
             <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
               <Hash className="w-4 h-4 text-brand-400" /> Recommended hashtags to add

@@ -44,7 +44,7 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
   if (currentStep === -1) return null; // All done — don't show
 
   return (
-    <div className="glass rounded-2xl p-6">
+    <div className="glass rounded-2xl p-4 sm:p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
           <h2 className="font-semibold">Get started</h2>
@@ -70,7 +70,7 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
           <div
             key={i}
             className={cn(
-              "flex items-center gap-4 rounded-xl p-4 transition-all",
+              "flex items-center gap-4 rounded-xl p-3 sm:p-4 transition-all",
               step.done
                 ? "opacity-50"
                 : i === currentStep

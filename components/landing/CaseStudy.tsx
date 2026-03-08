@@ -3,17 +3,17 @@ import Sparkline from "./Sparkline";
 
 export default function CaseStudy() {
   return (
-    <section id="case" className="py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section id="case" className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
       <div className="max-w-6xl mx-auto">
         <div className="label-mono mb-4">Case study</div>
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-2">
           @cookswithjordan, 6 weeks
         </h2>
         <p className="text-muted-foreground text-sm mb-12">
           Instagram &middot; cooking &middot; numbers verified by the creator
         </p>
 
-        <div className="grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16 items-start">
+        <div className="grid lg:grid-cols-[1fr_320px] gap-8 sm:gap-12 lg:gap-16 items-start">
 
           {/* Changes + sparkline */}
           <div>

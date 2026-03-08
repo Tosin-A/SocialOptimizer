@@ -35,11 +35,11 @@ export default function GrowthScoreCard({ score, delta, niche, lastAnalyzedAt, a
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div className={cn("glass rounded-2xl p-6 flex flex-col items-center text-center space-y-4", className)}>
+    <div className={cn("glass rounded-2xl p-4 sm:p-6 flex flex-col items-center text-center space-y-4", className)}>
       <div className="text-sm font-medium text-muted-foreground">Growth Score</div>
 
       {/* Circular progress */}
-      <div className="relative w-36 h-36">
+      <div className="relative w-28 h-28 sm:w-36 sm:h-36">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
           {/* Track */}
           <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="10" />

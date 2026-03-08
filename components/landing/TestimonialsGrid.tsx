@@ -2,11 +2,11 @@ import { TESTIMONIALS } from "@/lib/data/landing";
 
 export default function TestimonialsGrid() {
   return (
-    <section className="py-20 px-6">
+    <section className="py-12 sm:py-16 lg:py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <div className="label-mono mb-4">From creators</div>
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">
             What happened when they fixed it.
           </h2>
         </div>

@@ -6,10 +6,10 @@ import StarBorder from "@/components/ui/StarBorder";
 
 export default function PricingTable() {
   return (
-    <section className="py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
       <div className="max-w-6xl mx-auto">
         <div className="label-mono mb-4">Pricing</div>
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-2">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-2">
           Simple. No tricks.
         </h2>
         <p className="text-muted-foreground mb-12">
@@ -20,7 +20,7 @@ export default function PricingTable() {
           {TIERS.map((tier) => (
             <div
               key={tier.name}
-              className={`rounded-lg p-6 flex flex-col border ${
+              className={`rounded-lg p-4 sm:p-6 flex flex-col border ${
                 tier.accent
                   ? "border-brand-500/40 bg-brand-950/20"
                   : "border-white/[0.07] bg-white/[0.02]"

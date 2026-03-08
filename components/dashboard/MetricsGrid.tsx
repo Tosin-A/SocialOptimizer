@@ -17,7 +17,7 @@ function MetricCard({
   color: string;
 }) {
   return (
-    <div className="glass rounded-xl p-4 space-y-2">
+    <div className="glass rounded-xl p-3 sm:p-4 space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">{label}</p>
         <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center", color)}>
@@ -62,7 +62,7 @@ export default function MetricsGrid({ stats, accounts, className }: Props) {
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
         <MetricCard
           icon={Users}
           label="Total followers"

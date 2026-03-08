@@ -2,11 +2,11 @@ import { PLATFORMS } from "@/lib/data/landing";
 
 export default function PlatformCards() {
   return (
-    <section className="py-20 px-6">
+    <section className="py-12 sm:py-16 lg:py-20 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <div className="label-mono mb-4">Platforms</div>
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-3">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-3">
             One report. Four platforms.
           </h2>
           <p className="text-muted-foreground max-w-xl">
@@ -19,7 +19,7 @@ export default function PlatformCards() {
           {PLATFORMS.map((p) => (
             <div
               key={p.name}
-              className="rounded-lg p-5 border"
+              className="rounded-lg p-3 sm:p-5 border"
               style={{ background: p.bg, borderColor: p.border }}
             >
               <div className="flex items-center justify-between mb-4">

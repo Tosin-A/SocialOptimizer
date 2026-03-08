@@ -29,7 +29,7 @@ interface Props { reports: Report[]; }
 export default function RecentReports({ reports }: Props) {
   return (
     <div className="glass rounded-2xl flex flex-col">
-      <div className="p-5 border-b border-white/5">
+      <div className="p-3 sm:p-5 border-b border-white/5">
         <h3 className="font-semibold flex items-center gap-2">
           <FileText className="w-4 h-4 text-brand-400" /> Recent Reports
         </h3>
@@ -37,7 +37,7 @@ export default function RecentReports({ reports }: Props) {
 
       <div className="flex-1 divide-y divide-white/5">
         {reports.length === 0 && (
-          <div className="p-8 text-center text-sm text-muted-foreground">
+          <div className="p-4 sm:p-8 text-center text-sm text-muted-foreground">
             No reports yet. Run your first analysis
           </div>
         )}
@@ -50,7 +50,7 @@ export default function RecentReports({ reports }: Props) {
             <Link
               key={r.id}
               href={`/dashboard/analyze?report=${r.id}`}
-              className="flex items-center gap-3 p-4 hover:bg-white/5 transition-colors group"
+              className="flex items-center gap-3 p-3 sm:p-4 hover:bg-white/5 transition-colors group"
             >
               <PlatformIcon platform={acc?.platform ?? ""} size={20} />
               <div className="flex-1 min-w-0">

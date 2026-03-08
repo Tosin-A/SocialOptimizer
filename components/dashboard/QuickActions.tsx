@@ -13,7 +13,7 @@ export default function QuickActions({ hasAccounts }: { hasAccounts: boolean }) 
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
       <Button variant="outline" size="sm" asChild>
         <Link href="/dashboard/settings"><UserPlus className="w-3.5 h-3.5 mr-1.5" />Connect account</Link>
       </Button>

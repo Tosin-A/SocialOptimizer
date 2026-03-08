@@ -3,11 +3,11 @@ import { FAQ } from "@/lib/data/landing";
 
 export default function FAQAccordion() {
   return (
-    <section className="py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-14 lg:gap-24">
+    <section className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 sm:gap-12 lg:gap-24">
         <div className="lg:w-72 flex-shrink-0">
           <div className="label-mono mb-4">FAQ</div>
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight mb-4">
             Common questions.
           </h2>
           <p className="text-muted-foreground text-sm leading-relaxed">

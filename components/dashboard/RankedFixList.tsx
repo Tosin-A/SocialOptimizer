@@ -17,7 +17,7 @@ export default function RankedFixList({ fixes }: Props) {
   if (!fixes?.length) return null;
 
   return (
-    <div className="glass rounded-2xl p-6 space-y-4">
+    <div className="glass rounded-2xl p-4 sm:p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
         <AlertTriangle className="w-4 h-4 text-red-400" />
         Top fixes — ranked by impact
@@ -26,7 +26,7 @@ export default function RankedFixList({ fixes }: Props) {
         {fixes.map((fix) => (
           <div
             key={fix.rank}
-            className="border border-white/[0.07] rounded-xl p-4 space-y-2"
+            className="border border-white/[0.07] rounded-xl p-3 sm:p-4 space-y-2"
           >
             <div className="flex items-start gap-3">
               <div className="w-7 h-7 rounded-full bg-red-500/15 border border-red-500/25 flex items-center justify-center text-xs font-bold text-red-400 flex-shrink-0">

@@ -20,7 +20,7 @@ export default function ImprovementRoadmap({ roadmap, className }: Props) {
 
   return (
     <div className={cn("glass rounded-2xl flex flex-col", className)}>
-      <div className="p-5 border-b border-white/5 flex items-center justify-between">
+      <div className="p-3 sm:p-5 border-b border-white/5 flex items-center justify-between">
         <h3 className="font-semibold flex items-center gap-2">
           <Map className="w-4 h-4 text-brand-400" /> Growth Roadmap
         </h3>
@@ -31,7 +31,7 @@ export default function ImprovementRoadmap({ roadmap, className }: Props) {
         )}
       </div>
 
-      <div className="p-5 space-y-4 flex-1">
+      <div className="p-3 sm:p-5 space-y-4 flex-1">
         {displayed.map((action, i) => {
           const cc = CATEGORY_CONFIG[action.category] ?? { color: "bg-white/10 text-foreground", label: action.category };
           return (

@@ -12,7 +12,7 @@ import StarBorder from "@/components/ui/StarBorder";
 
 export default function HeroSection() {
   return (
-    <section className="pt-32 pb-20 px-6 relative overflow-hidden">
+    <section className="pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-20 px-6 relative overflow-hidden">
       {/* Dot-grid background with bottom blur fade */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div className="dot-grid absolute inset-0" />
@@ -28,7 +28,7 @@ export default function HeroSection() {
         />
       </div>
       {/* Subtle indigo glow behind dashboard */}
-      <div className="absolute top-40 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="hidden sm:block absolute top-40 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto" style={{ zIndex: 1 }}>
         {/* Platform pill */}
@@ -46,7 +46,7 @@ export default function HeroSection() {
             italic={false}
           />
         </div>
-        <h1 className="md:hidden text-3xl sm:text-4xl font-semibold leading-[1.06] tracking-tight mb-6 max-w-3xl">
+        <h1 className="md:hidden text-2xl sm:text-3xl font-semibold leading-[1.06] tracking-tight mb-6 max-w-3xl">
           Know exactly what&apos;s<br />
           costing you growth.
         </h1>
@@ -57,7 +57,7 @@ export default function HeroSection() {
           list, not a generic report.
         </p>
 
-        <div className="flex flex-wrap items-center gap-4 mb-16">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-16">
           <StarBorder as="div" speed="6s">
             <Button
               size="lg"
@@ -106,7 +106,7 @@ export default function HeroSection() {
           <div className="grid md:grid-cols-[200px_1fr_200px] divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
 
             {/* Score panel */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="label-mono mb-5">Growth score</div>
               <ScoreRing score={74} />
               <div className="mt-5 space-y-2">
@@ -120,7 +120,7 @@ export default function HeroSection() {
             </div>
 
             {/* Signal breakdown */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="label-mono mb-5">Signal breakdown</div>
               <div className="space-y-5">
                 {SIGNALS.map((s) => (
