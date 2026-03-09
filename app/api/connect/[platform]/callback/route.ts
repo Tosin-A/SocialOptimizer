@@ -80,7 +80,7 @@ export async function GET(
   }
 
   try {
-    const redirectUri = `${appUrl}/api/connect/${platform}/callback`;
+    const redirectUri = `${appUrl.replace(/\/$/, "")}/api/connect/${platform}/callback`;
 
     // Exchange code for access token
     const tokens = await exchangeCodeForToken(platform as Platform, code, redirectUri);

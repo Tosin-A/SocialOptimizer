@@ -27,7 +27,7 @@ const PLATFORMS = [
     desc: "Improve retention, CTR, and subscriber growth",
     color: "from-red-500/20 to-orange-500/20 border-red-500/30",
     btnColor: "bg-red-500 hover:bg-red-600",
-    comingSoon: true,
+    comingSoon: false,
   },
   {
     id: "facebook",

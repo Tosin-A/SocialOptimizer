@@ -1,11 +1,12 @@
 // ════════════════════════════════════════════════════════════════════════════
-// YouTube Data API v3 — platform adapter
+// YouTube Data API v3 + YouTube Analytics API — platform adapter
 // ════════════════════════════════════════════════════════════════════════════
 
 import type { Post } from "@/types";
 import type { ConnectedAccountWithTokens as ConnectedAccount } from "@/lib/platforms/token-refresh";
 
 const YT_API_BASE = "https://www.googleapis.com/youtube/v3";
+const YT_ANALYTICS_BASE = "https://youtubeanalytics.googleapis.com/v2";
 
 interface YouTubeVideo {
   id: string;
@@ -27,6 +28,18 @@ interface YouTubeVideo {
   };
 }
 
+interface VideoAnalytics {
+  views: number;
+  likes: number;
+  comments: number;
+  shares: number;
+  impressions: number;
+  impressionClickThroughRate: number; // 0–1
+  estimatedMinutesWatched: number;
+  averageViewDuration: number; // seconds
+  averageViewPercentage: number; // 0–100
+}
+
 function parseISO8601Duration(duration: string): number {
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return 0;
@@ -45,10 +58,80 @@ async function ytFetch(path: string, token: string): Promise<any> {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(`YouTube API error: ${err.error?.message ?? res.statusText}`);
   }
   return res.json();
+}
+
+async function ytAnalyticsFetch(path: string, token: string): Promise<any> {
+  const res = await fetch(`${YT_ANALYTICS_BASE}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`YouTube Analytics API error: ${err.error?.message ?? res.statusText}`);
+  }
+  return res.json();
+}
+
+// Fetch analytics for up to 50 video IDs at a time.
+// Returns a map of videoId → VideoAnalytics.
+async function fetchVideoAnalyticsBatch(
+  videoIds: string[],
+  token: string,
+  startDate: string,
+  endDate: string
+): Promise<Map<string, VideoAnalytics>> {
+  const metrics = [
+    "views",
+    "likes",
+    "comments",
+    "shares",
+    "impressions",
+    "impressionClickThroughRate",
+    "estimatedMinutesWatched",
+    "averageViewDuration",
+    "averageViewPercentage",
+  ].join(",");
+
+  const filterIds = videoIds.join(",");
+  const params = new URLSearchParams({
+    ids: "channel==MINE",
+    startDate,
+    endDate,
+    dimensions: "video",
+    metrics,
+    filters: `video==${filterIds}`,
+  });
+
+  const data = await ytAnalyticsFetch(`/reports?${params.toString()}`, token);
+
+  const result = new Map<string, VideoAnalytics>();
+  if (!data.rows || !data.columnHeaders) return result;
+
+  // Build column index from headers
+  const colIndex: Record<string, number> = {};
+  for (const [i, header] of data.columnHeaders.entries()) {
+    colIndex[header.name] = i;
+  }
+
+  for (const row of data.rows) {
+    const videoId: string = row[colIndex["video"]];
+    result.set(videoId, {
+      views: row[colIndex["views"]] ?? 0,
+      likes: row[colIndex["likes"]] ?? 0,
+      comments: row[colIndex["comments"]] ?? 0,
+      shares: row[colIndex["shares"]] ?? 0,
+      impressions: row[colIndex["impressions"]] ?? 0,
+      impressionClickThroughRate: row[colIndex["impressionClickThroughRate"]] ?? 0,
+      estimatedMinutesWatched: row[colIndex["estimatedMinutesWatched"]] ?? 0,
+      averageViewDuration: row[colIndex["averageViewDuration"]] ?? 0,
+      averageViewPercentage: row[colIndex["averageViewPercentage"]] ?? 0,
+    });
+  }
+
+  return result;
 }
 
 export async function fetchYouTubePosts(
@@ -96,47 +179,81 @@ export async function fetchYouTubePosts(
   videoIds = videoIds.slice(0, maxPosts);
 
   // 3. Fetch video details in batches of 50
-  const posts: Post[] = [];
+  const videoMap = new Map<string, YouTubeVideo>();
   for (let i = 0; i < videoIds.length; i += 50) {
     const batch = videoIds.slice(i, i + 50).join(",");
     const videoData = await ytFetch(
       `/videos?part=snippet,statistics,contentDetails&id=${batch}`,
       token
     );
-
     for (const video of (videoData.items ?? []) as YouTubeVideo[]) {
-      const duration = parseISO8601Duration(video.contentDetails.duration);
-      const views = parseInt(video.statistics.viewCount ?? "0");
-      const likes = parseInt(video.statistics.likeCount ?? "0");
-      const comments = parseInt(video.statistics.commentCount ?? "0");
-
-      const caption = `${video.snippet.title}\n${video.snippet.description}`;
-      const hashtags = [
-        ...(video.snippet.tags?.map((t) => `#${t}`.toLowerCase()) ?? []),
-        ...extractHashtags(video.snippet.description),
-      ];
-
-      posts.push({
-        id: "", // Will be set by DB
-        account_id: account.id,
-        platform_post_id: video.id,
-        content_type: duration < 60 ? "short" : "video",
-        caption,
-        hashtags: [...new Set(hashtags)],
-        mentions: [],
-        media_url: `https://www.youtube.com/watch?v=${video.id}`,
-        thumbnail_url: video.snippet.thumbnails.high?.url ?? null,
-        duration_seconds: duration,
-        likes,
-        comments,
-        shares: 0, // YouTube API doesn't expose shares
-        saves: 0,
-        views,
-        reach: views,
-        engagement_rate: views > 0 ? (likes + comments) / views : 0,
-        posted_at: video.snippet.publishedAt,
-      });
+      videoMap.set(video.id, video);
     }
+  }
+
+  // 4. Fetch Analytics API data in batches of 50
+  // Use a wide date range to cover all uploaded videos
+  const endDate = new Date().toISOString().split("T")[0];
+  const startDate = "2010-01-01"; // YouTube founded 2005, this covers all realistic uploads
+
+  const analyticsMap = new Map<string, VideoAnalytics>();
+  for (let i = 0; i < videoIds.length; i += 50) {
+    const batch = videoIds.slice(i, i + 50);
+    try {
+      const batchAnalytics = await fetchVideoAnalyticsBatch(batch, token, startDate, endDate);
+      for (const [id, analytics] of batchAnalytics) {
+        analyticsMap.set(id, analytics);
+      }
+    } catch {
+      // Analytics API may not be authorized yet — fall back to Data API stats only
+    }
+  }
+
+  // 5. Merge Data API + Analytics API into Post objects
+  const posts: Post[] = [];
+  for (const videoId of videoIds) {
+    const video = videoMap.get(videoId);
+    if (!video) continue;
+
+    const duration = parseISO8601Duration(video.contentDetails.duration);
+    const analytics = analyticsMap.get(videoId);
+
+    // Prefer Analytics API data when available; fall back to Data API statistics
+    const views = analytics?.views ?? parseInt(video.statistics.viewCount ?? "0");
+    const likes = analytics?.likes ?? parseInt(video.statistics.likeCount ?? "0");
+    const comments = analytics?.comments ?? parseInt(video.statistics.commentCount ?? "0");
+    const shares = analytics?.shares ?? 0;
+    // impressions is a better reach proxy than views (counts thumbnail served, not video started)
+    const reach = analytics?.impressions ?? views;
+
+    const engagementRate = views > 0 ? (likes + comments + shares) / views : 0;
+
+    const caption = `${video.snippet.title}\n${video.snippet.description}`;
+    const hashtags = [
+      ...(video.snippet.tags?.map((t) => `#${t}`.toLowerCase()) ?? []),
+      ...extractHashtags(video.snippet.description),
+    ];
+
+    posts.push({
+      id: "",
+      account_id: account.id,
+      platform_post_id: video.id,
+      content_type: duration < 60 ? "short" : "video",
+      caption,
+      hashtags: [...new Set(hashtags)],
+      mentions: [],
+      media_url: `https://www.youtube.com/watch?v=${video.id}`,
+      thumbnail_url: video.snippet.thumbnails.high?.url ?? null,
+      duration_seconds: duration,
+      likes,
+      comments,
+      shares,
+      saves: 0,
+      views,
+      reach,
+      engagement_rate: engagementRate,
+      posted_at: video.snippet.publishedAt,
+    });
   }
 
   return posts;
