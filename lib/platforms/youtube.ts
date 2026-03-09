@@ -266,7 +266,7 @@ export async function getYouTubeProfile(token: string) {
 
   return {
     platform_user_id: channel.id,
-    username: channel.snippet.customUrl ?? channel.id,
+    username: (channel.snippet.customUrl ?? channel.id).replace(/^@/, ""),
     display_name: channel.snippet.title,
     avatar_url: channel.snippet.thumbnails?.high?.url ?? null,
     followers: parseInt(channel.statistics.subscriberCount ?? "0"),
