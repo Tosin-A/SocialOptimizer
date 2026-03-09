@@ -442,47 +442,10 @@ function SettingsContent() {
           <Link2 className="w-4 h-4" /> Connected platforms
         </h2>
 
-        {accounts.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-muted-foreground text-sm mb-4">No platforms connected yet.</p>
-            <PlatformConnect mode="initial" />
-          </div>
-        ) : (
-          <>
-            <div className="space-y-3">
-              {accounts.map((a) => (
-                <div key={a.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                      <CheckCircle2 className="w-4 h-4 text-neon-green" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium capitalize">{a.platform}</div>
-                      <div className="text-xs text-muted-foreground">
-                        @{a.username}
-                        {a.followers != null && ` · ${a.followers.toLocaleString()} followers`}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => disconnectAccount(a.id, a.platform)}
-                    disabled={disconnecting === a.id}
-                    className="text-xs text-muted-foreground hover:text-red-400 transition-colors flex items-center gap-1"
-                  >
-                    {disconnecting === a.id
-                      ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      : <Trash2 className="w-3.5 h-3.5" />
-                    }
-                    Disconnect
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 pt-6 border-t border-white/5">
-              <PlatformConnect mode="add" />
-            </div>
-          </>
-        )}
+        <PlatformConnect
+          mode={accounts.length === 0 ? "initial" : "add"}
+          connectedAccounts={accounts}
+        />
       </div>
 
       {/* Danger zone */}
