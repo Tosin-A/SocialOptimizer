@@ -103,7 +103,7 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
                   {connected ? (
                     <p className="text-xs text-emerald-400 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
-                      @{connected.username}
+                      {connected.username.startsWith("@") ? connected.username : `@${connected.username}`}
                     </p>
                   ) : (
                     <p className="text-xs text-muted-foreground truncate">{p.desc}</p>
