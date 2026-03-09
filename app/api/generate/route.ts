@@ -13,9 +13,9 @@ import type { PlanType } from "@/types";
 
 const GenerateSchema = z.object({
   platform: z.enum(["tiktok", "instagram", "youtube", "facebook"]),
-  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan", "scored_hook", "structured_caption", "personalized_idea"]),
+  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan"]),
   niche: z.string().min(2).max(100),
-  topic: z.string().min(3).max(200),
+  topic: z.string().max(200).optional().default(""),
   tone: z.enum(["educational", "entertaining", "inspirational", "controversial", "storytelling"]).optional(),
   target_audience: z.string().max(200).optional(),
   account_id: z.string().uuid().optional(),
@@ -43,14 +43,8 @@ export async function POST(req: NextRequest) {
 
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Feature gating for enhanced generators
+    // Determine plan access for auto-upgrade
     const access = getFeatureAccess(dbUser.plan as PlanType);
-    if (parsed.data.content_type === "scored_hook" && !access.hook_writer) {
-      return NextResponse.json({ error: "Hook writer requires a Starter plan or above. Upgrade at /dashboard/settings." }, { status: 403 });
-    }
-    if (parsed.data.content_type === "structured_caption" && !access.caption_builder) {
-      return NextResponse.json({ error: "Caption builder requires a Starter plan or above. Upgrade at /dashboard/settings." }, { status: 403 });
-    }
 
     // Get user context from latest report if account_id provided
     let userContext: { niche: string; top_themes: string[]; avg_engagement: number } | undefined;
@@ -74,35 +68,38 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Generate content — dispatch by type
-    let output: any;
+    // Generate content — dispatch by type, auto-upgrade to enhanced when plan allows
+    let output: unknown;
+    let actualContentType = parsed.data.content_type;
 
-    if (parsed.data.content_type === "scored_hook") {
-      output = await generateScoredHooks(parsed.data.topic, parsed.data.niche, parsed.data.platform);
-    } else if (parsed.data.content_type === "structured_caption") {
-      output = await generateStructuredCaption(parsed.data.topic, parsed.data.niche, parsed.data.platform);
-    } else if (parsed.data.content_type === "personalized_idea") {
-      // Get outlier patterns and trends for context
+    if (parsed.data.content_type === "hook" && access.hook_writer) {
+      // Auto-upgrade to scored hooks for Starter+
+      output = await generateScoredHooks(parsed.data.topic || parsed.data.niche, parsed.data.niche, parsed.data.platform);
+      actualContentType = "hook"; // stays "hook" but output is ScoredHook[]
+    } else if (parsed.data.content_type === "caption" && access.caption_builder) {
+      // Auto-upgrade to structured caption for Starter+
+      output = await generateStructuredCaption(parsed.data.topic || parsed.data.niche, parsed.data.niche, parsed.data.platform);
+      actualContentType = "caption"; // stays "caption" but output is StructuredCaption
+    } else if (parsed.data.content_type === "idea" && parsed.data.account_id) {
+      // Auto-upgrade to personalized ideas when account context is available
       let outlierPatterns: string[] = [];
       let trendNames: string[] = [];
       let topThemes: string[] = userContext?.top_themes ?? [];
 
-      if (parsed.data.account_id) {
-        const { data: outliers } = await serviceClient
-          .from("outlier_posts")
-          .select("pattern_tags")
-          .eq("user_id", dbUser.id)
-          .limit(10);
-        outlierPatterns = (outliers ?? []).flatMap((o: any) => o.pattern_tags ?? []);
+      const { data: outliers } = await serviceClient
+        .from("outlier_posts")
+        .select("pattern_tags")
+        .eq("user_id", dbUser.id)
+        .limit(10);
+      outlierPatterns = (outliers ?? []).flatMap((o: { pattern_tags: string[] | null }) => o.pattern_tags ?? []);
 
-        const { data: trends } = await serviceClient
-          .from("trends")
-          .select("name")
-          .eq("platform", parsed.data.platform)
-          .order("velocity_score", { ascending: false })
-          .limit(5);
-        trendNames = (trends ?? []).map((t: any) => t.name);
-      }
+      const { data: trends } = await serviceClient
+        .from("trends")
+        .select("name")
+        .eq("platform", parsed.data.platform)
+        .order("velocity_score", { ascending: false })
+        .limit(5);
+      trendNames = (trends ?? []).map((t: { name: string }) => t.name);
 
       output = await generatePersonalizedIdeas({
         outlierPatterns: [...new Set(outlierPatterns)].slice(0, 10),
@@ -122,7 +119,7 @@ export async function POST(req: NextRequest) {
         user_id: dbUser.id,
         account_id: parsed.data.account_id ?? null,
         platform: parsed.data.platform,
-        content_type: parsed.data.content_type,
+        content_type: actualContentType,
         prompt_context: {
           niche: parsed.data.niche,
           topic: parsed.data.topic,
