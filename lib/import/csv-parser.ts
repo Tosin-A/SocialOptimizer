@@ -138,7 +138,7 @@ function parseFlexibleDate(val: string | undefined | null): string {
 
 /** Instagram/Meta CSV exports use various date column names. */
 const INSTAGRAM_DATE_KEYS = [
-  "date",
+  "publish_time",
   "posted_at",
   "timestamp",
   "created_at",
@@ -146,7 +146,7 @@ const INSTAGRAM_DATE_KEYS = [
   "date_(gmt)",
   "date(gmt)",
   "time",
-  "publish_time",
+  "date",
 ];
 
 function getDateFromRow(row: CSVRow): string | undefined {
@@ -505,7 +505,7 @@ export function parseInstagramCSV(text: string): { posts: ParsedPost[]; errors: 
       const views = safeInt(row.views ?? row.impressions ?? row.reach ?? row.plays);
       const reach = safeInt(row.reach ?? row.impressions) || views;
 
-      const typeRaw = (row.type ?? row.media_type ?? row.content_type ?? "post").toLowerCase();
+      const typeRaw = (row.type ?? row.media_type ?? row.content_type ?? row.post_type ?? "post").toLowerCase();
       let contentType: ContentType = "post";
       if (typeRaw.includes("reel")) contentType = "reel";
       else if (typeRaw.includes("story")) contentType = "story";
@@ -530,7 +530,7 @@ export function parseInstagramCSV(text: string): { posts: ParsedPost[]; errors: 
         reach,
         engagement_rate: engagementRate,
         posted_at: postedAt,
-        duration_seconds: safeInt(row.duration ?? row.video_duration) || null,
+        duration_seconds: safeInt(row.duration ?? row.video_duration ?? row["duration_(sec)"]) || null,
       });
     } catch (err) {
       errors.push(`Row ${i + 1}: ${err instanceof Error ? err.message : "parse error"}`);

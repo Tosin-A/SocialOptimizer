@@ -93,7 +93,7 @@ export default function GeneratePage() {
           setSelectedAccount(accts[0].id);
           // Try to auto-fill niche from latest analysis report
           try {
-            const res = await fetch(`/api/analyze?account_id=${accts[0].id}&limit=1`);
+            const res = await fetch(`/api/reports?account_id=${accts[0].id}`);
             const data = await res.json();
             const report = data.data?.[0] ?? data.data;
             if (report?.detected_niche) {
