@@ -8,8 +8,7 @@ openai==1.59.9
 supabase==2.11.0
 
 # NLP & ML
-transformers==4.47.1
-torch>=2.9.0
+# torch CPU-only is installed separately in Dockerfile (no CUDA needed on Railway)
 sentencepiece==0.2.1
 nltk==3.9.1
 textblob==0.18.0.post0

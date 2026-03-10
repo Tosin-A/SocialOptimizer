@@ -8,7 +8,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Install torch CPU-only first (~200MB vs ~4GB CUDA version).
+# Use constraints file to prevent pip from replacing it with CUDA torch
+# when resolving sentence-transformers dependencies.
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip freeze | grep -i "^torch==" > /tmp/torch-constraint.txt && \
+    pip install --no-cache-dir -r requirements.txt -c /tmp/torch-constraint.txt
 
 # Download NLTK data
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
@@ -17,4 +23,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
