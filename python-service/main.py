@@ -33,30 +33,40 @@ structlog.configure(
 )
 logger = structlog.get_logger()
 
-# ─── Service singletons ───────────────────────────────────────────────────────
+# ─── Service singletons (lazy-initialized so /health responds immediately) ────
 transcription_service: TranscriptionService | None = None
 content_analyzer: ContentAnalyzer | None = None
 sentiment_analyzer: SentimentAnalyzer | None = None
 hashtag_analyzer: HashtagAnalyzer | None = None
 scraper: PublicProfileScraper | None = None
+_services_ready = False
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global transcription_service, content_analyzer, sentiment_analyzer, hashtag_analyzer, scraper
-    logger.info("Starting SocialOptimizer Python service...")
 
+async def _ensure_services():
+    """Initialize services on first real request (not healthcheck)."""
+    global transcription_service, content_analyzer, sentiment_analyzer, hashtag_analyzer, scraper, _services_ready
+    if _services_ready:
+        return
+    logger.info("Initializing services on first request...")
     transcription_service = TranscriptionService()
     content_analyzer = ContentAnalyzer()
     sentiment_analyzer = SentimentAnalyzer()
     hashtag_analyzer = HashtagAnalyzer()
     scraper = PublicProfileScraper()
-
     await scraper.init()
+    _services_ready = True
     logger.info("All services initialized")
-    yield
 
-    await scraper.close()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("SocialOptimizer Python service starting...")
+    yield
+    # Cleanup scraper on shutdown if it was initialized
+    if scraper:
+        await scraper.close()
     logger.info("Service shutdown complete")
+
 
 # ─── App setup ────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -85,7 +95,7 @@ def verify_secret(x_service_secret: str = Header(...)):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "social-optimizer-python"}
+    return {"status": "ok", "service": "social-optimizer-python", "ready": _services_ready}
 
 
 @app.post("/analyze/posts", response_model=PostAnalysisResponse)
@@ -100,6 +110,7 @@ async def analyze_posts(
     - Run sentiment analysis
     - Extract keywords
     """
+    await _ensure_services()
     logger.info("analyze_posts", count=len(request.posts))
 
     hook_scores = []
@@ -165,6 +176,7 @@ async def scrape_profile(
     Scrape public profile data for competitor analysis.
     Only accesses publicly visible profile pages.
     """
+    await _ensure_services()
     logger.info("scrape_profile", platform=request.platform, username=request.username)
 
     try:
@@ -181,6 +193,7 @@ async def analyze_competitor(
     _: bool = Depends(verify_secret)
 ):
     """Compare user metrics against a competitor."""
+    await _ensure_services()
     logger.info("analyze_competitor", username=request.competitor_username)
 
     try:
