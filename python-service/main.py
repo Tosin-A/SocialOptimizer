@@ -17,11 +17,6 @@ from models.analysis import (
     ProfileScrapeRequest, ProfileScrapeResponse,
     CompetitorAnalysisRequest, CompetitorAnalysisResponse,
 )
-from services.transcription import TranscriptionService
-from analyzers.content import ContentAnalyzer
-from analyzers.sentiment import SentimentAnalyzer
-from analyzers.hashtags import HashtagAnalyzer
-from scrapers.public_scraper import PublicProfileScraper
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 structlog.configure(
@@ -34,20 +29,28 @@ structlog.configure(
 logger = structlog.get_logger()
 
 # ─── Service singletons (lazy-initialized so /health responds immediately) ────
-transcription_service: TranscriptionService | None = None
-content_analyzer: ContentAnalyzer | None = None
-sentiment_analyzer: SentimentAnalyzer | None = None
-hashtag_analyzer: HashtagAnalyzer | None = None
-scraper: PublicProfileScraper | None = None
+transcription_service = None
+content_analyzer = None
+sentiment_analyzer = None
+hashtag_analyzer = None
+scraper = None
 _services_ready = False
 
 
 async def _ensure_services():
-    """Initialize services on first real request (not healthcheck)."""
+    """Initialize services on first real request (not healthcheck).
+    Imports are deferred here to avoid slow module loads blocking startup."""
     global transcription_service, content_analyzer, sentiment_analyzer, hashtag_analyzer, scraper, _services_ready
     if _services_ready:
         return
     logger.info("Initializing services on first request...")
+
+    from services.transcription import TranscriptionService
+    from analyzers.content import ContentAnalyzer
+    from analyzers.sentiment import SentimentAnalyzer
+    from analyzers.hashtags import HashtagAnalyzer
+    from scrapers.public_scraper import PublicProfileScraper
+
     transcription_service = TranscriptionService()
     content_analyzer = ContentAnalyzer()
     sentiment_analyzer = SentimentAnalyzer()
