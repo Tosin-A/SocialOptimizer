@@ -16,9 +16,6 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
     pip freeze | grep -i "^torch==" > /tmp/torch-constraint.txt && \
     pip install --no-cache-dir -r requirements.txt -c /tmp/torch-constraint.txt
 
-# Download NLTK data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-
 COPY . .
 
 EXPOSE 8000
