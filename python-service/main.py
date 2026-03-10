@@ -2,8 +2,11 @@
 SocialOptimizer Python AI Service
 FastAPI service for compute-heavy tasks: transcription, NLP, scraping
 """
+import sys
 import os
 import logging
+print(f"[startup] Python {sys.version}, PID {os.getpid()}", flush=True)
+
 from dotenv import load_dotenv
 
 load_dotenv()
