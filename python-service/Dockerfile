@@ -20,5 +20,5 @@ COPY . .
 
 EXPOSE 8000
 
-# Railway sets $PORT dynamically; fall back to 8000 for local dev
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Use python main.py so PORT is read from env at runtime (no shell expansion needed)
+CMD ["python", "main.py"]
