@@ -5,6 +5,7 @@
 // { "crons": [{ "path": "/api/notifications/weekly", "schedule": "0 9 * * 1" }] }
 
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
 import { sendWeeklyDigest } from "@/lib/email";
 
@@ -33,7 +34,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: 0 });
   }
 
-  const { createClient } = require("@supabase/supabase-js");
   const authClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -49,35 +49,58 @@ export async function POST(req: NextRequest) {
       const email = authUser?.user?.email;
       if (!email) continue;
 
-      // Fetch latest report per account for this user
+      // Fetch recent reports per account (enough to get at least 2 per account for delta)
       const { data: reports } = await supabase
         .from("analysis_reports")
         .select(`
-          growth_score, avg_engagement_rate, improvement_roadmap,
+          account_id, growth_score, avg_engagement_rate, improvement_roadmap,
           connected_accounts:account_id(platform, username)
         `)
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (!reports || reports.length === 0) continue;
 
-      // Deduplicate to one report per account (take the most recent)
-      const seen = new Set<string>();
-      const accountSummaries = [];
+      interface ReportRow {
+        account_id: string;
+        growth_score: number | null;
+        avg_engagement_rate: number | null;
+        improvement_roadmap: unknown[] | null;
+        connected_accounts: { platform: string; username: string }[];
+      }
 
-      for (const r of reports as any[]) {
-        const key = `${r.connected_accounts?.platform}-${r.connected_accounts?.username}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
+      // Group reports by account, keeping chronological order (newest first)
+      const reportsByAccount = new Map<string, ReportRow[]>();
+      for (const r of reports as ReportRow[]) {
+        const key = r.account_id;
+        if (!reportsByAccount.has(key)) {
+          reportsByAccount.set(key, []);
+        }
+        reportsByAccount.get(key)!.push(r);
+      }
+
+      // Build summaries with delta from the two most recent reports per account
+      const accountSummaries = [];
+      for (const [, accountReports] of reportsByAccount) {
+        const latest = accountReports[0];
+        const previous = accountReports[1];
+        const account = latest.connected_accounts?.[0];
+
+        const latestScore = latest.growth_score ?? 0;
+        const growthScoreDelta = previous
+          ? latestScore - (previous.growth_score ?? 0)
+          : 0;
 
         accountSummaries.push({
-          platform: r.connected_accounts?.platform ?? "unknown",
-          username: r.connected_accounts?.username ?? "unknown",
-          growthScore: r.growth_score ?? 0,
-          growthScoreDelta: 0, // delta calculation would need previous report — simplified for now
-          avgEngagementRate: r.avg_engagement_rate ?? 0,
-          pendingActions: r.improvement_roadmap?.length ?? 0,
+          platform: account?.platform ?? "unknown",
+          username: account?.username ?? "unknown",
+          growthScore: latestScore,
+          growthScoreDelta,
+          avgEngagementRate: latest.avg_engagement_rate ?? 0,
+          pendingActions: Array.isArray(latest.improvement_roadmap)
+            ? latest.improvement_roadmap.length
+            : 0,
         });
       }
 

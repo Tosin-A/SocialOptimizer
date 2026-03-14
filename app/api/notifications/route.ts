@@ -7,12 +7,22 @@ interface Notification {
   type: string;
   title: string;
   body: string;
+  link: string;
   created_at: string;
 }
 
 function formatEvent(event: { id: string; event_type: string; metadata: any; created_at: string }): Notification {
   const meta = event.metadata ?? {};
   switch (event.event_type) {
+    case "analysis_run":
+      return {
+        id: event.id,
+        type: "analysis",
+        title: "Analysis started",
+        body: meta.platform ? `${meta.platform} analysis in progress.` : "Analysis in progress.",
+        link: "/dashboard/analyze",
+        created_at: event.created_at,
+      };
     case "analysis_completed":
       return {
         id: event.id,
@@ -21,6 +31,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         body: meta.platform && meta.username
           ? `${meta.platform} @${meta.username} — score: ${meta.growth_score ?? "–"}`
           : "Your account analysis finished.",
+        link: meta.report_id ? `/dashboard/reports/${meta.report_id}` : "/dashboard/reports",
         created_at: event.created_at,
       };
     case "content_generated":
@@ -31,6 +42,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         body: meta.platform && meta.content_type
           ? `${meta.content_type.replace("_", " ")} for ${meta.platform}`
           : "New content created.",
+        link: "/dashboard/generate",
         created_at: event.created_at,
       };
     case "plan_upgraded":
@@ -39,6 +51,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         type: "billing",
         title: "Plan upgraded",
         body: meta.plan ? `You're now on the ${meta.plan} plan.` : "Your plan was updated.",
+        link: "/dashboard/settings",
         created_at: event.created_at,
       };
     case "weekly_digest_sent":
@@ -47,6 +60,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         type: "email",
         title: "Weekly digest sent",
         body: "Your weekly performance summary was emailed.",
+        link: "/dashboard",
         created_at: event.created_at,
       };
     case "competitor_compared":
@@ -55,6 +69,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         type: "competitor",
         title: "Competitor compared",
         body: meta.username ? `Gap analysis for @${meta.username} complete.` : "Competitor comparison done.",
+        link: "/dashboard/competitors",
         created_at: event.created_at,
       };
     default:
@@ -63,6 +78,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         type: "info",
         title: "Activity",
         body: event.event_type.replace(/_/g, " "),
+        link: "/dashboard",
         created_at: event.created_at,
       };
   }

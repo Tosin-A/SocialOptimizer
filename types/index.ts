@@ -262,7 +262,7 @@ export interface CadenceComparison {
 
 export interface GenerateRequest {
   platform: Platform;
-  content_type: "hook" | "caption" | "script" | "hashtags" | "idea" | "full_plan";
+  content_type: "hook" | "caption" | "script" | "hashtags" | "idea" | "full_plan" | "replicate";
   niche: string;
   topic: string;
   tone?: "educational" | "entertaining" | "inspirational" | "controversial" | "storytelling";
@@ -444,6 +444,35 @@ export interface CSVImportResult {
   posts_skipped: number;
   errors: string[];
   account_id: string;
+}
+
+// ─── Replicate Winners ──────────────────────────────────────────────────────
+
+export interface ReplicateWinnerOutput {
+  original_post: {
+    caption_preview: string;
+    engagement_rate: string;
+    why_it_worked: string;
+  };
+  replicated_content: {
+    hook: string;
+    caption: string;
+    script_outline: string;
+    hashtags: string[];
+    format: string;
+    expected_engagement: "high" | "medium" | "low";
+  };
+  adaptation_notes: string;
+}
+
+// ─── Content Coach ───────────────────────────────────────────────────────
+
+export type CoachMessageRole = "user" | "assistant";
+
+export interface CoachMessage {
+  role: CoachMessageRole;
+  content: string;
+  timestamp: string;
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

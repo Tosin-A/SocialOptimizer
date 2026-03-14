@@ -6,6 +6,7 @@ import {
   generateScoredHooks,
   generateStructuredCaption,
   generatePersonalizedIdeas,
+  generateReplicateWinners,
 } from "@/lib/ai/claude";
 import { z } from "zod";
 import { getFeatureAccess } from "@/lib/plans/feature-gate";
@@ -13,7 +14,7 @@ import type { PlanType } from "@/types";
 
 const GenerateSchema = z.object({
   platform: z.enum(["tiktok", "instagram", "youtube", "facebook"]),
-  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan"]),
+  content_type: z.enum(["hook", "caption", "script", "hashtags", "idea", "full_plan", "replicate"]),
   niche: z.string().min(2).max(100),
   topic: z.string().max(200).optional().default(""),
   tone: z.enum(["educational", "entertaining", "inspirational", "controversial", "storytelling"]).optional(),
@@ -80,6 +81,34 @@ export async function POST(req: NextRequest) {
       // Auto-upgrade to structured caption for Starter+
       output = await generateStructuredCaption(parsed.data.topic || parsed.data.niche, parsed.data.niche, parsed.data.platform);
       actualContentType = "caption"; // stays "caption" but output is StructuredCaption
+    } else if (parsed.data.content_type === "replicate") {
+      // Fetch competitor profiles for context (if user has added any)
+      let competitorContext: Array<{ username: string; followers: number | null; avg_engagement_rate: number | null; top_hashtags: string[]; content_formats: string[] }> | undefined;
+
+      const { data: competitors } = await serviceClient
+        .from("competitors")
+        .select("username, followers, avg_engagement_rate, top_hashtags, content_formats")
+        .eq("user_id", dbUser.id)
+        .eq("platform", parsed.data.platform)
+        .limit(5);
+
+      if (competitors && competitors.length > 0) {
+        competitorContext = competitors.map((c) => ({
+          username: c.username,
+          followers: c.followers,
+          avg_engagement_rate: c.avg_engagement_rate,
+          top_hashtags: c.top_hashtags ?? [],
+          content_formats: c.content_formats ?? [],
+        }));
+      }
+
+      output = await generateReplicateWinners(
+        userContext?.niche ?? parsed.data.niche,
+        parsed.data.platform,
+        parsed.data.count ?? 3,
+        competitorContext
+      );
+      actualContentType = "replicate";
     } else if (parsed.data.content_type === "idea" && parsed.data.account_id) {
       // Auto-upgrade to personalized ideas when account context is available
       let outlierPatterns: string[] = [];

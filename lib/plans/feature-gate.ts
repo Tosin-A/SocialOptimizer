@@ -23,6 +23,9 @@ export interface FeatureAccess {
   // Competitors
   competitors: boolean;
   competitors_limit: number;
+
+  // Coach
+  coach: boolean;
 }
 
 const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
@@ -36,6 +39,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     track: false,
     competitors: false,
     competitors_limit: 0,
+    coach: false,
   },
   starter: {
     analyses_per_month: 10,
@@ -47,6 +51,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     track: true,
     competitors: false,
     competitors_limit: 0,
+    coach: true,
   },
   pro: {
     analyses_per_month: 20,
@@ -58,6 +63,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     track: true,
     competitors: true,
     competitors_limit: 3,
+    coach: true,
   },
   agency: {
     analyses_per_month: 50,
@@ -69,6 +75,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     track: true,
     competitors: true,
     competitors_limit: 50,
+    coach: true,
   },
 };
 

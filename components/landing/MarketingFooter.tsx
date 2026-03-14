@@ -10,7 +10,7 @@ export default function MarketingFooter() {
             <BarChart3 className="w-3 h-3 text-white" />
           </div>
           SocialOptimizer
-          <span className="font-normal text-muted-foreground ml-1">&copy; 2026</span>
+          <span className="font-normal text-muted-foreground ml-1">&copy; 2026 All rights reserved.</span>
         </div>
         <div className="flex gap-6 text-xs">
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>

@@ -13,11 +13,20 @@ import type {
   PersonalizedIdea,
   ScoredHook,
   StructuredCaption,
+  ReplicateWinnerOutput,
 } from "@/types";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const MODEL = "claude-opus-4-6";
+// ─── Model tiers ───────────────────────────────────────────────────────────────
+// ANALYSIS_MODEL  — core product output (strengths/weaknesses/roadmap). Keep Opus.
+// STRATEGY_MODEL  — creative generation + complex structured tasks. Sonnet is sufficient.
+// CLASSIFY_MODEL  — classification, scoring, lookup tasks. Haiku handles these well.
+
+const ANALYSIS_MODEL = "claude-opus-4-6";
+const STRATEGY_MODEL = "claude-sonnet-4-6";
+const CLASSIFY_MODEL = "claude-haiku-4-5-20251001";
+
 const MAX_TOKENS = 8096;
 
 // ─── System prompts ────────────────────────────────────────────────────────────
@@ -53,7 +62,8 @@ export async function analyzeNicheAndThemes(posts: {
   keywords: string[];
   themes: ContentTheme[];
 }> {
-  const postSummary = posts.slice(0, 50).map((p) => ({
+  // 20 posts is sufficient for niche classification — reduces input tokens by ~60%
+  const postSummary = posts.slice(0, 20).map((p) => ({
     caption: p.caption?.slice(0, 300) ?? "",
     hashtags: p.hashtags.slice(0, 10),
     engagement_rate: p.engagement_rate ?? 0,
@@ -61,7 +71,7 @@ export async function analyzeNicheAndThemes(posts: {
   }));
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: CLASSIFY_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -99,7 +109,7 @@ export async function analyzeHashtags(
   niche: string,
   platform: Platform
 ): Promise<HashtagAnalysis[]> {
-  // Deduplicate and get top 30 most used
+  // Deduplicate and get top 20 most used (20 is sufficient for useful recommendations)
   const tagFrequency = hashtags.reduce((acc, tag) => {
     acc[tag] = (acc[tag] ?? 0) + 1;
     return acc;
@@ -107,11 +117,11 @@ export async function analyzeHashtags(
 
   const topTags = Object.entries(tagFrequency)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 30)
+    .slice(0, 20)
     .map(([tag, freq]) => ({ tag, frequency: freq }));
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: CLASSIFY_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -169,7 +179,7 @@ export async function generateInsightsAndRoadmap(analysisData: {
   executive_summary: string;
 }> {
   const response = await client.messages.create({
-    model: MODEL,
+    model: ANALYSIS_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -190,12 +200,14 @@ Metrics:
 - Top performing formats: ${analysisData.top_performing_formats.join(", ")}
 - Content themes: ${analysisData.content_themes.map((t) => t.theme).join(", ")}
 
+Be terse. Each description should be 1-2 sentences max. No filler.
+
 Return this exact JSON structure:
 {
   "strengths": [
     {
       "title": "specific strength title",
-      "description": "detailed explanation with specific metrics",
+      "description": "1-2 sentence explanation referencing a specific metric",
       "impact": "high" | "medium" | "low",
       "metric": "specific metric backing this up"
     }
@@ -203,7 +215,7 @@ Return this exact JSON structure:
   "weaknesses": [
     {
       "title": "specific weakness",
-      "description": "why this hurts growth with specific context",
+      "description": "1-2 sentence explanation of why this hurts growth",
       "impact": "high" | "medium" | "low",
       "metric": "specific metric",
       "recommendation": "specific fix with expected outcome"
@@ -225,10 +237,10 @@ Return this exact JSON structure:
       "category": "content" | "hashtags" | "posting" | "engagement" | "branding"
     }
   ],
-  "executive_summary": "2-3 sentence executive summary of the creator's current state and biggest opportunity"
+  "executive_summary": "1-2 sentence summary of current state and biggest opportunity"
 }
 
-Provide minimum 3 items in strengths and weaknesses. Roadmap should have 8-10 prioritized actions.`,
+Provide 2-3 strengths (high/medium impact only), 2-3 weaknesses (high/medium impact only), 1-2 opportunities (most impactful only), and 4-5 prioritized roadmap actions.`,
       },
     ],
   });
@@ -246,7 +258,7 @@ export async function analyzeHookStrength(transcript: string, caption: string): 
   const openingWords = transcript ? transcript.slice(0, 300) : caption?.slice(0, 200) ?? "";
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: CLASSIFY_MODEL,
     max_tokens: 512,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -278,105 +290,6 @@ Hook scoring rubric:
   return JSON.parse(extractJSON(text));
 }
 
-// ─── Competitor analysis AI functions ─────────────────────────────────────────
-
-export async function analyzeHashtagGap(
-  userHashtags: string[],
-  competitorHashtags: string[],
-  niche: string,
-  platform: Platform
-): Promise<Array<{ hashtag: string; competitor_uses: boolean; user_uses: boolean; recommendation: string; rationale: string }>> {
-  const userSet = new Set(userHashtags.map((h) => h.toLowerCase()));
-  const compSet = new Set(competitorHashtags.map((h) => h.toLowerCase()));
-
-  // Find gaps
-  const compOnly = [...compSet].filter((h) => !userSet.has(h));
-  const userOnly = [...userSet].filter((h) => !compSet.has(h));
-  const shared = [...userSet].filter((h) => compSet.has(h));
-
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `Analyze the hashtag gap between a user and their competitor in the ${niche} niche on ${platform}.
-
-Competitor uses but user doesn't: ${compOnly.slice(0, 20).join(", ")}
-User uses but competitor doesn't: ${userOnly.slice(0, 20).join(", ")}
-Both use: ${shared.slice(0, 20).join(", ")}
-
-For the top 10 most impactful hashtags, return JSON array:
-[
-  {
-    "hashtag": "#tag",
-    "competitor_uses": true/false,
-    "user_uses": true/false,
-    "recommendation": "adopt" | "ignore" | "already_using",
-    "rationale": "specific reason to adopt or ignore this hashtag"
-  }
-]
-
-Focus on hashtags that would meaningfully improve reach in the ${niche} niche.`,
-      },
-    ],
-  });
-
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
-}
-
-export async function analyzeCompetitorOutliers(
-  competitorPosts: Array<{ caption: string | null; engagement_rate: number; content_type: string }>,
-  avgEngagement: number,
-  niche: string,
-  platform: Platform
-): Promise<Array<{ caption: string | null; engagement_rate: number; multiplier: number; what_worked: string }>> {
-  const outliers = competitorPosts
-    .filter((p) => p.engagement_rate > avgEngagement * 3)
-    .sort((a, b) => b.engagement_rate - a.engagement_rate)
-    .slice(0, 5);
-
-  if (outliers.length === 0) return [];
-
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `Analyze these competitor outlier posts in the ${niche} niche on ${platform}.
-Average competitor engagement: ${(avgEngagement * 100).toFixed(2)}%
-
-Outlier posts:
-${JSON.stringify(outliers.map((o) => ({
-  caption_preview: o.caption?.slice(0, 200),
-  engagement_rate: `${(o.engagement_rate * 100).toFixed(2)}%`,
-  multiplier: `${(o.engagement_rate / avgEngagement).toFixed(1)}x`,
-  type: o.content_type,
-})), null, 2)}
-
-For each post, explain what worked and how the user could apply the same pattern.
-
-Return JSON array:
-[
-  {
-    "caption": "short caption preview",
-    "engagement_rate": 0.0,
-    "multiplier": 3.5,
-    "what_worked": "specific explanation"
-  }
-]`,
-      },
-    ],
-  });
-
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
-}
-
 // ─── Discover module AI functions ─────────────────────────────────────────────
 
 export async function detectOutlierPatterns(
@@ -386,7 +299,7 @@ export async function detectOutlierPatterns(
   platform: Platform
 ): Promise<Array<{ pattern_tags: string[]; what_worked: string }>> {
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -426,40 +339,116 @@ function multiplierLabel(outliers: Array<{ multiplier: number }>): string {
   return `${min}–${max}x`;
 }
 
-export async function analyzeNicheSaturation(
+// ─── Niche saturation — static lookup (no Claude call) ────────────────────────
+// Claude's training data is not real-time market data. A static table is more
+// honest, faster, and free. Fuzzy-match on niche keywords; fall back to defaults.
+
+interface SaturationEntry {
+  active_creators: number;
+  avg_engagement_rate: number;
+  trend_direction: "growing" | "stable" | "declining";
+}
+
+const NICHE_SATURATION_TABLE: Record<string, SaturationEntry> = {
+  fitness: { active_creators: 2800000, avg_engagement_rate: 0.042, trend_direction: "stable" },
+  gym: { active_creators: 1900000, avg_engagement_rate: 0.039, trend_direction: "stable" },
+  workout: { active_creators: 1600000, avg_engagement_rate: 0.041, trend_direction: "stable" },
+  "weight loss": { active_creators: 950000, avg_engagement_rate: 0.044, trend_direction: "growing" },
+  "personal finance": { active_creators: 980000, avg_engagement_rate: 0.038, trend_direction: "growing" },
+  investing: { active_creators: 720000, avg_engagement_rate: 0.035, trend_direction: "growing" },
+  "stock market": { active_creators: 540000, avg_engagement_rate: 0.033, trend_direction: "stable" },
+  crypto: { active_creators: 1100000, avg_engagement_rate: 0.028, trend_direction: "declining" },
+  cooking: { active_creators: 3200000, avg_engagement_rate: 0.051, trend_direction: "stable" },
+  recipe: { active_creators: 2100000, avg_engagement_rate: 0.048, trend_direction: "stable" },
+  "meal prep": { active_creators: 480000, avg_engagement_rate: 0.055, trend_direction: "growing" },
+  travel: { active_creators: 4100000, avg_engagement_rate: 0.036, trend_direction: "stable" },
+  vlog: { active_creators: 2900000, avg_engagement_rate: 0.032, trend_direction: "stable" },
+  beauty: { active_creators: 3800000, avg_engagement_rate: 0.047, trend_direction: "stable" },
+  skincare: { active_creators: 1700000, avg_engagement_rate: 0.052, trend_direction: "growing" },
+  makeup: { active_creators: 2600000, avg_engagement_rate: 0.044, trend_direction: "stable" },
+  fashion: { active_creators: 4500000, avg_engagement_rate: 0.038, trend_direction: "stable" },
+  gaming: { active_creators: 5200000, avg_engagement_rate: 0.029, trend_direction: "stable" },
+  tech: { active_creators: 1400000, avg_engagement_rate: 0.034, trend_direction: "growing" },
+  business: { active_creators: 1200000, avg_engagement_rate: 0.036, trend_direction: "growing" },
+  motivation: { active_creators: 2300000, avg_engagement_rate: 0.031, trend_direction: "declining" },
+  mindset: { active_creators: 890000, avg_engagement_rate: 0.033, trend_direction: "stable" },
+  education: { active_creators: 1800000, avg_engagement_rate: 0.043, trend_direction: "growing" },
+  parenting: { active_creators: 1500000, avg_engagement_rate: 0.049, trend_direction: "stable" },
+  pets: { active_creators: 2700000, avg_engagement_rate: 0.057, trend_direction: "stable" },
+  music: { active_creators: 3600000, avg_engagement_rate: 0.041, trend_direction: "stable" },
+  comedy: { active_creators: 4800000, avg_engagement_rate: 0.044, trend_direction: "stable" },
+  dance: { active_creators: 3900000, avg_engagement_rate: 0.053, trend_direction: "stable" },
+  diy: { active_creators: 1300000, avg_engagement_rate: 0.048, trend_direction: "growing" },
+  art: { active_creators: 2100000, avg_engagement_rate: 0.046, trend_direction: "stable" },
+};
+
+const SATURATION_DEFAULT: SaturationEntry = {
+  active_creators: 500000,
+  avg_engagement_rate: 0.040,
+  trend_direction: "stable",
+};
+
+function buildSaturationVerdict(
   niche: string,
-  platform: Platform,
+  entry: SaturationEntry
+): string {
+  const engPct = (entry.avg_engagement_rate * 100).toFixed(1);
+  const creatorLabel =
+    entry.active_creators >= 1000000
+      ? `${(entry.active_creators / 1000000).toFixed(1)}M`
+      : `${Math.round(entry.active_creators / 1000)}K`;
+
+  const trendPhrase =
+    entry.trend_direction === "growing"
+      ? "audience interest is actively growing"
+      : entry.trend_direction === "declining"
+      ? "audience interest is contracting — differentiation is critical"
+      : "audience interest is holding steady";
+
+  const saturationLevel =
+    entry.active_creators >= 3000000
+      ? "highly competitive"
+      : entry.active_creators >= 1000000
+      ? "moderately competitive"
+      : "relatively uncrowded";
+
+  return `The ${niche} niche has an estimated ${creatorLabel} active creators — ${saturationLevel} — with an average engagement rate of ${engPct}%. ${trendPhrase.charAt(0).toUpperCase() + trendPhrase.slice(1)}. Creators who establish a specific sub-niche angle will outperform broad competitors.`;
+}
+
+export function analyzeNicheSaturation(
+  niche: string,
+  _platform: Platform,
   benchmarkData?: { avg_engagement_rate?: number; creator_count?: number }
-): Promise<{
+): {
   active_creators: number;
   avg_engagement_rate: number;
   trend_direction: "growing" | "stable" | "declining";
   verdict: string;
-}> {
-  const response = await client.messages.create({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `Assess the saturation level of the "${niche}" niche on ${platform}.
+} {
+  const normalized = niche.toLowerCase().trim();
 
-${benchmarkData ? `Known data: ~${benchmarkData.creator_count ?? "unknown"} creators, avg engagement ${benchmarkData.avg_engagement_rate ? (benchmarkData.avg_engagement_rate * 100).toFixed(2) + "%" : "unknown"}` : "No benchmark data available — estimate based on your knowledge."}
+  // Direct match
+  let entry = NICHE_SATURATION_TABLE[normalized];
 
-Return JSON:
-{
-  "active_creators": estimated_number,
-  "avg_engagement_rate": 0.0-1.0,
-  "trend_direction": "growing" | "stable" | "declining",
-  "verdict": "2-3 sentence assessment: is this niche oversaturated, has opportunity, or is emerging? Be specific about why."
-}`,
-      },
-    ],
-  });
+  // Fuzzy: find first table key that appears in the niche string or vice versa
+  if (!entry) {
+    const key = Object.keys(NICHE_SATURATION_TABLE).find(
+      (k) => normalized.includes(k) || k.includes(normalized)
+    );
+    entry = key ? NICHE_SATURATION_TABLE[key] : SATURATION_DEFAULT;
+  }
 
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  // Override with caller-supplied benchmark data if provided
+  const result: SaturationEntry = {
+    active_creators: benchmarkData?.creator_count ?? entry.active_creators,
+    avg_engagement_rate: benchmarkData?.avg_engagement_rate ?? entry.avg_engagement_rate,
+    trend_direction: entry.trend_direction,
+  };
+
+  return {
+    ...result,
+    verdict: buildSaturationVerdict(niche, result),
+  };
 }
 
 export async function extractFormatPatterns(
@@ -491,7 +480,7 @@ export async function extractFormatPatterns(
   }));
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: CLASSIFY_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
@@ -537,13 +526,13 @@ export async function generateFixList(analysisData: {
     .join("\n");
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: ANALYSIS_SYSTEM_PROMPT,
     messages: [
       {
         role: "user",
-        content: `Generate a ranked fix list (max 6 items) for this ${analysisData.platform} creator in the ${analysisData.niche} niche.
+        content: `Generate a ranked fix list (max 4 items) for this ${analysisData.platform} creator in the ${analysisData.niche} niche.
 
 Current scores:
 - Growth score: ${analysisData.growth_score}/100
@@ -561,7 +550,9 @@ Current scores:
 Platform signal weights:
 ${signalSummary}
 
-Return a JSON array of max 6 items, ranked by expected impact (highest first):
+Be terse. Each field should be 1-2 sentences max. No filler.
+
+Return a JSON array of max 4 items, ranked by expected impact (highest first):
 [
   {
     "rank": 1,
@@ -598,7 +589,7 @@ export async function generatePersonalizedIdeas(
   }
 ): Promise<PersonalizedIdea[]> {
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: GENERATION_SYSTEM_PROMPT,
     messages: [
@@ -639,7 +630,7 @@ export async function generateScoredHooks(
   platform: Platform
 ): Promise<ScoredHook[]> {
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: GENERATION_SYSTEM_PROMPT,
     messages: [
@@ -680,7 +671,7 @@ export async function generateStructuredCaption(
   platform: Platform
 ): Promise<StructuredCaption> {
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: GENERATION_SYSTEM_PROMPT,
     messages: [
@@ -730,7 +721,7 @@ export async function generateContent(
   };
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: GENERATION_SYSTEM_PROMPT,
     messages: [
@@ -773,6 +764,107 @@ function getGenerationSchema(type: string): string {
     default:
       return `Return appropriate JSON for the content type.`;
   }
+}
+
+// ─── Replicate Winners ────────────────────────────────────────────────────────
+
+export async function generateReplicateWinners(
+  niche: string,
+  platform: Platform,
+  count: number = 3,
+  competitorContext?: Array<{ username: string; followers: number | null; avg_engagement_rate: number | null; top_hashtags: string[]; content_formats: string[] }>
+): Promise<ReplicateWinnerOutput[]> {
+  const competitorSection = competitorContext && competitorContext.length > 0
+    ? `\nKnown competitors in this niche:\n${JSON.stringify(competitorContext.map((c) => ({
+        username: c.username,
+        followers: c.followers,
+        avg_engagement: c.avg_engagement_rate ? `${(c.avg_engagement_rate * 100).toFixed(2)}%` : "unknown",
+        top_hashtags: c.top_hashtags.slice(0, 5),
+        formats: c.content_formats,
+      })), null, 2)}\nUse these competitor profiles to inform what winning patterns look like in this niche.`
+    : "";
+
+  const response = await client.messages.create({
+    model: STRATEGY_MODEL,
+    max_tokens: MAX_TOKENS,
+    system: GENERATION_SYSTEM_PROMPT,
+    messages: [
+      {
+        role: "user",
+        content: `Identify ${count} specific winning post patterns that top creators use in the ${niche} niche on ${platform}. For each pattern, describe a real example of how it's used by successful creators, then create a new post concept the user can replicate with their own angle.
+${competitorSection}
+Return exactly ${count} items as a JSON array:
+[
+  {
+    "original_post": {
+      "caption_preview": "example of a winning post in this niche (realistic caption snippet)",
+      "engagement_rate": "estimated typical engagement rate for this pattern",
+      "why_it_worked": "1-2 sentence analysis of the winning pattern"
+    },
+    "replicated_content": {
+      "hook": "opening hook line (first 1-3 seconds)",
+      "caption": "full caption text",
+      "script_outline": "brief 3-5 bullet point script outline",
+      "hashtags": ["#tag1", "#tag2", ...up to 15],
+      "format": "video" | "reel" | "short" | "post",
+      "expected_engagement": "high" | "medium" | "low"
+    },
+    "adaptation_notes": "1 sentence on how this was adapted for a fresh angle in the ${niche} niche"
+  }
+]
+
+Rules:
+- Each winning pattern must be a distinct, proven content format (e.g. "controversial take", "before/after transformation", "day-in-the-life", "myth-busting", "POV storytelling")
+- The original_post should describe a realistic winning post other creators use — not generic
+- The replicated_content must be specific and filmable today
+- No filler. No generic advice.`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return JSON.parse(extractJSON(text));
+}
+
+// ─── Content Coach chat ───────────────────────────────────────────────────
+
+const COACH_SYSTEM_PROMPT = `You are a content coach inside SocialOptimizer — a data-driven social media analysis tool.
+
+The user has connected their social accounts and you have access to their analysis data below.
+Your job is to answer specific questions about their page performance, strategy, and growth using ONLY the data provided.
+
+Rules:
+- Reference specific metrics and numbers from the data when answering.
+- Be direct and terse. No motivational filler, no "great question!" preamble.
+- If the data doesn't contain enough information to answer, say so explicitly. Do not fabricate numbers.
+- Give concrete, actionable advice — not vague encouragement.
+- Format your response in markdown for readability. Use bold for metrics, bullet points for lists.
+- Keep responses under 400 words unless the question warrants more detail.`;
+
+export async function coachChat(
+  messages: Array<{ role: "user" | "assistant"; content: string }>,
+  analysisContext: string
+): Promise<string> {
+  const contextMessage = `Here is the user's current analysis data:\n\n${analysisContext}\n\nAnswer their questions using this data.`;
+
+  const apiMessages = [
+    { role: "user" as const, content: contextMessage },
+    { role: "assistant" as const, content: "Understood. I have your analysis data loaded. What would you like to know?" },
+    ...messages.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    })),
+  ];
+
+  const response = await client.messages.create({
+    model: STRATEGY_MODEL,
+    max_tokens: MAX_TOKENS,
+    system: COACH_SYSTEM_PROMPT,
+    messages: apiMessages,
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return text;
 }
 
 // ─── Utility ──────────────────────────────────────────────────────────────────

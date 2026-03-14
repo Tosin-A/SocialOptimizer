@@ -1,13 +1,15 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Bell, BarChart3, Wand2, CreditCard, Mail, Users, Info, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bell, BarChart3, Wand2, CreditCard, Mail, Users, Info, Check, ChevronRight } from "lucide-react";
 
 interface Notification {
   id: string;
   type: string;
   title: string;
   body: string;
+  link: string;
   created_at: string;
 }
 
@@ -34,6 +36,7 @@ function timeAgo(iso: string): string {
 const SEEN_KEY = "notif_seen_at";
 
 export default function NotificationsPopover() {
+  const router = useRouter();
   const [open, setOpen]             = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading]       = useState(false);
@@ -149,9 +152,13 @@ export default function NotificationsPopover() {
             {!loading && notifications.map((n) => {
               const Icon = TYPE_ICONS[n.type] ?? Info;
               return (
-                <div
+                <button
                   key={n.id}
-                  className="flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/5 transition-colors"
+                  onClick={() => {
+                    setOpen(false);
+                    router.push(n.link);
+                  }}
+                  className="w-full flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/5 transition-colors text-left cursor-pointer group"
                 >
                   <div className="w-7 h-7 rounded-lg bg-brand-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                     <Icon className="w-3.5 h-3.5 text-brand-400" />
@@ -160,10 +167,13 @@ export default function NotificationsPopover() {
                     <p className="text-xs font-medium leading-snug">{n.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-snug truncate">{n.body}</p>
                   </div>
-                  <span className="text-[10px] text-muted-foreground/50 flex-shrink-0 mt-0.5">
-                    {timeAgo(n.created_at)}
-                  </span>
-                </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] text-muted-foreground/50">
+                      {timeAgo(n.created_at)}
+                    </span>
+                    <ChevronRight className="w-3 h-3 text-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </button>
               );
             })}
           </div>

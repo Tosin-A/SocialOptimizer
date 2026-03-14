@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3, Home, Users, Wand2, Settings,
   TrendingUp, ChevronRight, LogOut, FileText, X,
-  Compass, Target, Lock, Map,
+  Compass, Target, Lock, Map, MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -27,6 +27,7 @@ const NAV: NavItem[] = [
   { href: "/dashboard/discover",    icon: Compass,    label: "Discover",     gate: "discover" },
   { href: "/dashboard/competitors", icon: Users,      label: "Competitors",  gate: "competitors" },
   { href: "/dashboard/generate",    icon: Wand2,      label: "Generate" },
+  { href: "/dashboard/coach",      icon: MessageSquare, label: "Coach",     gate: "coach" },
   { href: "/dashboard/track",       icon: Target,     label: "Track",        gate: "track" },
   { href: "/dashboard/settings",    icon: Settings,   label: "Settings" },
 ];

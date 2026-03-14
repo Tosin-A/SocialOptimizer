@@ -131,7 +131,7 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
             }}
           >
             <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-700 shadow-xl">
+            <SelectContent>
               <SelectItem value="tiktok">TikTok</SelectItem>
               <SelectItem value="instagram">Instagram</SelectItem>
             </SelectContent>

@@ -60,9 +60,6 @@ function InsightCard({ insight, type }: { insight: Insight; type: "strength" | "
           <span className="font-medium">Fix:</span> {insight.recommendation}
         </p>
       )}
-      {insight.metric && (
-        <p className="text-xs font-mono text-muted-foreground">{insight.metric}</p>
-      )}
     </div>
   );
 }
@@ -382,7 +379,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
           <div>
             <h3 className="text-sm font-semibold mb-3 text-red-400">Overused hashtags (reduce)</h3>
             <div className="flex flex-wrap gap-2">
-              {report.overused_hashtags?.slice(0, 15).map((h) => (
+              {report.overused_hashtags?.slice(0, 10).map((h) => (
                 <span key={h} className="bg-red-400/10 border border-red-400/20 text-red-400 px-3 py-1 rounded-full text-xs">{h}</span>
               ))}
             </div>
@@ -390,7 +387,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
           <div>
             <h3 className="text-sm font-semibold mb-3">Hashtag effectiveness details</h3>
             <div className="space-y-2">
-              {report.hashtag_effectiveness?.slice(0, 15).map((h) => (
+              {report.hashtag_effectiveness?.slice(0, 10).map((h) => (
                 <div key={h.tag} className="flex items-center gap-3 text-xs">
                   <span className="w-28 text-muted-foreground truncate">{h.tag}</span>
                   <div className="flex-1 bg-white/5 rounded-full h-1.5">

@@ -9,10 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import ScoredHookList from "@/components/dashboard/ScoredHookList";
 import StructuredCaptionCard from "@/components/dashboard/StructuredCaptionCard";
 import PersonalizedIdeaList from "@/components/dashboard/PersonalizedIdeaList";
+import ReplicateWinnerCard from "@/components/dashboard/ReplicateWinnerCard";
 import PostingTimeGrid from "@/components/dashboard/PostingTimeGrid";
-import type { Platform, GeneratedContentOutput, ScoredHook, StructuredCaption, PersonalizedIdea, PostingTimeRecommendation } from "@/types";
+import type { Platform, GeneratedContentOutput, ScoredHook, StructuredCaption, PersonalizedIdea, PostingTimeRecommendation, ReplicateWinnerOutput } from "@/types";
 
-type EnhancedOutput = GeneratedContentOutput | ScoredHook[] | StructuredCaption | PersonalizedIdea[];
+type EnhancedOutput = GeneratedContentOutput | ScoredHook[] | StructuredCaption | PersonalizedIdea[] | ReplicateWinnerOutput[];
 
 interface SavedItem {
   id: string;
@@ -30,6 +31,7 @@ const CONTENT_TYPES = [
   { value: "idea", label: "Video ideas" },
   { value: "hashtags", label: "Hashtag sets" },
   { value: "full_plan", label: "Full content plan (all of the above)" },
+  { value: "replicate", label: "Replicate winners" },
 ];
 
 const TONES = [
@@ -52,6 +54,10 @@ function isStructuredCaption(output: EnhancedOutput): output is StructuredCaptio
 
 function isPersonalizedIdeaArray(output: EnhancedOutput): output is PersonalizedIdea[] {
   return Array.isArray(output) && output.length > 0 && "source" in output[0] && "source_reference" in output[0];
+}
+
+function isReplicateWinnerArray(output: EnhancedOutput): output is ReplicateWinnerOutput[] {
+  return Array.isArray(output) && output.length > 0 && "original_post" in output[0] && "replicated_content" in output[0];
 }
 
 function isBasicOutput(output: EnhancedOutput): output is GeneratedContentOutput {
@@ -82,29 +88,33 @@ export default function GeneratePage() {
 
   const { toast } = useToast();
 
-  // Fetch accounts + auto-fill niche from latest analysis
+  // Fetch accounts on mount
   useEffect(() => {
     fetch("/api/accounts")
       .then((r) => r.json())
-      .then(async (d) => {
+      .then((d) => {
         const accts = d.data ?? [];
         setAccounts(accts);
-        if (accts[0]) {
-          setSelectedAccount(accts[0].id);
-          // Try to auto-fill niche from latest analysis report
-          try {
-            const res = await fetch(`/api/reports?account_id=${accts[0].id}`);
-            const data = await res.json();
-            const report = data.data?.[0] ?? data.data;
-            if (report?.detected_niche) {
-              setNiche(report.detected_niche);
-            }
-          } catch {
-            // No analysis yet — niche stays empty
-          }
-        }
+        if (accts[0]) setSelectedAccount(accts[0].id);
       });
   }, []);
+
+  // Auto-fill niche from latest analysis report when account changes
+  useEffect(() => {
+    if (!selectedAccount) return;
+    (async () => {
+      try {
+        const res = await fetch(`/api/reports?account_id=${selectedAccount}`);
+        const data = await res.json();
+        const report = data.data?.[0] ?? data.data;
+        if (report?.detected_niche) {
+          setNiche(report.detected_niche);
+        }
+      } catch {
+        // No analysis yet — niche stays empty
+      }
+    })();
+  }, [selectedAccount]);
 
   const loadHistory = useCallback(async (page = 1) => {
     setHistoryLoading(true);
@@ -423,6 +433,9 @@ function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; co
   }
   if (isPersonalizedIdeaArray(output)) {
     return <PersonalizedIdeaList ideas={output} />;
+  }
+  if (isReplicateWinnerArray(output)) {
+    return <ReplicateWinnerCard winners={output} onCopy={copyToClipboard} />;
   }
 
   // Basic GeneratedContentOutput
