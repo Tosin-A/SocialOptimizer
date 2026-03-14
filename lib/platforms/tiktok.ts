@@ -21,7 +21,6 @@ interface TikTokVideo {
   comment_count: number;
   share_count: number;
   view_count: number;
-  hashtag_names?: string[];
 }
 
 function extractHashtags(text: string, explicit: string[]): string[] {
@@ -59,9 +58,9 @@ export async function fetchTikTokPosts(
 ): Promise<Post[]> {
   const token = account.access_token;
 
-  // TikTok requires "fields" as a query param (comma-separated), not in the body
+  // TikTok requires "fields" as a query param; only use fields from the Video Object spec (no hashtag_names)
   const fieldsQuery =
-    "id,title,video_description,create_time,cover_image_url,share_url,duration,like_count,comment_count,share_count,view_count,hashtag_names";
+    "id,title,video_description,create_time,cover_image_url,share_url,duration,like_count,comment_count,share_count,view_count";
 
   let posts: Post[] = [];
   let cursor = 0;
@@ -78,7 +77,7 @@ export async function fetchTikTokPosts(
 
     for (const video of videos) {
       const caption = `${video.title}\n${video.video_description}`;
-      const hashtags = extractHashtags(caption, video.hashtag_names ?? []);
+      const hashtags = extractHashtags(caption, []);
       const views = video.view_count ?? 0;
       const likes = video.like_count ?? 0;
       const comments = video.comment_count ?? 0;
