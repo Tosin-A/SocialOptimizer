@@ -166,7 +166,11 @@ export async function POST(req: NextRequest) {
           .eq("id", job.id);
 
         if (dbPosts.length === 0) {
-          throw new Error("No posts found. Import more data or connect your account.");
+          throw new Error(
+            isCsvImport
+              ? "No posts found. Import more data via CSV."
+              : "No posts returned from the platform API. If your app is in sandbox/development mode, TikTok may restrict video access. Try importing a CSV export of your analytics instead, or submit your TikTok app for production review."
+          );
         }
 
         const freshAccount = isCsvImport ? account : await refreshTokenIfNeeded(account as any);

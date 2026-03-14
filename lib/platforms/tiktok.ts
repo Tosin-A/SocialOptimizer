@@ -73,7 +73,16 @@ export async function fetchTikTokPosts(
       { max_count: 20, cursor }
     );
 
+    if (data.error && data.error.code !== "ok") {
+      console.error("TikTok video/list error:", JSON.stringify(data.error));
+      throw new Error(`TikTok API error: ${data.error.message ?? data.error.code}`);
+    }
+
     const videos: TikTokVideo[] = data.data?.videos ?? [];
+
+    if (posts.length === 0 && videos.length === 0) {
+      console.warn("TikTok video/list returned 0 videos. Full response:", JSON.stringify(data));
+    }
 
     for (const video of videos) {
       const caption = `${video.title}\n${video.video_description}`;
