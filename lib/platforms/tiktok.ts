@@ -59,31 +59,20 @@ export async function fetchTikTokPosts(
 ): Promise<Post[]> {
   const token = account.access_token;
 
-  const fields = [
-    "id",
-    "title",
-    "video_description",
-    "create_time",
-    "cover_image_url",
-    "share_url",
-    "duration",
-    "like_count",
-    "comment_count",
-    "share_count",
-    "view_count",
-    "hashtag_names",
-  ];
+  // TikTok requires "fields" as a query param (comma-separated), not in the body
+  const fieldsQuery =
+    "id,title,video_description,create_time,cover_image_url,share_url,duration,like_count,comment_count,share_count,view_count,hashtag_names";
 
   let posts: Post[] = [];
   let cursor = 0;
   let hasMore = true;
 
   while (posts.length < maxPosts && hasMore) {
-    const data = await tikTokFetch("/video/list/", token, {
-      fields,
-      max_count: 20,
-      cursor,
-    });
+    const data = await tikTokFetch(
+      `/video/list/?fields=${encodeURIComponent(fieldsQuery)}`,
+      token,
+      { max_count: 20, cursor }
+    );
 
     const videos: TikTokVideo[] = data.data?.videos ?? [];
 
