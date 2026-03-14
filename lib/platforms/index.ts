@@ -39,7 +39,7 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
 
 export const PLATFORM_OAUTH_URLS: Record<Platform, (state: string) => string> = {
   tiktok: (state) =>
-    `https://www.tiktok.com/v2/auth/authorize?client_key=${process.env.TIKTOK_CLIENT_KEY}&response_type=code&scope=user.info.basic,video.list&redirect_uri=${APP_URL}/api/connect/tiktok/callback&state=${state}`,
+    `https://www.tiktok.com/v2/auth/authorize?client_key=${process.env.TIKTOK_CLIENT_KEY}&response_type=code&scope=user.info.basic,user.info.profile,user.info.stats,video.list&redirect_uri=${APP_URL}/api/connect/tiktok/callback&state=${state}`,
 
   instagram: (state) =>
     `https://api.instagram.com/oauth/authorize?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${APP_URL}/api/connect/instagram/callback&scope=instagram_basic,instagram_manage_insights&response_type=code&state=${state}`,

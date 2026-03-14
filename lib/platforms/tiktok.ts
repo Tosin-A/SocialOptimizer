@@ -125,16 +125,21 @@ export async function fetchTikTokPosts(
 }
 
 export async function getTikTokProfile(token: string) {
+  // username requires user.info.profile scope
+  // follower_count/following_count require user.info.stats scope
+  // open_id/union_id/avatar_url/display_name only need user.info.basic
   const data = await tikTokFetch(
     "/user/info/?fields=open_id,union_id,avatar_url,display_name,username,follower_count,following_count",
     token
   );
 
   const user = data.data?.user;
+  if (!user) throw new Error("TikTok API error: no user data returned");
+
   return {
     platform_user_id: user.open_id,
-    username: user.username ?? user.display_name,
-    display_name: user.display_name,
+    username: user.username ?? user.display_name ?? user.open_id,
+    display_name: user.display_name ?? user.username ?? user.open_id,
     avatar_url: user.avatar_url ?? null,
     followers: user.follower_count ?? 0,
     following: user.following_count ?? 0,
