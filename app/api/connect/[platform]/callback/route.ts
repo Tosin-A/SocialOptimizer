@@ -1,5 +1,6 @@
 // GET /api/connect/[platform]/callback — Handle OAuth callback
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { getProfileForPlatform } from "@/lib/platforms";
 import type { Platform } from "@/types";
@@ -120,6 +121,9 @@ export async function GET(
       },
       { onConflict: "user_id,platform,platform_user_id" }
     );
+
+    // Invalidate dashboard cache so the UI shows the new account immediately
+    revalidateTag(`dashboard:${dbUser.id}`);
 
     // Clear OAuth cookies
     const response = NextResponse.redirect(
