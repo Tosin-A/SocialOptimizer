@@ -17,21 +17,32 @@ async function exchangeCodeForToken(
   code: string,
   redirectUri: string
 ): Promise<{ access_token: string; refresh_token?: string; expires_in?: number; token_type: string }> {
-  const configs: Record<Platform, { client_id: string; client_secret: string }> = {
-    tiktok: { client_id: process.env.TIKTOK_CLIENT_KEY!, client_secret: process.env.TIKTOK_CLIENT_SECRET! },
-    instagram: { client_id: process.env.FACEBOOK_APP_ID!, client_secret: process.env.FACEBOOK_APP_SECRET! },
-    youtube: { client_id: process.env.GOOGLE_CLIENT_ID!, client_secret: process.env.GOOGLE_CLIENT_SECRET! },
-    facebook: { client_id: process.env.FACEBOOK_APP_ID!, client_secret: process.env.FACEBOOK_APP_SECRET! },
-  };
+  let body: URLSearchParams;
 
-  const config = configs[platform];
-  const body = new URLSearchParams({
-    code,
-    client_id: config.client_id,
-    client_secret: config.client_secret,
-    redirect_uri: redirectUri,
-    grant_type: "authorization_code",
-  });
+  // TikTok uses client_key/client_secret; others use client_id/client_secret
+  if (platform === "tiktok") {
+    body = new URLSearchParams({
+      code,
+      client_key: process.env.TIKTOK_CLIENT_KEY!,
+      client_secret: process.env.TIKTOK_CLIENT_SECRET!,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code",
+    });
+  } else {
+    const configs: Record<Exclude<Platform, "tiktok">, { client_id: string; client_secret: string }> = {
+      instagram: { client_id: process.env.FACEBOOK_APP_ID!, client_secret: process.env.FACEBOOK_APP_SECRET! },
+      youtube: { client_id: process.env.GOOGLE_CLIENT_ID!, client_secret: process.env.GOOGLE_CLIENT_SECRET! },
+      facebook: { client_id: process.env.FACEBOOK_APP_ID!, client_secret: process.env.FACEBOOK_APP_SECRET! },
+    };
+    const config = configs[platform as Exclude<Platform, "tiktok">];
+    body = new URLSearchParams({
+      code,
+      client_id: config.client_id,
+      client_secret: config.client_secret,
+      redirect_uri: redirectUri,
+      grant_type: "authorization_code",
+    });
+  }
 
   const res = await fetch(TOKEN_ENDPOINTS[platform], {
     method: "POST",
@@ -44,7 +55,25 @@ async function exchangeCodeForToken(
     throw new Error(`Token exchange failed: ${err.error_description ?? err.message ?? res.statusText}`);
   }
 
-  return res.json();
+  const raw = await res.json();
+  // TikTok may return { data: { access_token, ... } } or top-level { access_token, ... }
+  const access_token =
+    (raw.data && typeof raw.data.access_token === "string" ? raw.data.access_token : null) ??
+    (typeof raw.access_token === "string" ? raw.access_token : null);
+  const refresh_token =
+    (raw.data && typeof raw.data.refresh_token === "string" ? raw.data.refresh_token : null) ??
+    (typeof raw.refresh_token === "string" ? raw.refresh_token : null) ??
+    undefined;
+  const expires_in =
+    typeof raw.data?.expires_in === "number" ? raw.data.expires_in
+    : typeof raw.expires_in === "number" ? raw.expires_in
+    : undefined;
+
+  if (!access_token) {
+    throw new Error("Token exchange failed: no access_token in response");
+  }
+
+  return { access_token, refresh_token, expires_in, token_type: "Bearer" };
 }
 
 export async function GET(
