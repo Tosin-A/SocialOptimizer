@@ -10,6 +10,8 @@ Internal engineering reference. Read this before touching any code.
 
 The product is not a social media scheduler, a vanity dashboard, or a generic AI chatbot. It is an analysis engine. The output is an `AnalysisReport` — a structured document with scores, insights, a competitor comparison, and a prioritized improvement roadmap.
 
+**Current launch focus:** TikTok-first. Other platforms are supported but TikTok is the primary integration.
+
 **Target users:**
 - Serious individual creators who treat their channel as a business
 - Marketing agencies running analysis on multiple client accounts
@@ -29,6 +31,8 @@ The product is not a social media scheduler, a vanity dashboard, or a generic AI
 | Auth + DB | Supabase (PostgreSQL, RLS, Auth, Storage) |
 | AI/LLM | Anthropic Claude API (`@anthropic-ai/sdk`) |
 | Python service | FastAPI — NLP, sentiment, transcription, scraping |
+| Scraping | httpx + BeautifulSoup (HTTP-based, no headless browser) |
+| Payments | Stripe (checkout, subscriptions, webhooks) |
 | Job queue | BullMQ + Redis |
 | Client state | Zustand |
 | Server state | TanStack React Query |
@@ -40,9 +44,13 @@ Key files:
 - `lib/ai/claude.ts` — all Anthropic API calls live here
 - `lib/analysis/engine.ts` — analysis orchestration
 - `lib/platforms/` — per-platform OAuth and API adapters
+- `lib/stripe.ts` — Stripe client, plan config, price mapping
+- `lib/plans/feature-gate.ts` — per-plan feature access matrix
 - `types/index.ts` — all shared TypeScript interfaces
 - `app/api/` — Next.js API routes
+- `app/api/webhooks/stripe/route.ts` — Stripe webhook handler
 - `python-service/` — FastAPI microservice
+- `python-service/scrapers/public_scraper.py` — httpx-based profile scraper
 - `database/schema.sql` — full PostgreSQL schema
 
 ---
@@ -57,7 +65,7 @@ Key files:
 
 **Don't abstract until it hurts twice.** Three similar handlers is not a reason to build a factory. If a pattern repeats across four platforms and the logic is genuinely identical, extract it. Otherwise leave it inline.
 
-**The Python service exists for a reason.** Whisper transcription, VADER sentiment, and Playwright scraping are not appropriate in a Next.js edge function. Don't move Python logic into TypeScript unless there's a measurable reason to.
+**The Python service exists for a reason.** Whisper transcription, VADER sentiment, and httpx scraping are grouped in the Python service because they depend on Python-specific libraries. Don't move Python logic into TypeScript unless there's a measurable reason to.
 
 ---
 
@@ -95,7 +103,7 @@ export async function analyzeHashtags(hashtags, niche, platform)
 - Validate every request body with a Zod schema before touching it.
 - Return `{ data: T | null, error: string | null }` — the `ApiResponse<T>` type from `types/index.ts`.
 - Auth check goes first, always. Use `createServerClient` from `lib/supabase/server.ts`.
-- HTTP status codes should be meaningful: 202 for async jobs, 400 for validation errors, 401 for auth, 403 for plan limits, 500 for unexpected.
+- HTTP status codes should be meaningful: 202 for async jobs, 400 for validation errors, 401 for auth, 402 for usage limit exceeded, 403 for plan limits, 502 for Python service errors, 500 for unexpected.
 
 ### Naming
 
@@ -161,9 +169,16 @@ The current model is `claude-opus-4-6`. Don't downgrade to Haiku or Sonnet for a
 ### Environment variables
 
 - All secrets are in `.env.local` (local) or the Vercel/Railway dashboard (production).
-- Required vars: `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PYTHON_SERVICE_URL`, `PYTHON_SERVICE_SECRET`, `REDIS_URL`
+- Required vars: `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `PYTHON_SERVICE_URL`, `PYTHON_SERVICE_SECRET`, `REDIS_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_STARTER`, `STRIPE_PRICE_ID_PRO`, `STRIPE_PRICE_ID_AGENCY`
 - Internal service auth: Python FastAPI only accepts requests with a matching `X-Service-Secret` header. This is set from `PYTHON_SERVICE_SECRET`. Do not remove this check.
-- Never commit `.env.local`. It is gitignored.
+- Python service loads its `.env` via `python-dotenv` on startup. The `.env` file in `python-service/` is gitignored.
+- Never commit `.env.local` or `python-service/.env`. Both are gitignored.
+
+### Stripe webhooks
+
+- Webhook signature is verified with `stripe.webhooks.constructEvent()` before processing any event.
+- Raw body (`req.text()`) is required for signature verification — do not parse as JSON first.
+- Plan upgrades preserve `analyses_used` (usage carries over). Only cancellation/downgrade resets usage to 0.
 
 ### Least privilege
 
@@ -178,12 +193,17 @@ The current model is `claude-opus-4-6`. Don't downgrade to Haiku or Sonnet for a
 ### Visual rules
 
 - Background: dark slate (`slate-900`, `slate-950`)
-- Accents: indigo/blue (`indigo-500`, `indigo-600`)
+- Accents: indigo/blue (`indigo-500`, `indigo-600`), branded as `brand-400`/`brand-500`/`brand-600`
 - Text: `slate-100` (primary), `slate-400` (secondary/muted)
 - Font: Inter (already set in globals)
 - Border: `slate-700` / `slate-800`
 - Destructive: `red-500`
 - Success: `emerald-500`
+
+### Custom UI components
+
+- `StarBorder` (`components/ui/StarBorder.tsx`) — animated glowing border effect for CTA buttons. Default color: `#a855f7` (neon-purple).
+- `GradualBlur` (`components/landing/GradualBlur.tsx`) — configurable blur overlay for hero sections.
 
 ### UI philosophy
 
@@ -203,7 +223,51 @@ Framer Motion is installed. Use it for meaningful transitions (page-level, modal
 
 ---
 
-## 8. What to Avoid
+## 8. Monetization & Plans
+
+Plans are defined in `lib/stripe.ts` and enforced via `lib/plans/feature-gate.ts`.
+
+| Plan | Analyses/mo | Platforms | Competitors | Content Gens |
+|------|------------|-----------|-------------|-------------|
+| Free | 1 | 1 | 0 | 5 |
+| Starter ($19) | 10 | 2 | 0 | 50 |
+| Pro ($49) | 20 | 4 | 3 | unlimited |
+| Agency ($199) | 50 | 10 | 50 | unlimited |
+
+**Usage tracking:** `analyses_used` and `analyses_limit` columns on the `users` table. Incremented in `/api/analyze` before creating the job. Checked with `analyses_used >= analyses_limit` (returns 402).
+
+**Plan upgrades preserve usage.** When a user upgrades, only `analyses_limit` changes — `analyses_used` carries over so they don't lose their count. Usage resets to 0 only on cancellation/downgrade to free.
+
+**Feature gating:** Two layers:
+- Server-side: `lib/plans/feature-gate.ts` (`canAccess(plan, feature)`)
+- Client-side: `hooks/use-feature-access.ts` + `components/dashboard/UpgradeGate.tsx`
+
+---
+
+## 9. Competitor Scraping
+
+The scraper (`python-service/scrapers/public_scraper.py`) uses **httpx** with JSON/HTML parsing. No headless browser (Playwright was removed).
+
+| Platform | Data Source | Reliability |
+|----------|-------------|-------------|
+| TikTok | `__UNIVERSAL_DATA_FOR_REHYDRATION__` embedded JSON | High — 3 fallback strategies |
+| YouTube | `ytInitialData` embedded JSON + GDPR consent cookies | High — handles both old and new page formats |
+| Instagram | Meta tags (`og:description`, page title) | Low — Instagram blocks non-authenticated requests |
+| Facebook | Not implemented | Returns empty profile |
+
+**Important scraper details:**
+- HTTP headers must be minimal — extra headers like `Accept-Encoding: br` cause platforms to return garbled/incomplete responses.
+- YouTube requires GDPR consent cookies (`SOCS`, `CONSENT`) to bypass the consent wall.
+- The Python service needs `PYTHON_SERVICE_SECRET` in its environment to accept requests. Locally this is loaded from `python-service/.env` via `python-dotenv`.
+
+**Competitor endpoints:**
+- `POST /api/competitors` — add competitor (scrapes on creation)
+- `POST /api/competitors/[id]/refresh` — re-scrape profile data, update DB, return fresh data
+- `POST /api/competitors/[id]/compare` — run gap analysis against user's latest report
+
+---
+
+## 10. What to Avoid
 
 ### In code
 
@@ -224,10 +288,11 @@ Framer Motion is installed. Use it for meaningful transitions (page-level, modal
 - Do not move analysis work into API route handlers that run synchronously. Long operations go through BullMQ.
 - Do not bypass RLS with service-role key shortcuts during development and forget to revert.
 - Do not add a new microservice unless the workload is genuinely incompatible with the existing Python service.
+- Do not add Playwright or headless browser dependencies. The scraper uses httpx for a reason — it's lighter, faster, and doesn't need browser system libraries.
 
 ---
 
-## 9. Product Voice
+## 11. Product Voice
 
 When writing UI copy, error messages, empty states, or anything user-facing:
 
@@ -239,12 +304,12 @@ When writing UI copy, error messages, empty states, or anything user-facing:
 
 ---
 
-## 10. Development Workflow
+## 12. Development Workflow
 
 ```bash
-# Local dev
-npm run dev           # Next.js on :3000
-cd python-service && uvicorn main:app --reload  # FastAPI on :8000
+# Local dev — run both services
+npm run dev                                          # Next.js on :3000
+cd python-service && source venv/bin/activate && uvicorn main:app --reload --port 8000  # FastAPI on :8000
 
 # Type checking
 npm run type-check
@@ -255,6 +320,13 @@ npm run db:generate
 # Bundle analysis
 npm run analyze
 ```
+
+### Deployment
+
+- **Frontend:** Vercel (auto-deploys from `main` branch)
+- **Python service:** Railway (root directory: `python-service`, start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`)
+- **Database:** Supabase (run `schema.sql` + migrations in order)
+- **Redis:** Upstash
 
 Before opening a PR:
 1. `npm run type-check` — must pass with zero errors

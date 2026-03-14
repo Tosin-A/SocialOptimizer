@@ -2,10 +2,11 @@
 Content Analyzer — Hook detection, CTA detection, keyword extraction
 """
 import re
-from typing import TypedDict
-from keybert import KeyBERT
-from sentence_transformers import SentenceTransformer
+from typing import TYPE_CHECKING
 import logging
+
+if TYPE_CHECKING:
+    from keybert import KeyBERT
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +39,14 @@ CTA_PATTERNS = [
 
 class ContentAnalyzer:
     def __init__(self):
-        self._kw_model: KeyBERT | None = None
+        self._kw_model: "KeyBERT | None" = None
 
     @property
-    def kw_model(self) -> KeyBERT:
+    def kw_model(self) -> "KeyBERT":
         if self._kw_model is None:
             logger.info("Loading KeyBERT model...")
+            from keybert import KeyBERT
+            from sentence_transformers import SentenceTransformer
             self._kw_model = KeyBERT(model=SentenceTransformer("all-MiniLM-L6-v2"))
         return self._kw_model
 

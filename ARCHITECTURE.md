@@ -8,33 +8,39 @@
 └────────────────────────────┬─────────────────────────────────────┘
                              │ HTTPS
 ┌────────────────────────────▼─────────────────────────────────────┐
-│              NEXT.JS 15 APP (Vercel Edge)                        │
+│              NEXT.JS 15 APP (Vercel)                             │
 │  ┌──────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
 │  │  Landing     │  │  Dashboard   │  │  API Routes            │  │
 │  │  Auth pages  │  │  Analyze     │  │  /api/analyze          │  │
-│  │              │  │  Generate    │  │  /api/generate         │  │
-│  │              │  │  Competitors │  │  /api/connect/[plat]   │  │
-│  └──────────────┘  └──────────────┘  │  /api/competitors      │  │
-│                                      │  /api/accounts         │  │
-│                                      └────────────────────────┘  │
-└────────────────┬─────────────────┬────────────────────────────-──┘
-                 │                 │
-   ┌─────────────▼──┐    ┌─────────▼────────-──┐
-   │  SUPABASE      │    │  PYTHON FASTAPI     │
-   │  (PostgreSQL)  │    │  (Railway/Fly.io)   │
-   │  - Auth        │    │  - Whisper STT      │
-   │  - RLS         │    │  - Hook detection   │
-   │  - Storage     │    │  - Sentiment NLP    │
-   │  - Realtime    │    │  - Public scraping  │
-   └────────────────┘    └──────────┬──────────┘
-                                    │
-                          ┌─────────▼──────────┐
-                          │  REDIS             │
-                          │  (Upstash/Railway) │
-                          │  - Job queuing     │
-                          │  - Rate limiting   │
-                          │  - Response cache  │
-                          └────────────────────┘
+│  │  Terms       │  │  Generate    │  │  /api/generate         │  │
+│  │  Pricing     │  │  Competitors │  │  /api/connect/[plat]   │  │
+│  │              │  │  Discover    │  │  /api/competitors      │  │
+│  │              │  │  Track       │  │  /api/competitors/[id]/│  │
+│  │              │  │  Settings    │  │    ├── compare         │  │
+│  │              │  │              │  │    └── refresh         │  │
+│  │              │  │              │  │  /api/accounts         │  │
+│  │              │  │              │  │  /api/billing          │  │
+│  │              │  │              │  │  /api/webhooks/stripe  │  │
+│  └──────────────┘  └──────────────┘  └────────────────────────┘  │
+└────────────────┬────────────────┬───────────────────────────────┘
+                 │                │
+   ┌─────────────▼──┐    ┌────────▼─────────────-─┐
+   │  SUPABASE      │    │  PYTHON FASTAPI        │
+   │  (PostgreSQL)  │    │  (Railway)             │
+   │  - Auth        │    │  - Whisper STT         │
+   │  - RLS         │    │  - Hook detection      │
+   │  - Storage     │    │  - Sentiment NLP       │
+   │                │    │  - Profile scraping    │
+   └────────────────┘    │    (httpx + JSON/HTML) │
+                         └────────────┬───────────┘
+                                      │
+                            ┌─────────▼──────────┐
+                            │  REDIS             │
+                            │  (Upstash/Railway) │
+                            │  - Job queuing     │
+                            │  - Rate limiting   │
+                            │  - Response cache  │
+                            └────────────────────┘
 ```
 
 ## Tech Stack
@@ -42,17 +48,20 @@
 | Layer | Technology | Why |
 |-------|-----------|-----|
 | Framework | Next.js 15 (App Router) | SSR, API routes, edge middleware |
-| Language | TypeScript | Type safety across the entire codebase |
+| Language | TypeScript (strict) | Type safety across the entire codebase |
 | UI | Tailwind CSS + shadcn/ui | Production-quality components, dark mode |
 | Auth | Supabase Auth | OAuth + email, JWT, session management |
 | Database | Supabase PostgreSQL | RLS, triggers, full-text search |
 | AI/LLM | Anthropic Claude API | Content analysis, insight generation |
-| Transcription | OpenAI Whisper | Audio/video speech-to-text |
+| Transcription | OpenAI Whisper API | Audio/video speech-to-text |
 | NLP | Python: VADER, KeyBERT | Sentiment, keyword extraction |
-| Web scraping | Playwright | Headless browser for public profile data |
+| Web scraping | httpx + BeautifulSoup | HTTP-based public profile scraping (no browser) |
 | Job queue | BullMQ + Redis | Async analysis jobs |
-| State | Zustand + React Query | Client state + server state |
-| Animations | Framer Motion | Smooth UI transitions |
+| Payments | Stripe | Checkout, subscriptions, webhooks |
+| Client state | Zustand + React Query | Client state + server state |
+| Validation | Zod | Request body validation on all API routes |
+| Charts | Recharts | Dark-themed data visualization |
+| Animations | Framer Motion | Smooth UI transitions (used sparingly) |
 
 ## Folder Structure
 
@@ -64,41 +73,63 @@ SocialOptimizer/
 │   │   ├── layout.tsx            # Auth guard + sidebar layout
 │   │   ├── dashboard/page.tsx    # Main dashboard
 │   │   ├── analyze/page.tsx      # Analysis runner + report viewer
-│   │   ├── competitors/page.tsx  # Competitor benchmarking
+│   │   ├── competitors/page.tsx  # Competitor benchmarking + refresh
+│   │   ├── discover/page.tsx     # Outliers, trends, saturation
 │   │   ├── generate/page.tsx     # AI content generator
+│   │   ├── track/page.tsx        # Experiments, win library
 │   │   └── settings/page.tsx     # Account + billing settings
+│   ├── (marketing)/              # Public marketing pages
+│   │   ├── analyze/page.tsx      # Marketing landing for analysis
+│   │   └── settings/page.tsx     # Public pricing/plan info
 │   ├── api/                      # API routes
-│   │   ├── accounts/route.ts     # List connected accounts
+│   │   ├── accounts/route.ts     # List connected accounts + usage
 │   │   ├── analyze/route.ts      # Start analysis job (POST)
 │   │   │   └── status/[jobId]/   # Poll job status (GET)
+│   │   ├── billing/              # Stripe checkout session creation
+│   │   │   └── checkout/route.ts
 │   │   ├── connect/[platform]/   # OAuth initiation
 │   │   │   └── callback/         # OAuth callback handler
-│   │   ├── competitors/route.ts  # Add/list competitors
+│   │   ├── competitors/route.ts  # Add/list competitors (GET, POST)
+│   │   │   └── [id]/
+│   │   │       ├── compare/      # Gap analysis (GET, POST)
+│   │   │       └── refresh/      # Re-scrape profile data (POST)
 │   │   ├── generate/route.ts     # Content generation
-│   │   └── reports/route.ts      # Analysis reports
+│   │   ├── reports/route.ts      # Analysis reports
+│   │   └── webhooks/
+│   │       └── stripe/route.ts   # Stripe webhook handler
+│   ├── terms/page.tsx            # Terms of service
 │   ├── layout.tsx                # Root layout with providers
 │   ├── page.tsx                  # Marketing landing page
 │   └── globals.css
 ├── components/
 │   ├── dashboard/                # Dashboard-specific components
 │   │   ├── AnalysisReport.tsx    # Full report viewer (tabs)
+│   │   ├── AnalysisUsageBadge.tsx # Monthly usage indicator
 │   │   ├── GrowthScoreCard.tsx   # Circular growth score
 │   │   ├── ImprovementRoadmap.tsx
 │   │   ├── MetricsGrid.tsx
 │   │   ├── PlatformConnect.tsx   # OAuth connect cards
 │   │   ├── QuickActions.tsx
-│   │   └── RecentReports.tsx
+│   │   ├── RecentReports.tsx
+│   │   └── UpgradeGate.tsx       # Feature lock for plan-gated features
+│   ├── landing/                  # Marketing page components
+│   │   └── GradualBlur.tsx
 │   ├── layout/                   # Sidebar, Header
-│   ├── ui/                       # shadcn/ui primitives
+│   ├── ui/                       # shadcn/ui primitives + StarBorder
 │   └── providers/                # QueryProvider, ToastProvider
+├── hooks/
+│   └── use-feature-access.ts     # Client-side plan feature gate
 ├── lib/
-│   ├── ai/claude.ts              # Anthropic Claude API calls
+│   ├── ai/claude.ts              # All Anthropic Claude API calls
 │   ├── analysis/engine.ts        # Core analysis orchestrator
+│   ├── data/landing.ts           # Landing page content + pricing tiers
+│   ├── plans/feature-gate.ts     # Server-side plan feature access matrix
 │   ├── platforms/                # Platform-specific API adapters
 │   │   ├── tiktok.ts
 │   │   ├── instagram.ts
 │   │   ├── youtube.ts
 │   │   └── index.ts              # OAuth URL factory
+│   ├── stripe.ts                 # Stripe client, plan config, price mapping
 │   ├── supabase/                 # Browser/server/service clients
 │   └── utils.ts
 ├── python-service/               # FastAPI AI microservice
@@ -107,7 +138,7 @@ SocialOptimizer/
 │   │   ├── content.py            # Hook, CTA, keyword analysis
 │   │   └── sentiment.py          # VADER sentiment analysis
 │   ├── scrapers/
-│   │   └── public_scraper.py     # Playwright public profile scraper
+│   │   └── public_scraper.py     # httpx-based public profile scraper
 │   ├── services/
 │   │   └── transcription.py      # Whisper audio transcription
 │   ├── models/analysis.py        # Pydantic request/response models
@@ -115,10 +146,10 @@ SocialOptimizer/
 │   └── Dockerfile
 ├── database/
 │   ├── schema.sql                # Complete PostgreSQL schema
+│   ├── migrations/               # Incremental schema changes
 │   └── seed.sql                  # Niche benchmark data
 ├── types/index.ts                # Shared TypeScript types
 ├── middleware.ts                 # Auth middleware (route protection)
-├── docker-compose.yml
 ├── next.config.ts
 ├── tailwind.config.ts
 └── .env.example
@@ -133,7 +164,8 @@ User triggers analysis
 POST /api/analyze
         │
         ├── Validate auth & account ownership
-        ├── Check usage limits (free plan gate)
+        ├── Check usage limits (analyses_used < analyses_limit)
+        ├── Increment analyses_used
         ├── Create analysis_job record (status: pending)
         └── Return job_id immediately (202 Accepted)
                 │
@@ -145,9 +177,9 @@ POST /api/analyze
                 │
                 ▼
         Call Python service /analyze/posts
-        ├── Transcribe audio (Whisper)
+        ├── Transcribe audio (Whisper API)
         ├── Analyze hooks & CTAs
-        └── Run sentiment analysis
+        └── Run sentiment analysis (VADER)
                 │
                 ▼
         Claude API — analyzeNicheAndThemes()
@@ -176,25 +208,47 @@ POST /api/analyze
         Update job status → completed
 ```
 
+## Competitor Scraping
+
+The scraper uses **httpx** (HTTP requests) with JSON/HTML parsing — no headless browser required.
+
+| Platform | Method | Data Source |
+|----------|--------|-------------|
+| TikTok | httpx GET | `__UNIVERSAL_DATA_FOR_REHYDRATION__` embedded JSON (3 fallback strategies: universal data → SIGI_STATE → meta tags) |
+| YouTube | httpx GET | `ytInitialData` embedded JSON (handles both `c4TabbedHeaderRenderer` and `pageHeaderRenderer` formats). GDPR consent cookies bypass the consent wall. |
+| Instagram | httpx GET | Meta tags (`og:description`, page title). Limited — Instagram blocks non-authenticated requests. |
+| Facebook | — | Not implemented (returns empty profile) |
+
+**Competitor lifecycle:**
+1. `POST /api/competitors` — adds competitor, scrapes profile via Python service, upserts to DB
+2. `POST /api/competitors/[id]/refresh` — re-scrapes profile data, updates DB row, returns fresh data to UI
+3. `POST /api/competitors/[id]/compare` — computes gap analysis against user's latest report
+
 ## API Reference
 
 ### Authentication
 All dashboard API routes require a valid Supabase session cookie.
-Internal routes (Python service) use a shared HMAC secret via `X-Service-Secret` header.
+Internal routes (Python service) use a shared secret via `X-Service-Secret` header.
+Stripe webhooks are verified via `stripe.webhooks.constructEvent()` with `STRIPE_WEBHOOK_SECRET`.
 
 ### Key Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/api/accounts` | List connected accounts |
+| GET | `/api/accounts` | List connected accounts + usage stats |
 | GET | `/api/connect/[platform]` | Initiate OAuth flow |
 | GET | `/api/connect/[platform]/callback` | OAuth callback |
-| POST | `/api/analyze` | Start analysis job |
+| POST | `/api/analyze` | Start analysis job (returns 202 + job_id) |
 | GET | `/api/analyze/status/[jobId]` | Poll job progress |
 | GET | `/api/reports?id=` | Get specific report |
 | POST | `/api/generate` | Generate content (hooks, captions, etc.) |
-| POST | `/api/competitors` | Add competitor |
+| POST | `/api/competitors` | Add competitor (scrapes profile) |
 | GET | `/api/competitors` | List competitors |
+| POST | `/api/competitors/[id]/refresh` | Re-scrape competitor profile data |
+| POST | `/api/competitors/[id]/compare` | Run gap analysis |
+| GET | `/api/competitors/[id]/compare` | Get saved comparison |
+| POST | `/api/billing/checkout` | Create Stripe checkout session |
+| POST | `/api/webhooks/stripe` | Stripe webhook handler |
 
 ## Database Design Decisions
 
@@ -203,21 +257,30 @@ Internal routes (Python service) use a shared HMAC secret via `X-Service-Secret`
 3. **JSONB for flexible structures** — Insights, roadmap, hashtag analysis stored as JSONB to avoid schema churn as AI outputs evolve.
 4. **Engagement rate trigger** — Computed automatically on INSERT/UPDATE via DB trigger.
 5. **Token encryption** — OAuth tokens should be encrypted with `pgcrypto` before storage in production.
+6. **Usage tracking** — `analyses_used` and `analyses_limit` on the `users` table. Usage is preserved across plan upgrades (only the limit changes). Reset to 0 only on cancellation/downgrade to free.
 
 ## Deployment
 
 ### Frontend (Vercel)
 ```bash
 vercel deploy --prod
-# Set env vars in Vercel dashboard
+# Set env vars in Vercel dashboard:
+# ANTHROPIC_API_KEY, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY, PYTHON_SERVICE_URL, PYTHON_SERVICE_SECRET,
+# REDIS_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+# STRIPE_PRICE_ID_STARTER, STRIPE_PRICE_ID_PRO, STRIPE_PRICE_ID_AGENCY
 ```
 
 ### Python Service (Railway)
 ```bash
-railway login
-railway link
-railway up --service python-service
-# Set env vars in Railway dashboard
+# Connect your GitHub repo in Railway dashboard
+# Set Root Directory: python-service
+# Build Command: pip install -r requirements.txt
+# Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+#
+# Set env vars in Railway dashboard:
+# PYTHON_SERVICE_SECRET (must match Next.js app)
+# PORT is set automatically by Railway
 ```
 
 ### Database (Supabase)
@@ -225,6 +288,7 @@ railway up --service python-service
 # Run schema
 supabase db push
 # Or paste schema.sql into Supabase SQL editor
+# Then run migrations in order from database/migrations/
 ```
 
 ### Redis (Upstash)
@@ -240,7 +304,7 @@ supabase db push
 | Platform API quotas | Token refresh, webhook-based data sync where available |
 | Transcription cost | Cache transcripts in `post_analyses.transcript` column |
 | Database load | Supabase connection pooling (pgBouncer) + read replicas |
-| Python service load | Horizontal scaling via Railway/Fly.io replicas |
+| Python service load | Horizontal scaling via Railway replicas |
 | Memory (ML models) | Lazy-load models on first request, keep warm |
 | Storage (media) | Supabase Storage for thumbnails, TTL cleanup job |
 
@@ -253,14 +317,24 @@ supabase db push
 5. **Rate limiting** — API routes enforce per-user limits via Redis counters
 6. **Input validation** — All API inputs validated with Zod schemas
 7. **CSP headers** — Configured in `next.config.ts`
+8. **Stripe webhook verification** — Raw body + signature verified before processing
+9. **No token logging** — OAuth tokens never appear in console.log or error messages
 
 ## Monetization Architecture
 
 | Plan | Analyses/mo | Platforms | Competitors | Content Gens |
 |------|------------|-----------|-------------|-------------|
-| Free | 3 | 1 | 0 | 20 |
-| Starter ($29) | 20 | 2 | 5 | unlimited |
-| Pro ($79) | unlimited | 4 | 20 | unlimited |
-| Agency ($199) | unlimited | 10 | 50 | unlimited |
+| Free | 1 | 1 | 0 | 5 |
+| Starter ($19) | 10 | 2 | 0 | 50 |
+| Pro ($49) | 20 | 4 | 3 | unlimited |
+| Agency ($199) | 50 | 10 | 50 | unlimited |
 
-Stripe webhooks update the `users.plan` and `users.analyses_limit` columns.
+Stripe webhooks handle plan changes:
+- `checkout.session.completed` — updates `users.plan` and `users.analyses_limit` (preserves `analyses_used`)
+- `customer.subscription.updated` — updates plan and limit if subscription is active
+- `customer.subscription.deleted` — downgrades to free, resets usage
+- `invoice.payment_failed` — logs failure for follow-up
+
+Feature access is enforced at two levels:
+- **Server-side**: `lib/plans/feature-gate.ts` defines the per-plan feature matrix
+- **Client-side**: `hooks/use-feature-access.ts` + `UpgradeGate.tsx` component locks gated features with upgrade prompts
