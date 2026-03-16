@@ -29,6 +29,7 @@ CREATE TABLE users (
   stripe_customer_id TEXT,
   analyses_used   INT NOT NULL DEFAULT 0,
   analyses_limit  INT NOT NULL DEFAULT 1,        -- Free: 1, Starter: 10, Pro: 20, Agency: 50 per month
+  brand_pillars   TEXT[] DEFAULT '{}',            -- up to 5 identity tags (e.g. ["fitness","nutrition"])
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const serviceClient = getSupabaseServiceClient();
     const { data: dbUser } = await serviceClient
       .from("users")
-      .select("id, plan")
+      .select("id, plan, brand_pillars")
       .eq("auth_id", user.id)
       .single();
 
@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
     // Determine plan access for auto-upgrade
     const access = getFeatureAccess(dbUser.plan as PlanType);
 
+    // Build brand pillar context for Claude prompts
+    const brandPillars: string[] = dbUser.brand_pillars ?? [];
+
     // Get user context from latest report if account_id provided
-    let userContext: { niche: string; top_themes: string[]; avg_engagement: number } | undefined;
+    let userContext: { niche: string; top_themes: string[]; avg_engagement: number; brand_pillars?: string[] } | undefined;
 
     if (parsed.data.account_id) {
       const { data: latestReport } = await serviceClient
@@ -65,8 +68,19 @@ export async function POST(req: NextRequest) {
           niche: latestReport.detected_niche ?? parsed.data.niche,
           top_themes: themes.slice(0, 5).map((t: any) => t.theme),
           avg_engagement: latestReport.avg_engagement_rate ?? 0,
+          brand_pillars: brandPillars.length > 0 ? brandPillars : undefined,
         };
       }
+    }
+
+    // If no report-based context but pillars exist, create minimal context
+    if (!userContext && brandPillars.length > 0) {
+      userContext = {
+        niche: parsed.data.niche,
+        top_themes: brandPillars,
+        avg_engagement: 0,
+        brand_pillars: brandPillars,
+      };
     }
 
     // Generate content — dispatch by type, auto-upgrade to enhanced when plan allows
@@ -154,6 +168,7 @@ export async function POST(req: NextRequest) {
           topic: parsed.data.topic,
           tone: parsed.data.tone,
           target_audience: parsed.data.target_audience,
+          brand_pillars: brandPillars.length > 0 ? brandPillars : undefined,
         },
         output,
       })

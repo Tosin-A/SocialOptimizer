@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X } from "lucide-react";
 import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -115,6 +115,10 @@ function SettingsContent() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [brandPillars, setBrandPillars] = useState<string[]>([]);
+  const [pillarInput, setPillarInput] = useState("");
+  const [savingPillars, setSavingPillars] = useState(false);
+  const [pillarsLoaded, setPillarsLoaded] = useState(false);
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
   const searchParams = useSearchParams();
@@ -160,6 +164,14 @@ function SettingsContent() {
       }
 
       const currentPlan = await fetchPlanData();
+
+      // Fetch brand pillars
+      try {
+        const pillarsRes = await fetch("/api/brand-pillars");
+        const pillarsData = await pillarsRes.json();
+        if (pillarsData.data) setBrandPillars(pillarsData.data);
+      } catch {}
+      setPillarsLoaded(true);
 
       // Handle return from Stripe checkout — poll until webhook updates the plan
       const upgradedTo = searchParams.get("upgraded");
@@ -297,6 +309,98 @@ function SettingsContent() {
             Save changes
           </Button>
         </form>
+      </div>
+
+      {/* Brand Profile */}
+      <div className="glass rounded-2xl p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
+          <Sparkles className="w-4 h-4" /> Brand Profile
+        </h2>
+        <p className="text-xs text-muted-foreground">
+          These pillars define your content identity and feed into content generation.
+        </p>
+
+        {pillarsLoaded && brandPillars.length === 0 && !pillarInput && (
+          <p className="text-sm text-muted-foreground/60">
+            Run your first analysis to auto-generate brand pillars, or add them manually.
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {brandPillars.map((pillar, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1.5 bg-brand-600/20 text-brand-300 px-3 py-1.5 rounded-full text-sm"
+            >
+              {pillar}
+              <button
+                onClick={() => setBrandPillars((prev) => prev.filter((_, idx) => idx !== i))}
+                className="hover:text-white transition-colors"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          ))}
+        </div>
+
+        {brandPillars.length < 5 && (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add a pillar (e.g. fitness, nutrition)"
+              value={pillarInput}
+              onChange={(e) => setPillarInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && pillarInput.trim().length >= 2) {
+                  e.preventDefault();
+                  setBrandPillars((prev) => [...prev, pillarInput.trim()]);
+                  setPillarInput("");
+                }
+              }}
+              className="max-w-xs"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={pillarInput.trim().length < 2 || brandPillars.length >= 5}
+              onClick={() => {
+                setBrandPillars((prev) => [...prev, pillarInput.trim()]);
+                setPillarInput("");
+              }}
+            >
+              Add
+            </Button>
+          </div>
+        )}
+
+        {brandPillars.length > 0 && (
+          <Button
+            size="sm"
+            disabled={savingPillars}
+            className="gap-2"
+            onClick={async () => {
+              setSavingPillars(true);
+              try {
+                const res = await fetch("/api/brand-pillars", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ pillars: brandPillars }),
+                });
+                if (!res.ok) {
+                  const data = await res.json();
+                  throw new Error(data.error ?? "Failed to save");
+                }
+                toast({ title: "Brand pillars saved" });
+              } catch (err: any) {
+                toast({ title: "Couldn't save pillars", description: err.message, variant: "destructive" });
+              } finally {
+                setSavingPillars(false);
+              }
+            }}
+          >
+            {savingPillars && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            Save pillars
+          </Button>
+        )}
       </div>
 
       {/* Plan & Usage */}

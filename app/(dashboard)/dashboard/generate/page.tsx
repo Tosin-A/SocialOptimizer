@@ -85,10 +85,11 @@ export default function GeneratePage() {
   const [enhancedLoading, setEnhancedLoading] = useState(false);
   const [accounts, setAccounts] = useState<Array<{ id: string; platform: string; username: string }>>([]);
   const [selectedAccount, setSelectedAccount] = useState("");
+  const [brandPillars, setBrandPillars] = useState<string[]>([]);
 
   const { toast } = useToast();
 
-  // Fetch accounts on mount
+  // Fetch accounts and brand pillars on mount
   useEffect(() => {
     fetch("/api/accounts")
       .then((r) => r.json())
@@ -97,6 +98,16 @@ export default function GeneratePage() {
         setAccounts(accts);
         if (accts[0]) setSelectedAccount(accts[0].id);
       });
+
+    fetch("/api/brand-pillars")
+      .then((r) => r.json())
+      .then((d) => {
+        const pillars = d.data ?? [];
+        setBrandPillars(pillars);
+        // Auto-fill niche with first pillar if niche is empty
+        if (pillars.length > 0) setNiche((prev) => prev || pillars[0]);
+      })
+      .catch(() => {});
   }, []);
 
   // Auto-fill niche from latest analysis report when account changes
@@ -245,6 +256,24 @@ export default function GeneratePage() {
 
         <div className="space-y-2">
           <Label>Your niche</Label>
+          {brandPillars.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-1">
+              {brandPillars.map((pillar) => (
+                <button
+                  key={pillar}
+                  type="button"
+                  onClick={() => setNiche(pillar)}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                    niche === pillar
+                      ? "bg-brand-500/20 border-brand-500/40 text-brand-300"
+                      : "bg-white/5 border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20"
+                  }`}
+                >
+                  {pillar}
+                </button>
+              ))}
+            </div>
+          )}
           <Input
             placeholder="e.g. personal finance, fitness for moms, travel vlogging"
             value={niche}

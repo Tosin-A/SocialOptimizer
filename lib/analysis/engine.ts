@@ -509,6 +509,33 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
 
     if (reportError) throw reportError;
 
+    // ── Step 9b: Auto-populate brand pillars if empty ──────────────────────────
+    try {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("brand_pillars")
+        .eq("id", account.user_id)
+        .single();
+
+      if (userData && (!userData.brand_pillars || userData.brand_pillars.length === 0)) {
+        const dominantThemes = nicheResult.themes
+          .filter((t: { is_dominant: boolean }) => t.is_dominant)
+          .slice(0, 4)
+          .map((t: { theme: string }) => t.theme);
+
+        const autoPillars = [nicheResult.niche, ...dominantThemes].slice(0, 5);
+
+        if (autoPillars.length > 0) {
+          await supabase
+            .from("users")
+            .update({ brand_pillars: autoPillars })
+            .eq("id", account.user_id);
+        }
+      }
+    } catch {
+      // Brand pillar auto-population is best-effort — never fail the analysis
+    }
+
     // ── Step 10: Mark job complete ─────────────────────────────────────────────
     await supabase
       .from("analysis_jobs")

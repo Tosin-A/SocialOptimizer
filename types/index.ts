@@ -22,6 +22,7 @@ export interface User {
   stripe_customer_id: string | null;
   analyses_used: number;
   analyses_limit: number;
+  brand_pillars: string[];
   created_at: string;
   updated_at: string;
 }

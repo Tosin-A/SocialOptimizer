@@ -707,10 +707,13 @@ Return JSON:
 
 export async function generateContent(
   request: GenerateRequest,
-  userContext?: { niche: string; top_themes: string[]; avg_engagement: number }
+  userContext?: { niche: string; top_themes: string[]; avg_engagement: number; brand_pillars?: string[] }
 ): Promise<GeneratedContentOutput> {
+  const pillarsStr = userContext?.brand_pillars?.length
+    ? `\nCreator's brand pillars: [${userContext.brand_pillars.join(", ")}]. Align generated content with these pillars.`
+    : "";
   const contextStr = userContext
-    ? `Account context: Niche=${userContext.niche}, Top themes=${userContext.top_themes.join(", ")}, Avg engagement=${(userContext.avg_engagement * 100).toFixed(2)}%`
+    ? `Account context: Niche=${userContext.niche}, Top themes=${userContext.top_themes.join(", ")}, Avg engagement=${(userContext.avg_engagement * 100).toFixed(2)}%${pillarsStr}`
     : "";
 
   const platformSpecifics: Record<string, string> = {
