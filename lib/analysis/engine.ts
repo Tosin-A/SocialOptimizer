@@ -20,6 +20,7 @@ interface EngineOptions {
 }
 
 const PYTHON_ANALYSIS_TIMEOUT_MS = 12_000;
+const CLAUDE_RETRY_DELAYS_MS = [800, 1800];
 
 // ─── Progress reporter ────────────────────────────────────────────────────────
 
@@ -33,6 +34,41 @@ async function updateJobProgress(
     .from("analysis_jobs")
     .update({ progress, current_step: step })
     .eq("id", jobId);
+}
+
+function isRetryableClaudeError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const maybeStatus = (error as Error & { status?: number }).status;
+  if (maybeStatus && [408, 429, 500, 502, 503, 504].includes(maybeStatus)) return true;
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("\"type\":\"api_error\"") ||
+    message.includes("internal server error") ||
+    message.includes("overloaded") ||
+    message.includes("rate limit")
+  );
+}
+
+async function retryClaudeCall<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= CLAUDE_RETRY_DELAYS_MS.length; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableClaudeError(error) || attempt === CLAUDE_RETRY_DELAYS_MS.length) {
+        throw error;
+      }
+
+      const waitMs = CLAUDE_RETRY_DELAYS_MS[attempt];
+      console.warn(`[analysis:${label}] transient Claude error, retrying in ${waitMs}ms`, error);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(`Unknown Claude error in ${label}`);
 }
 
 function estimateHookScore(caption: string | null): number {
@@ -274,23 +310,31 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     // ── Step 2: Niche & theme detection ──────────────────────────────────────
     await updateJobProgress(jobId, 15, "Detecting niche and content themes...");
 
-    const nicheResult = await analyzeNicheAndThemes(
-      posts.map((p) => ({
-        caption: p.caption,
-        hashtags: p.hashtags,
-        engagement_rate: p.engagement_rate,
-        content_type: p.content_type,
-      }))
+    const nicheResult = await retryClaudeCall(
+      () =>
+        analyzeNicheAndThemes(
+          posts.map((p) => ({
+            caption: p.caption,
+            hashtags: p.hashtags,
+            engagement_rate: p.engagement_rate,
+            content_type: p.content_type,
+          }))
+        ),
+      "analyzeNicheAndThemes"
     );
 
     // ── Step 3: Hashtag analysis ──────────────────────────────────────────────
     await updateJobProgress(jobId, 30, "Analyzing hashtag effectiveness...");
 
     const allHashtags = posts.flatMap((p) => p.hashtags);
-    const hashtagAnalysis = await analyzeHashtags(
-      allHashtags,
-      nicheResult.niche,
-      account.platform
+    const hashtagAnalysis = await retryClaudeCall(
+      () =>
+        analyzeHashtags(
+          allHashtags,
+          nicheResult.niche,
+          account.platform
+        ),
+      "analyzeHashtags"
     );
 
     // ── Step 4: Hook + CTA analysis (via Python service) ─────────────────────
@@ -452,39 +496,47 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     // ── Step 8: AI-generated insights ─────────────────────────────────────────
     await updateJobProgress(jobId, 75, "Generating strategic insights...");
 
-    const aiInsights = await generateInsightsAndRoadmap({
-      platform: account.platform,
-      niche: nicheResult.niche,
-      avg_engagement_rate: avgEngagementRate,
-      avg_hook_score: avgHookScore,
-      cta_usage_rate: ctaUsageRate,
-      posting_consistency: consistencyScore / 100,
-      hashtag_score: hashtagScore,
-      branding_score: brandingScore,
-      content_themes: nicheResult.themes,
-      top_performing_formats: topPerformingFormats.map(String),
-      best_days,
-      best_hours,
-      avg_posts_per_week,
-    });
+    const aiInsights = await retryClaudeCall(
+      () =>
+        generateInsightsAndRoadmap({
+          platform: account.platform,
+          niche: nicheResult.niche,
+          avg_engagement_rate: avgEngagementRate,
+          avg_hook_score: avgHookScore,
+          cta_usage_rate: ctaUsageRate,
+          posting_consistency: consistencyScore / 100,
+          hashtag_score: hashtagScore,
+          branding_score: brandingScore,
+          content_themes: nicheResult.themes,
+          top_performing_formats: topPerformingFormats.map(String),
+          best_days,
+          best_hours,
+          avg_posts_per_week,
+        }),
+      "generateInsightsAndRoadmap"
+    );
 
     // ── Generate ranked fix list ──────────────────────────────────────────────
-    const fixList = await generateFixList({
-      platform: account.platform,
-      niche: nicheResult.niche,
-      growth_score: growthScore,
-      hook_strength_score: hookStrengthScore,
-      cta_score: ctaScore,
-      hashtag_score: hashtagScore,
-      engagement_score: engagementScore,
-      consistency_score: consistencyScore,
-      branding_score: brandingScore,
-      avg_engagement_rate: avgEngagementRate,
-      avg_hook_score: avgHookScore,
-      cta_usage_rate: ctaUsageRate,
-      avg_posts_per_week,
-      platform_signal_weights: platformSignalWeights,
-    });
+    const fixList = await retryClaudeCall(
+      () =>
+        generateFixList({
+          platform: account.platform,
+          niche: nicheResult.niche,
+          growth_score: growthScore,
+          hook_strength_score: hookStrengthScore,
+          cta_score: ctaScore,
+          hashtag_score: hashtagScore,
+          engagement_score: engagementScore,
+          consistency_score: consistencyScore,
+          branding_score: brandingScore,
+          avg_engagement_rate: avgEngagementRate,
+          avg_hook_score: avgHookScore,
+          cta_usage_rate: ctaUsageRate,
+          avg_posts_per_week,
+          platform_signal_weights: platformSignalWeights,
+        }),
+      "generateFixList"
+    );
 
     // Hashtag breakdown
     const recommendedHashtags = hashtagAnalysis
