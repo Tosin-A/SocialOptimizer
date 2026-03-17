@@ -877,12 +877,16 @@ export async function coachChat(
     }))
   );
 
+  // Keep web search enabled while remaining compatible across Anthropic SDK type revisions.
+  const coachTools = [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }] as unknown as
+    Parameters<typeof client.messages.create>[0]["tools"];
+
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: COACH_SYSTEM_PROMPT,
     messages: apiMessages,
-    tools: [{ type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 3 }],
+    tools: coachTools,
   });
 
   // Extract text from response, which may include tool use blocks from web search
