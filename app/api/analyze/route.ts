@@ -40,6 +40,18 @@ export async function POST(req: NextRequest) {
 
     if (!dbUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    const FREE_PLAN_MAX_POSTS = 10;
+    const effectiveMaxPosts = dbUser.plan === "free" ? FREE_PLAN_MAX_POSTS : max_posts;
+
+    if (dbUser.plan === "free" && max_posts > FREE_PLAN_MAX_POSTS) {
+      return NextResponse.json(
+        {
+          error: `Free plan can analyze up to the last ${FREE_PLAN_MAX_POSTS} posts. Upgrade in Settings to analyze more posts.`,
+        },
+        { status: 403 }
+      );
+    }
+
     // Enforce usage limits (all plans have limits)
     if (dbUser.analyses_used >= dbUser.analyses_limit) {
       return NextResponse.json(
@@ -134,7 +146,7 @@ export async function POST(req: NextRequest) {
     await serviceClient.from("usage_events").insert({
       user_id: dbUser.id,
       event_type: "analysis_run",
-      metadata: { account_id, platform: account.platform, job_id: job.id },
+      metadata: { account_id, platform: account.platform, job_id: job.id, max_posts: effectiveMaxPosts },
     });
 
     // ── Run analysis after response ──
@@ -155,14 +167,14 @@ export async function POST(req: NextRequest) {
             .select("*")
             .eq("account_id", account_id)
             .order("posted_at", { ascending: false })
-            .limit(max_posts);
+            .limit(effectiveMaxPosts);
           dbPosts = data ?? [];
         } else {
           // OAuth accounts: refresh token and fetch from platform
           const freshAccount = await refreshTokenIfNeeded(account as any);
           let posts: any[] = [];
           try {
-            posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
+            posts = await fetchPostsForPlatform(freshAccount as any, effectiveMaxPosts);
             fetchedPostsCount = posts.length;
           } catch (fetchErr) {
             throw new Error(
@@ -188,7 +200,7 @@ export async function POST(req: NextRequest) {
             .select("*")
             .eq("account_id", account_id)
             .order("posted_at", { ascending: false })
-            .limit(max_posts);
+            .limit(effectiveMaxPosts);
           dbPosts = data ?? [];
         }
 

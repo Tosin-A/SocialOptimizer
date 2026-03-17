@@ -134,6 +134,14 @@ function AnalyzePageInner() {
   };
 
   const isRunning = job && ["pending", "processing"].includes(job.status);
+  const isFreePlan = (userPlan?.plan ?? "free") === "free";
+  const maxPostsAllowed = isFreePlan ? 10 : 100;
+
+  useEffect(() => {
+    if (maxPosts > maxPostsAllowed) {
+      setMaxPosts(maxPostsAllowed);
+    }
+  }, [maxPosts, maxPostsAllowed]);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -192,7 +200,7 @@ function AnalyzePageInner() {
           <input
             type="range"
             min={10}
-            max={100}
+            max={maxPostsAllowed}
             step={10}
             value={maxPosts}
             onChange={(e) => setMaxPosts(parseInt(e.target.value))}
@@ -201,8 +209,16 @@ function AnalyzePageInner() {
           />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
             <span>10 (faster)</span>
-            <span>100 (thorough)</span>
+            <span>{maxPostsAllowed} {isFreePlan ? "(free plan cap)" : "(thorough)"}</span>
           </div>
+          {isFreePlan && (
+            <div className="mt-3 rounded-lg border border-brand-500/20 bg-brand-500/5 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between gap-3">
+              <span>Free plan analyzes up to the last 10 posts. Upgrade to unlock deeper analysis depth.</span>
+              <Button asChild size="sm" variant="outline" className="h-7 px-2 text-xs border-brand-500/40">
+                <Link href="/dashboard/settings">Upgrade</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Job progress */}
@@ -229,6 +245,11 @@ function AnalyzePageInner() {
                 style={{ width: `${Math.min(100, job.progress ?? 0)}%` }}
               />
             </div>
+            {isRunning && (
+              <p className="text-xs text-muted-foreground">
+                We&apos;ll email you as soon as the analysis is complete, with direct links to your report and printable PDF view.
+              </p>
+            )}
           </div>
         )}
       </div>

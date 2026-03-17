@@ -26,9 +26,24 @@ interface AnalysisReadyOptions {
   reportId: string;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
   const scoreColor = opts.growthScore >= 70 ? "#22c55e" : opts.growthScore >= 45 ? "#f59e0b" : "#ef4444";
-  const reportUrl = `${APP_URL}/dashboard/analyze`;
+  const reportUrl = `${APP_URL}/dashboard/reports/${opts.reportId}`;
+  const printUrl = `${APP_URL}/reports/${opts.reportId}/print`;
+  const websiteUrl = `${APP_URL}/dashboard`;
+  const username = escapeHtml(opts.username);
+  const platform = escapeHtml(opts.platform.charAt(0).toUpperCase() + opts.platform.slice(1));
+  const niche = escapeHtml(opts.niche);
+  const topInsight = escapeHtml(opts.topInsight);
 
   const html = `<!DOCTYPE html>
 <html>
@@ -43,10 +58,10 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
 
     <div style="padding:28px 32px;">
       <p style="font-size:15px;font-weight:600;color:#0f172a;margin:0 0 4px;">
-        @${opts.username} on ${opts.platform.charAt(0).toUpperCase() + opts.platform.slice(1)}
+        @${username} on ${platform}
       </p>
       <p style="font-size:13px;color:#64748b;margin:0 0 24px;">
-        Niche detected: <strong>${opts.niche}</strong>
+        Niche detected: <strong>${niche}</strong>
       </p>
 
       <div style="background:#f8fafc;border-radius:10px;padding:20px;text-align:center;margin-bottom:24px;">
@@ -57,12 +72,21 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
 
       <div style="background:#eff6ff;border-left:3px solid #4f46e5;border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:24px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#4f46e5;font-weight:600;margin-bottom:4px;">Top opportunity</div>
-        <div style="font-size:13px;color:#1e40af;">${opts.topInsight}</div>
+        <div style="font-size:13px;color:#1e40af;">${topInsight}</div>
       </div>
 
-      <a href="${reportUrl}" style="display:block;background:#4f46e5;color:#fff;text-decoration:none;text-align:center;padding:13px 24px;border-radius:8px;font-weight:600;font-size:14px;">
-        View full report →
+      <a href="${reportUrl}" style="display:block;background:#4f46e5;color:#fff;text-decoration:none;text-align:center;padding:13px 24px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:10px;">
+        View full report
       </a>
+      <a href="${printUrl}" style="display:block;background:#0f172a;color:#fff;text-decoration:none;text-align:center;padding:13px 24px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:10px;">
+        Download PDF report
+      </a>
+      <a href="${websiteUrl}" style="display:block;border:1px solid #cbd5e1;color:#334155;text-decoration:none;text-align:center;padding:12px 24px;border-radius:8px;font-weight:600;font-size:13px;">
+        Open SocialOptimizer
+      </a>
+      <p style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;">
+        PDF opens in a print-friendly view. Use Save as PDF in your browser.
+      </p>
     </div>
 
     <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
