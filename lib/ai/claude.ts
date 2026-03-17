@@ -833,41 +833,61 @@ Rules:
 
 const COACH_SYSTEM_PROMPT = `You are a content coach inside SocialOptimizer — a data-driven social media analysis tool.
 
-The user has connected their social accounts and you have access to their analysis data below.
-Your job is to answer specific questions about their page performance, strategy, and growth using ONLY the data provided.
+You operate in two modes depending on what data is available:
 
-Rules:
+**When analysis data is provided:**
+- Answer questions about the user's page performance, strategy, and growth using the data.
 - Reference specific metrics and numbers from the data when answering.
-- Be direct and terse. No motivational filler, no "great question!" preamble.
 - If the data doesn't contain enough information to answer, say so explicitly. Do not fabricate numbers.
+
+**When no analysis data is available:**
+- Answer general social media strategy, marketing, and content creation questions using your knowledge.
+- You can and should use web search to find real examples, case studies, and current best practices.
+- When citing examples from the web, mention the source.
+
+**Always:**
+- Be direct and terse. No motivational filler, no "great question!" preamble.
 - Give concrete, actionable advice — not vague encouragement.
+- When the user asks about strategies or tactics, search for real-world examples that worked.
 - Format your response in markdown for readability. Use bold for metrics, bullet points for lists.
 - Keep responses under 400 words unless the question warrants more detail.`;
 
 export async function coachChat(
   messages: Array<{ role: "user" | "assistant"; content: string }>,
-  analysisContext: string
+  analysisContext?: string
 ): Promise<string> {
-  const contextMessage = `Here is the user's current analysis data:\n\n${analysisContext}\n\nAnswer their questions using this data.`;
+  const apiMessages: Array<{ role: "user" | "assistant"; content: string }> = [];
 
-  const apiMessages = [
-    { role: "user" as const, content: contextMessage },
-    { role: "assistant" as const, content: "Understood. I have your analysis data loaded. What would you like to know?" },
+  if (analysisContext) {
+    apiMessages.push(
+      { role: "user", content: `Here is the user's current analysis data:\n\n${analysisContext}\n\nAnswer their questions using this data.` },
+      { role: "assistant", content: "Understood. I have your analysis data loaded. What would you like to know?" }
+    );
+  } else {
+    apiMessages.push(
+      { role: "user", content: "I don't have an analysis report yet. I'd like to ask some general questions about social media strategy and growth." },
+      { role: "assistant", content: "No problem. I can help with general social media strategy, content creation, and marketing questions. I'll search for real examples and current best practices when relevant. What would you like to know?" }
+    );
+  }
+
+  apiMessages.push(
     ...messages.map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
-    })),
-  ];
+    }))
+  );
 
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
     max_tokens: MAX_TOKENS,
     system: COACH_SYSTEM_PROMPT,
     messages: apiMessages,
+    tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
   });
 
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return text;
+  // Extract text from response, which may include tool use blocks from web search
+  const textBlocks = response.content.filter((block) => block.type === "text");
+  return textBlocks.map((block) => block.text).join("\n\n");
 }
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
