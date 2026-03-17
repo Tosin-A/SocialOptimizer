@@ -3,6 +3,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import {
   analyzeNicheAndThemes,
   analyzeHashtags,
@@ -15,6 +16,7 @@ import type {
   Platform,
   ConnectedAccount,
   PlatformSignalWeight,
+  HashtagAnalysis,
   Insight,
   RoadmapAction,
   FixListItem,
@@ -83,6 +85,10 @@ async function retryClaudeCall<T>(fn: () => Promise<T>, label: string): Promise<
 
 function shouldUseFastFallback(engineStartedAtMs: number): boolean {
   return Date.now() - engineStartedAtMs > FAST_FALLBACK_TRIGGER_MS;
+}
+
+function ensureArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
 }
 
 function buildFallbackInsightsAndRoadmap(input: {
@@ -469,7 +475,8 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
   const { jobId, account, pythonServiceUrl } = options;
   const engineStartedAtMs = Date.now();
   // Filter out posts with invalid dates to prevent "Invalid time value" errors
-  const posts = options.posts.filter((p) => !isNaN(new Date(p.posted_at).getTime()));
+  const rawPosts = ensureArray<Post>(options.posts);
+  const posts = rawPosts.filter((p) => !isNaN(new Date(p.posted_at).getTime()));
   const supabase = getSupabaseServiceClient();
 
   try {
@@ -487,19 +494,22 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         analyzeNicheAndThemes(
           posts.map((p) => ({
             caption: p.caption,
-            hashtags: p.hashtags,
+            hashtags: ensureArray<string>(p.hashtags),
             engagement_rate: p.engagement_rate,
             content_type: p.content_type,
           }))
         ),
       "analyzeNicheAndThemes"
     );
+    const nicheThemes = ensureArray<{ theme: string; frequency: number; avg_engagement_rate: number; is_dominant: boolean }>(
+      nicheResult.themes
+    );
 
     // ── Step 3: Hashtag analysis ──────────────────────────────────────────────
     await updateJobProgress(jobId, 30, "Analyzing hashtag effectiveness...");
 
-    const allHashtags = posts.flatMap((p) => p.hashtags);
-    const hashtagAnalysis = await retryClaudeCall(
+    const allHashtags = posts.flatMap((p) => ensureArray<string>(p.hashtags));
+    const hashtagAnalysisRaw = await retryClaudeCall(
       () =>
         analyzeHashtags(
           allHashtags,
@@ -508,6 +518,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         ),
       "analyzeHashtags"
     );
+    const hashtagAnalysis = ensureArray<HashtagAnalysis>(hashtagAnalysisRaw);
 
     // ── Step 4: Hook + CTA analysis (via Python service) ─────────────────────
     await updateJobProgress(jobId, 45, "Analyzing content hooks and CTAs...");
@@ -555,10 +566,19 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         }
 
         const pyData = await pyResponse.json();
-        hookScores = pyData.hook_scores ?? [];
-        ctaDetected = pyData.cta_count ?? 0;
-        sentimentScores = pyData.sentiment_scores ?? [];
-        postAnalyses = pyData.post_analyses ?? [];
+        hookScores = ensureArray<number>(pyData.hook_scores).filter((n) => Number.isFinite(n));
+        ctaDetected = Number.isFinite(pyData.cta_count) ? Number(pyData.cta_count) : 0;
+        sentimentScores = ensureArray<number>(pyData.sentiment_scores).filter((n) => Number.isFinite(n));
+        postAnalyses = ensureArray<{
+          post_id: string;
+          transcript: string;
+          hook_score: number;
+          hook_text: string;
+          hook_type: string;
+          cta_detected: boolean;
+          sentiment_score: number;
+          keywords: string[];
+        }>(pyData.post_analyses);
       } finally {
         clearTimeout(timeout);
       }
@@ -697,7 +717,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
               posting_consistency: consistencyScore / 100,
               hashtag_score: hashtagScore,
               branding_score: brandingScore,
-              content_themes: nicheResult.themes,
+              content_themes: nicheThemes,
               top_performing_formats: topPerformingFormats.map(String),
               best_days,
               best_hours,
@@ -772,7 +792,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         detected_niche: nicheResult.niche,
         niche_confidence: nicheResult.confidence,
         niche_keywords: nicheResult.keywords,
-        content_themes: nicheResult.themes,
+        content_themes: nicheThemes,
         hashtag_effectiveness: hashtagAnalysis,
         recommended_hashtags: recommendedHashtags,
         overused_hashtags: overused,
@@ -840,7 +860,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         .single();
 
       if (userData && (!userData.brand_pillars || userData.brand_pillars.length === 0)) {
-        const dominantThemes = nicheResult.themes
+        const dominantThemes = nicheThemes
           .filter((t: { is_dominant: boolean }) => t.is_dominant)
           .slice(0, 4)
           .map((t: { theme: string }) => t.theme);
@@ -872,6 +892,10 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
 
     // ── Send analysis-ready email (non-blocking, best-effort) ──────────────────
     try {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        throw new Error("Missing Supabase env for auth lookup");
+      }
+
       const { data: userData } = await supabase
         .from("users")
         .select("auth_id")
@@ -879,7 +903,6 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         .single();
 
       if (userData) {
-        const { createClient } = require("@supabase/supabase-js");
         const authClient = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -904,8 +927,12 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
           });
         }
       }
-    } catch {
+    } catch (emailError) {
       // Email failure must never fail the analysis job
+      console.error(
+        `Analysis ready email failed for job ${jobId}:`,
+        emailError instanceof Error ? emailError.message : emailError
+      );
     }
 
     return report!.id;

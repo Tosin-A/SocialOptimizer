@@ -250,6 +250,12 @@ function AnalyzePageInner() {
                 We&apos;ll email you as soon as the analysis is complete, with direct links to your report and printable PDF view.
               </p>
             )}
+            <p className="text-xs text-muted-foreground">
+              You can also view all generated reports anytime in{" "}
+              <Link href="/dashboard/reports" className="text-brand-400 hover:text-brand-300 underline-offset-2 hover:underline">
+                Reports
+              </Link>.
+            </p>
           </div>
         )}
       </div>

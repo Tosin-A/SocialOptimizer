@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   CheckCircle2, XCircle, Lightbulb, Map, Hash,
   ThumbsUp, AlertTriangle, BarChart2, TrendingUp, TrendingDown,
@@ -9,6 +9,7 @@ import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } fro
 import { cn } from "@/lib/utils";
 import RankedFixList from "./RankedFixList";
 import PlatformSignals from "./PlatformSignals";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const SCORE_ITEMS = [
   { key: "content_quality_score", label: "Content Quality" },
@@ -122,6 +123,10 @@ export default function AnalysisReport({ report, accountId }: Props) {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsFetched, setPostsFetched] = useState(false);
+  const [postSortField, setPostSortField] = useState<
+    "posted_at" | "engagement_rate" | "views" | "likes" | "comments" | "shares" | "saves"
+  >("engagement_rate");
+  const [postSortDirection, setPostSortDirection] = useState<"desc" | "asc">("desc");
 
   useEffect(() => {
     if (tab === "posts" && !postsFetched) {
@@ -132,6 +137,41 @@ export default function AnalysisReport({ report, accountId }: Props) {
         .finally(() => setPostsLoading(false));
     }
   }, [tab, report.id, postsFetched]);
+
+  const sortedPosts = useMemo(() => {
+    const sorted = [...posts];
+    sorted.sort((a, b) => {
+      const multiplier = postSortDirection === "desc" ? -1 : 1;
+
+      if (postSortField === "posted_at") {
+        const aValue = new Date(a.posted_at).getTime();
+        const bValue = new Date(b.posted_at).getTime();
+        return (aValue - bValue) * multiplier;
+      }
+
+      const getNumericValue = (post: PostRow): number => {
+        switch (postSortField) {
+          case "engagement_rate":
+            return post.engagement_rate ?? 0;
+          case "views":
+            return post.views ?? 0;
+          case "likes":
+            return post.likes ?? 0;
+          case "comments":
+            return post.comments ?? 0;
+          case "shares":
+            return post.shares ?? 0;
+          case "saves":
+            return post.saves ?? 0;
+          default:
+            return 0;
+        }
+      };
+
+      return (getNumericValue(a) - getNumericValue(b)) * multiplier;
+    });
+    return sorted;
+  }, [posts, postSortDirection, postSortField]);
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -288,7 +328,51 @@ export default function AnalysisReport({ report, accountId }: Props) {
       {tab === "posts" && (
         <div className="glass rounded-2xl p-4 sm:p-6 space-y-3">
           <h3 className="font-semibold text-sm mb-1">Post-level performance</h3>
-          <p className="text-xs text-muted-foreground mb-4">Sorted by engagement rate. Top performers are highlighted green, underperformers red.</p>
+          <p className="text-xs text-muted-foreground mb-4">Sort posts by key metrics. Top performers are highlighted green, underperformers red.</p>
+
+          {!postsLoading && posts.length > 0 && (
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between pb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Sort by</span>
+                <Select
+                  value={postSortField}
+                  onValueChange={(value) =>
+                    setPostSortField(
+                      value as "posted_at" | "engagement_rate" | "views" | "likes" | "comments" | "shares" | "saves"
+                    )
+                  }
+                >
+                  <SelectTrigger className="h-8 w-[180px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="engagement_rate">Engagement rate</SelectItem>
+                    <SelectItem value="posted_at">Date posted</SelectItem>
+                    <SelectItem value="views">Views</SelectItem>
+                    <SelectItem value="likes">Likes</SelectItem>
+                    <SelectItem value="comments">Comments</SelectItem>
+                    <SelectItem value="shares">Shares</SelectItem>
+                    <SelectItem value="saves">Saves</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Order</span>
+                <Select
+                  value={postSortDirection}
+                  onValueChange={(value) => setPostSortDirection(value as "desc" | "asc")}
+                >
+                  <SelectTrigger className="h-8 w-[130px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Highest first</SelectItem>
+                    <SelectItem value="asc">Lowest first</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
           {postsLoading && (
             <div className="flex items-center justify-center py-12">
@@ -302,7 +386,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
           {!postsLoading && posts.length > 0 && (
             <div className="space-y-2">
-              {posts.map((post) => {
+              {sortedPosts.map((post) => {
                 const engPct = ((post.engagement_rate ?? 0) * 100).toFixed(2);
                 const date = new Date(post.posted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
                 const caption = post.caption?.replace(/\n/g, " ").slice(0, 80) ?? "—";

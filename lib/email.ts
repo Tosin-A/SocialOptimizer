@@ -87,6 +87,9 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
       <p style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;">
         PDF opens in a print-friendly view. Use Save as PDF in your browser.
       </p>
+      <p style="font-size:12px;color:#64748b;margin:8px 0 0;text-align:center;">
+        You can also find all generated reports in your Reports tab: <a href="${APP_URL}/dashboard/reports" style="color:#4f46e5;text-decoration:none;">View all reports</a>.
+      </p>
     </div>
 
     <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
