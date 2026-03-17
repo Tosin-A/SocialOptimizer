@@ -105,7 +105,7 @@ function AnalyzePageInner() {
         poll().then((done) => {
           if (done) clearInterval(interval);
         });
-      }, 1000);
+      }, 3000);
       return () => clearInterval(interval);
     },
     [toast, fetchAccounts]

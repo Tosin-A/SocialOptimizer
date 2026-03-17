@@ -40,8 +40,9 @@ function getClientIp(req: NextRequest): string {
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  // Rate-limit all /api/ routes except Supabase auth callbacks
-  if (path.startsWith("/api/") && !path.startsWith("/api/auth/")) {
+  // Rate-limit all /api/ routes except auth callbacks and job status polls
+  const isJobPoll = path === "/api/analyze" && request.method === "GET";
+  if (path.startsWith("/api/") && !path.startsWith("/api/auth/") && !isJobPoll) {
     const ip = getClientIp(request);
     if (isRateLimited(ip)) {
       return new NextResponse(

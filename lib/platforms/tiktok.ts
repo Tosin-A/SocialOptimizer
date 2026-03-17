@@ -87,13 +87,18 @@ export async function fetchTikTokPosts(
     const videos: TikTokVideo[] = data.data?.videos ?? [];
 
     if (posts.length === 0 && videos.length === 0) {
-      console.error(
-        "TikTok video/list returned 0 videos.",
-        "cursor:", cursor,
-        "has_more:", data.data?.has_more,
-        "error:", JSON.stringify(data.error ?? null),
-        "full response keys:", Object.keys(data),
-        "data keys:", data.data ? Object.keys(data.data) : "no data field"
+      // Build a diagnostic snapshot to surface in the error message
+      const diag = {
+        error: data.error ?? null,
+        has_more: data.data?.has_more ?? null,
+        cursor: data.data?.cursor ?? null,
+        response_keys: Object.keys(data),
+        data_keys: data.data ? Object.keys(data.data) : null,
+      };
+      throw new Error(
+        `TikTok returned 0 videos. This usually means the access token was issued before production approval. ` +
+        `Disconnect and reconnect your TikTok account in Settings to get a fresh token. ` +
+        `Debug: ${JSON.stringify(diag)}`
       );
     }
 
