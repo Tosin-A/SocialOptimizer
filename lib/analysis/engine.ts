@@ -7,7 +7,6 @@ import {
   analyzeNicheAndThemes,
   analyzeHashtags,
   generateInsightsAndRoadmap,
-  analyzeHookStrength,
   generateFixList,
 } from "@/lib/ai/claude";
 import { sendAnalysisReady } from "@/lib/email";
@@ -20,7 +19,7 @@ interface EngineOptions {
   pythonServiceUrl: string;
 }
 
-const PYTHON_ANALYSIS_TIMEOUT_MS = 25_000;
+const PYTHON_ANALYSIS_TIMEOUT_MS = 12_000;
 
 // ─── Progress reporter ────────────────────────────────────────────────────────
 
@@ -34,6 +33,22 @@ async function updateJobProgress(
     .from("analysis_jobs")
     .update({ progress, current_step: step })
     .eq("id", jobId);
+}
+
+function estimateHookScore(caption: string | null): number {
+  const text = (caption ?? "").trim();
+  if (!text) return 0.35;
+
+  const opening = text.slice(0, 120).toLowerCase();
+  let score = 0.45;
+
+  if (opening.includes("?")) score += 0.15;
+  if (/\b(why|how|stop|don['’]t|mistake|secret|truth)\b/.test(opening)) score += 0.15;
+  if (/\d/.test(opening)) score += 0.08;
+  if (text.length > 80) score += 0.05;
+  if (text.length < 20) score -= 0.08;
+
+  return Math.max(0.2, Math.min(0.92, score));
 }
 
 // ─── Score calculators ────────────────────────────────────────────────────────
@@ -332,14 +347,15 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         clearTimeout(timeout);
       }
     } catch {
-      // Python service unavailable — use fallback Claude-based hook analysis
-      for (const post of posts.slice(0, 10)) {
-        const hookResult = await analyzeHookStrength(
-          "",
-          post.caption ?? ""
-        );
-        hookScores.push(hookResult.score);
+      // Python service unavailable — use deterministic local scoring to avoid
+      // long serverless runtimes and keep the job moving.
+      const sampledPosts = posts.slice(0, 30);
+      for (const post of sampledPosts) {
+        hookScores.push(estimateHookScore(post.caption ?? ""));
       }
+      ctaDetected = sampledPosts.filter((post) =>
+        /\b(comment|save|share|follow|dm|link in bio|subscribe|tag)\b/i.test(post.caption ?? "")
+      ).length;
     }
 
     const postsTranscribed = postAnalyses.filter((pa) => pa.transcript && pa.transcript.length > 0).length;

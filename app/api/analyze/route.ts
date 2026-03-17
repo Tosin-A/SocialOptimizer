@@ -275,6 +275,38 @@ export async function GET(req: NextRequest) {
 
   if (error || !job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
+  if (job.status === "pending" || job.status === "processing") {
+    const startedAt = job.started_at ?? job.created_at;
+    const ageMs = startedAt ? Date.now() - new Date(startedAt).getTime() : 0;
+    const DEAD_JOB_MS = 2 * 60 * 1000; // serverless tasks should finish within this window
+
+    if (ageMs > DEAD_JOB_MS) {
+      await serviceClient
+        .from("analysis_jobs")
+        .update({
+          status: "failed",
+          error_message:
+            "Analysis job exceeded server runtime budget. Please retry. If this keeps happening, reconnect account and ensure Python service is configured.",
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", job.id);
+
+      return NextResponse.json({
+        job_id: job.id,
+        status: "failed",
+        progress: job.progress,
+        current_step: job.current_step,
+        posts_fetched: job.posts_fetched,
+        posts_analyzed: job.posts_analyzed,
+        error_message:
+          "Analysis job exceeded server runtime budget. Please retry. If this keeps happening, reconnect account and ensure Python service is configured.",
+        report_id: null,
+        started_at: job.started_at,
+        completed_at: new Date().toISOString(),
+      });
+    }
+  }
+
   let report_id: string | null = null;
   if (job.status === "completed") {
     const { data: report } = await serviceClient
