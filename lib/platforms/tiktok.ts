@@ -11,7 +11,7 @@ interface TikTokVideo {
   id: string;
   title: string;
   video_description: string;
-  create_time: number;
+  create_time: number | string;
   cover_image_url: string;
   share_url: string;
   duration: number;
@@ -29,6 +29,56 @@ function extractHashtags(text: string, explicit: string[]): string[] {
   );
   const fromApi = explicit.map((t) => `#${t}`.toLowerCase());
   return [...new Set([...fromApi, ...fromText])];
+}
+
+function normalizeTikTokPostedAt(createTime: number | string | undefined): string {
+  if (createTime === undefined || createTime === null) {
+    return new Date().toISOString();
+  }
+
+  const raw = typeof createTime === "string" ? Number(createTime) : createTime;
+  if (!Number.isFinite(raw)) {
+    return new Date().toISOString();
+  }
+
+  // TikTok may return epoch seconds or epoch milliseconds.
+  const epochMs = raw > 1e12 ? raw : raw * 1000;
+  const date = new Date(epochMs);
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toISOString();
+  }
+
+  return date.toISOString();
+}
+
+function mapTikTokVideoToPost(video: TikTokVideo, accountId: string): Post {
+  const caption = `${video.title ?? ""}\n${video.video_description ?? ""}`.trim();
+  const hashtags = extractHashtags(caption, []);
+  const views = video.view_count ?? 0;
+  const likes = video.like_count ?? 0;
+  const comments = video.comment_count ?? 0;
+  const shares = video.share_count ?? 0;
+
+  return {
+    id: "",
+    account_id: accountId,
+    platform_post_id: video.id,
+    content_type: "video",
+    caption,
+    hashtags,
+    mentions: [],
+    media_url: video.share_url,
+    thumbnail_url: video.cover_image_url,
+    duration_seconds: video.duration,
+    likes,
+    comments,
+    shares,
+    saves: 0,
+    views,
+    reach: views,
+    engagement_rate: views > 0 ? (likes + comments + shares) / views : 0,
+    posted_at: normalizeTikTokPostedAt(video.create_time),
+  };
 }
 
 async function tikTokFetch(
@@ -95,35 +145,7 @@ export async function fetchTikTokPosts(
   hasMore = firstResponse.data?.has_more ?? false;
 
   for (const video of firstVideos) {
-    const caption = `${video.title}\n${video.video_description}`;
-    const hashtags = extractHashtags(caption, []);
-    const views = video.view_count ?? 0;
-    const likes = video.like_count ?? 0;
-    const comments = video.comment_count ?? 0;
-    const shares = video.share_count ?? 0;
-
-    posts.push({
-      id: "",
-      account_id: account.id,
-      platform_post_id: video.id,
-      content_type: "video",
-      caption,
-      hashtags,
-      mentions: [],
-      media_url: video.share_url,
-      thumbnail_url: video.cover_image_url,
-      duration_seconds: video.duration,
-      likes,
-      comments,
-      shares,
-      saves: 0,
-      views,
-      reach: views,
-      engagement_rate: views > 0 ? (likes + comments + shares) / views : 0,
-      posted_at: video.create_time
-        ? new Date(video.create_time * 1000).toISOString()
-        : new Date().toISOString(),
-    });
+    posts.push(mapTikTokVideoToPost(video, account.id));
   }
 
   // Fetch remaining pages
@@ -142,35 +164,7 @@ export async function fetchTikTokPosts(
     if (videos.length === 0) break;
 
     for (const video of videos) {
-      const caption = `${video.title}\n${video.video_description}`;
-      const hashtags = extractHashtags(caption, []);
-      const views = video.view_count ?? 0;
-      const likes = video.like_count ?? 0;
-      const comments = video.comment_count ?? 0;
-      const shares = video.share_count ?? 0;
-
-      posts.push({
-        id: "",
-        account_id: account.id,
-        platform_post_id: video.id,
-        content_type: "video",
-        caption,
-        hashtags,
-        mentions: [],
-        media_url: video.share_url,
-        thumbnail_url: video.cover_image_url,
-        duration_seconds: video.duration,
-        likes,
-        comments,
-        shares,
-        saves: 0,
-        views,
-        reach: views,
-        engagement_rate: views > 0 ? (likes + comments + shares) / views : 0,
-        posted_at: video.create_time
-          ? new Date(video.create_time * 1000).toISOString()
-          : new Date().toISOString(),
-      });
+      posts.push(mapTikTokVideoToPost(video, account.id));
     }
 
     cursor = data.data?.cursor ?? 0;

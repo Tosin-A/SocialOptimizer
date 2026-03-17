@@ -1,11 +1,15 @@
 // POST /api/analyze          — Kick off a new analysis job (returns 202 + job_id)
 // GET  /api/analyze?job_id=  — Poll job status
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { fetchPostsForPlatform } from "@/lib/platforms";
 import { refreshTokenIfNeeded } from "@/lib/platforms/token-refresh";
 import { runAnalysisEngine } from "@/lib/analysis/engine";
 import { z } from "zod";
+
+// Allow up to 60s on Vercel serverless (default is 10s on Hobby, 60s on Pro)
+export const maxDuration = 60;
 
 const AnalyzeSchema = z.object({
   account_id: z.string().uuid(),
@@ -122,13 +126,16 @@ export async function POST(req: NextRequest) {
       metadata: { account_id, platform: account.platform, job_id: job.id },
     });
 
-    // ── Run analysis asynchronously ──
-    // In production this would be enqueued to BullMQ/Redis.
-    // Here we use a non-blocking Promise and return the job_id immediately.
-    (async () => {
+    // ── Run analysis after response ──
+    // next/server `after()` keeps the serverless function alive after the
+    // response is sent, unlike fire-and-forget promises which get killed
+    // when Vercel terminates the function.
+    after(async () => {
       try {
         const isCsvImport = account.access_token === "csv_import" || account.platform_user_id?.startsWith("csv_");
         let dbPosts: any[] = [];
+        let fetchedPostsCount = 0;
+        let upsertErrorMessage: string | null = null;
 
         if (isCsvImport) {
           // CSV imports: posts already in DB, skip platform fetch
@@ -145,6 +152,7 @@ export async function POST(req: NextRequest) {
           let posts: any[] = [];
           try {
             posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
+            fetchedPostsCount = posts.length;
           } catch (fetchErr) {
             throw new Error(
               `Platform fetch failed for ${account.platform} @${account.username}: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`
@@ -152,10 +160,16 @@ export async function POST(req: NextRequest) {
           }
 
           if (posts.length > 0) {
-            await serviceClient.from("posts").upsert(
+            const { error: upsertError } = await serviceClient.from("posts").upsert(
               posts.map((p) => ({ ...p, account_id })),
               { onConflict: "account_id,platform_post_id", ignoreDuplicates: false }
             );
+            if (upsertError) {
+              upsertErrorMessage = upsertError.message;
+              throw new Error(
+                `Failed to persist fetched posts for ${account.platform} @${account.username}: ${upsertError.message}`
+              );
+            }
           }
 
           const { data } = await serviceClient
@@ -178,7 +192,8 @@ export async function POST(req: NextRequest) {
               ? "No posts found. Import more data via CSV."
               : `0 posts in DB after fetch. Platform: ${account.platform}, @${account.username}. ` +
                 `isCsvImport: ${isCsvImport}, access_token prefix: ${account.access_token?.slice(0, 10)}..., ` +
-                `platform_user_id: ${account.platform_user_id}. ` +
+                `platform_user_id: ${account.platform_user_id}, fetched_posts: ${fetchedPostsCount}, ` +
+                `upsert_error: ${upsertErrorMessage ?? "none"}. ` +
                 `Reconnect your account in Settings.`
           );
         }
@@ -201,7 +216,7 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", job.id);
       }
-    })();
+    });
 
     return NextResponse.json({ job_id: job.id }, { status: 202 });
   } catch (err) {
