@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
           throw new Error(
             isCsvImport
               ? "No posts found. Import more data via CSV."
-              : "No posts returned from the platform API. If your app is in sandbox/development mode, TikTok may restrict video access. Try importing a CSV export of your analytics instead, or submit your TikTok app for production review."
+              : `0 posts in database after platform fetch. Platform: ${account.platform}, account: @${account.username}. Reconnect your account in Settings to refresh your access token.`
           );
         }
 
