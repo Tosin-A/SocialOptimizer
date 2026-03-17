@@ -45,11 +45,18 @@ async function tikTokFetch(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`TikTok API error: ${err.error?.message ?? res.statusText}`);
+  const rawText = await res.text();
+  let parsed: any;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    throw new Error(`TikTok API returned non-JSON (status ${res.status}): ${rawText.slice(0, 200)}`);
   }
-  return res.json();
+
+  if (!res.ok) {
+    throw new Error(`TikTok API error (${res.status}): ${parsed.error?.message ?? parsed.error?.code ?? rawText.slice(0, 200)}`);
+  }
+  return parsed;
 }
 
 export async function fetchTikTokPosts(

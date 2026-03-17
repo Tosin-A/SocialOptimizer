@@ -142,7 +142,14 @@ export async function POST(req: NextRequest) {
         } else {
           // OAuth accounts: refresh token and fetch from platform
           const freshAccount = await refreshTokenIfNeeded(account as any);
-          const posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
+          let posts: any[] = [];
+          try {
+            posts = await fetchPostsForPlatform(freshAccount as any, max_posts);
+          } catch (fetchErr) {
+            throw new Error(
+              `Platform fetch failed for ${account.platform} @${account.username}: ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`
+            );
+          }
 
           if (posts.length > 0) {
             await serviceClient.from("posts").upsert(
