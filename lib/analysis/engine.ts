@@ -242,7 +242,9 @@ function calcWeightedGrowthScore(signalWeights: PlatformSignalWeight[]): number 
 // ─── Main engine ──────────────────────────────────────────────────────────────
 
 export async function runAnalysisEngine(options: EngineOptions): Promise<string> {
-  const { jobId, account, posts, pythonServiceUrl } = options;
+  const { jobId, account, pythonServiceUrl } = options;
+  // Filter out posts with invalid dates to prevent "Invalid time value" errors
+  const posts = options.posts.filter((p) => !isNaN(new Date(p.posted_at).getTime()));
   const supabase = getSupabaseServiceClient();
 
   try {
@@ -280,6 +282,16 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     let hookScores: number[] = [];
     let ctaDetected = 0;
     let sentimentScores: number[] = [];
+    let postAnalyses: Array<{
+      post_id: string;
+      transcript: string;
+      hook_score: number;
+      hook_text: string;
+      hook_type: string;
+      cta_detected: boolean;
+      sentiment_score: number;
+      keywords: string[];
+    }> = [];
 
     try {
       // Call Python service for transcript-based analysis
@@ -290,6 +302,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
           "X-Service-Secret": process.env.PYTHON_SERVICE_SECRET!,
         },
         body: JSON.stringify({
+          platform: account.platform,
           posts: posts.slice(0, 30).map((p) => ({
             id: p.id,
             caption: p.caption,
@@ -304,6 +317,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         hookScores = pyData.hook_scores ?? [];
         ctaDetected = pyData.cta_count ?? 0;
         sentimentScores = pyData.sentiment_scores ?? [];
+        postAnalyses = pyData.post_analyses ?? [];
       }
     } catch {
       // Python service unavailable — use fallback Claude-based hook analysis
@@ -315,6 +329,8 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         hookScores.push(hookResult.score);
       }
     }
+
+    const postsTranscribed = postAnalyses.filter((pa) => pa.transcript && pa.transcript.length > 0).length;
 
     // ── Step 5: Compute aggregate metrics ─────────────────────────────────────
     await updateJobProgress(jobId, 60, "Computing engagement metrics...");
@@ -503,11 +519,36 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         worst_posts: worstPosts,
         fix_list: fixList,
         platform_signal_weights: platformSignalWeights,
+        posts_transcribed: postsTranscribed,
       })
       .select()
       .single();
 
     if (reportError) throw reportError;
+
+    // ── Step 9a: Save per-post analysis data (transcripts, hooks, etc.) ────
+    if (postAnalyses.length > 0 && report) {
+      const postAnalysisRows = postAnalyses.map((pa) => ({
+        post_id: pa.post_id,
+        report_id: report.id,
+        hook_score: pa.hook_score,
+        hook_text: pa.hook_text,
+        hook_type: pa.hook_type,
+        cta_detected: pa.cta_detected,
+        sentiment_score: pa.sentiment_score,
+        keywords: pa.keywords,
+        transcript: pa.transcript || null,
+      }));
+
+      const { error: paError } = await supabase
+        .from("post_analyses")
+        .insert(postAnalysisRows);
+
+      if (paError) {
+        // Post-level analysis save is best-effort — don't fail the report
+        console.error("Failed to save post analyses:", paError.message);
+      }
+    }
 
     // ── Step 9b: Auto-populate brand pillars if empty ──────────────────────────
     try {

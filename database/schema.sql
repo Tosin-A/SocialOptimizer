@@ -194,6 +194,9 @@ CREATE TABLE analysis_reports (
   top_posts                 JSONB,              -- [{post_id, reason, metric}]
   worst_posts               JSONB,
 
+  -- Transcription metadata
+  posts_transcribed         INT DEFAULT 0,      -- count of posts with Whisper transcripts
+
   created_at                TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

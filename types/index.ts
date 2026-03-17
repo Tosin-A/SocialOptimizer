@@ -194,6 +194,9 @@ export interface AnalysisReport {
   fix_list: FixListItem[];
   platform_signal_weights: PlatformSignalWeight[];
 
+  // Transcription metadata
+  posts_transcribed: number;
+
   created_at: string;
 }
 

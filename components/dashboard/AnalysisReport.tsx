@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import {
   CheckCircle2, XCircle, Lightbulb, Map, Hash,
   ThumbsUp, AlertTriangle, BarChart2, TrendingUp, TrendingDown,
-  Minus, ExternalLink, Loader2, Download, RefreshCw
+  Minus, ExternalLink, Loader2, Download, RefreshCw, Mic
 } from "lucide-react";
 import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } from "@/types";
 import { cn } from "@/lib/utils";
@@ -112,6 +112,7 @@ interface PostRow {
   media_url: string | null;
   duration_seconds: number | null;
   performance: "top" | "worst" | "average";
+  has_transcript?: boolean;
 }
 
 interface Props { report: AnalysisReportType; accountId?: string; }
@@ -188,6 +189,15 @@ export default function AnalysisReport({ report, accountId }: Props) {
             </div>
           ))}
         </div>
+        {(report.posts_transcribed ?? 0) > 0 && (
+          <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-brand-600/10 border border-brand-600/20">
+            <Mic className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
+            <p className="text-xs text-brand-300">
+              <span className="font-medium">{report.posts_transcribed} video{report.posts_transcribed === 1 ? "" : "s"} transcribed</span>
+              <span className="text-brand-400/60"> — audio analyzed via Whisper for hook detection, CTA scoring, and sentiment analysis</span>
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Tab navigation */}
@@ -321,6 +331,11 @@ export default function AnalysisReport({ report, accountId }: Props) {
                       <p className="truncate text-muted-foreground">{caption}</p>
                       <div className="flex items-center gap-2 mt-0.5 text-white/30">
                         <span className="capitalize">{post.content_type}</span>
+                        {post.has_transcript && (
+                          <span className="inline-flex items-center gap-1 text-brand-400" title="Audio transcribed via Whisper">
+                            <Mic className="w-3 h-3" />
+                          </span>
+                        )}
                         <span>·</span>
                         <span>{date}</span>
                       </div>

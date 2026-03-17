@@ -41,6 +41,15 @@ export async function GET(req: NextRequest) {
       .order("engagement_rate", { ascending: false })
       .limit(50);
 
+    // Fetch post IDs that have transcripts for this report
+    const { data: transcribedPosts } = await serviceClient
+      .from("post_analyses")
+      .select("post_id")
+      .eq("report_id", postsFor)
+      .not("transcript", "is", null)
+      .neq("transcript", "");
+
+    const transcribedIds = new Set<string>((transcribedPosts ?? []).map((pa: { post_id: string }) => pa.post_id));
     const topIds = new Set<string>((report.top_posts ?? []).map((p: any) => p.post_id));
     const worstIds = new Set<string>((report.worst_posts ?? []).map((p: any) => p.post_id));
 
@@ -48,6 +57,7 @@ export async function GET(req: NextRequest) {
       data: (posts ?? []).map((p) => ({
         ...p,
         performance: topIds.has(p.id) ? "top" : worstIds.has(p.id) ? "worst" : "average",
+        has_transcript: transcribedIds.has(p.id),
       })),
     });
   }

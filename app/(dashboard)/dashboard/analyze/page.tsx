@@ -269,7 +269,14 @@ function AnalyzePageInner() {
             </div>
           </div>
           <div className="mt-6">
-            <PlatformConnect mode="add" />
+            <PlatformConnect
+              mode="add"
+              connectedAccounts={accounts}
+              onDisconnect={(id) => {
+                setAccounts((prev) => prev.filter((a) => a.id !== id));
+                if (selectedAccount === id) setSelectedAccount("");
+              }}
+            />
           </div>
         </>
       )}

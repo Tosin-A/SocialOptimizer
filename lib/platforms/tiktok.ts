@@ -110,7 +110,9 @@ export async function fetchTikTokPosts(
         views,
         reach: views,
         engagement_rate: views > 0 ? (likes + comments + shares) / views : 0,
-        posted_at: new Date(video.create_time * 1000).toISOString(),
+        posted_at: video.create_time
+          ? new Date(video.create_time * 1000).toISOString()
+          : new Date().toISOString(),
       });
     }
 
