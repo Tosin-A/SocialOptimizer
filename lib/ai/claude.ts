@@ -882,7 +882,7 @@ export async function coachChat(
     max_tokens: MAX_TOKENS,
     system: COACH_SYSTEM_PROMPT,
     messages: apiMessages,
-    tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
+    tools: [{ type: "web_search_20260209" as const, name: "web_search" as const, max_uses: 3 }],
   });
 
   // Extract text from response, which may include tool use blocks from web search
