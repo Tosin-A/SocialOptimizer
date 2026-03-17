@@ -851,7 +851,7 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
       }
     }
 
-    // ── Step 9b: Auto-populate brand pillars if empty ──────────────────────────
+    // ── Step 9b: Merge new themes into brand pillars ───────────────────────────
     try {
       const { data: userData } = await supabase
         .from("users")
@@ -859,23 +859,31 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
         .eq("id", account.user_id)
         .single();
 
-      if (userData && (!userData.brand_pillars || userData.brand_pillars.length === 0)) {
+      const existing: string[] = userData?.brand_pillars ?? [];
+
+      if (existing.length < 5) {
         const dominantThemes = nicheThemes
           .filter((t: { is_dominant: boolean }) => t.is_dominant)
           .slice(0, 4)
           .map((t: { theme: string }) => t.theme);
 
-        const autoPillars = [nicheResult.niche, ...dominantThemes].slice(0, 5);
+        const candidates = [nicheResult.niche, ...dominantThemes];
+        const existingLower = new Set(existing.map((p) => p.toLowerCase()));
+        const newUnique = candidates.filter(
+          (c) => c && !existingLower.has(c.toLowerCase())
+        );
 
-        if (autoPillars.length > 0) {
+        const merged = [...existing, ...newUnique].slice(0, 5);
+
+        if (merged.length > existing.length) {
           await supabase
             .from("users")
-            .update({ brand_pillars: autoPillars })
+            .update({ brand_pillars: merged })
             .eq("id", account.user_id);
         }
       }
     } catch {
-      // Brand pillar auto-population is best-effort — never fail the analysis
+      // Brand pillar merge is best-effort — never fail the analysis
     }
 
     // ── Step 10: Mark job complete ─────────────────────────────────────────────

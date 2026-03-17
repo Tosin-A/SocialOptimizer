@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw } from "lucide-react";
 import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,6 +118,7 @@ function SettingsContent() {
   const [brandPillars, setBrandPillars] = useState<string[]>([]);
   const [pillarInput, setPillarInput] = useState("");
   const [savingPillars, setSavingPillars] = useState(false);
+  const [syncingPillars, setSyncingPillars] = useState(false);
   const [pillarsLoaded, setPillarsLoaded] = useState(false);
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
@@ -318,11 +319,14 @@ function SettingsContent() {
         </h2>
         <p className="text-xs text-muted-foreground">
           These pillars define your content identity and feed into content generation.
+          {accounts.length > 1 && " Pillars are shared across all connected accounts."}
         </p>
 
         {pillarsLoaded && brandPillars.length === 0 && !pillarInput && (
           <p className="text-sm text-muted-foreground/60">
-            Run your first analysis to auto-generate brand pillars, or add them manually.
+            {accounts.length > 0
+              ? "Run an analysis on a connected account to auto-generate pillars, or add them manually."
+              : "Connect an account and run your first analysis to auto-generate brand pillars, or add them manually."}
           </p>
         )}
 
@@ -372,35 +376,67 @@ function SettingsContent() {
           </div>
         )}
 
-        {brandPillars.length > 0 && (
-          <Button
-            size="sm"
-            disabled={savingPillars}
-            className="gap-2"
-            onClick={async () => {
-              setSavingPillars(true);
-              try {
-                const res = await fetch("/api/brand-pillars", {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ pillars: brandPillars }),
-                });
-                if (!res.ok) {
-                  const data = await res.json();
-                  throw new Error(data.error ?? "Failed to save");
+        <div className="flex gap-2">
+          {brandPillars.length > 0 && (
+            <Button
+              size="sm"
+              disabled={savingPillars}
+              className="gap-2"
+              onClick={async () => {
+                setSavingPillars(true);
+                try {
+                  const res = await fetch("/api/brand-pillars", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ pillars: brandPillars }),
+                  });
+                  if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error ?? "Failed to save");
+                  }
+                  toast({ title: "Brand pillars saved" });
+                } catch (err: any) {
+                  toast({ title: "Couldn't save pillars", description: err.message, variant: "destructive" });
+                } finally {
+                  setSavingPillars(false);
                 }
-                toast({ title: "Brand pillars saved" });
-              } catch (err: any) {
-                toast({ title: "Couldn't save pillars", description: err.message, variant: "destructive" });
-              } finally {
-                setSavingPillars(false);
-              }
-            }}
-          >
-            {savingPillars && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            Save pillars
-          </Button>
-        )}
+              }}
+            >
+              {savingPillars && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              Save pillars
+            </Button>
+          )}
+          {accounts.length > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={syncingPillars}
+              className="gap-2"
+              onClick={async () => {
+                setSyncingPillars(true);
+                try {
+                  const res = await fetch("/api/brand-pillars", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "sync" }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error ?? "Failed to sync");
+                  setBrandPillars(data.data);
+                  toast({ title: "Pillars synced from all analyses" });
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : "Sync failed";
+                  toast({ title: "Couldn't sync pillars", description: message, variant: "destructive" });
+                }  finally {
+                  setSyncingPillars(false);
+                }
+              }}
+            >
+              {syncingPillars ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+              Re-sync from analyses
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Plan & Usage */}
