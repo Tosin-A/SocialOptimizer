@@ -73,6 +73,60 @@ export async function fetchTikTokPosts(
   let cursor = 0;
   let hasMore = true;
 
+  // First request — capture full response for diagnostics
+  const firstResponse = await tikTokFetch(
+    `/video/list/?fields=${encodeURIComponent(fieldsQuery)}`,
+    token,
+    { max_count: 20, cursor }
+  );
+
+  const firstVideos: TikTokVideo[] = firstResponse.data?.videos ?? [];
+
+  if (firstVideos.length === 0) {
+    // No videos at all — throw with full diagnostic
+    throw new Error(
+      `TikTok API returned 0 videos for @${account.username}. ` +
+      `Response: ${JSON.stringify(firstResponse).slice(0, 500)}`
+    );
+  }
+
+  // Process first batch
+  cursor = firstResponse.data?.cursor ?? 0;
+  hasMore = firstResponse.data?.has_more ?? false;
+
+  for (const video of firstVideos) {
+    const caption = `${video.title}\n${video.video_description}`;
+    const hashtags = extractHashtags(caption, []);
+    const views = video.view_count ?? 0;
+    const likes = video.like_count ?? 0;
+    const comments = video.comment_count ?? 0;
+    const shares = video.share_count ?? 0;
+
+    posts.push({
+      id: "",
+      account_id: account.id,
+      platform_post_id: video.id,
+      content_type: "video",
+      caption,
+      hashtags,
+      mentions: [],
+      media_url: video.share_url,
+      thumbnail_url: video.cover_image_url,
+      duration_seconds: video.duration,
+      likes,
+      comments,
+      shares,
+      saves: 0,
+      views,
+      reach: views,
+      engagement_rate: views > 0 ? (likes + comments + shares) / views : 0,
+      posted_at: video.create_time
+        ? new Date(video.create_time * 1000).toISOString()
+        : new Date().toISOString(),
+    });
+  }
+
+  // Fetch remaining pages
   while (posts.length < maxPosts && hasMore) {
     const data = await tikTokFetch(
       `/video/list/?fields=${encodeURIComponent(fieldsQuery)}`,
@@ -81,33 +135,11 @@ export async function fetchTikTokPosts(
     );
 
     if (data.error && data.error.code !== "ok") {
-      console.error("TikTok video/list error:", JSON.stringify(data.error));
-      // access_token_invalid or token_expired likely means user needs to reconnect
-      if (data.error.code === "access_token_invalid" || data.error.code === "token_expired") {
-        throw new Error(
-          `TikTok access token is invalid or expired. Please reconnect your TikTok account in Settings.`
-        );
-      }
-      throw new Error(`TikTok API error: ${data.error.message ?? data.error.code}`);
+      break; // Stop pagination on error, we already have some posts
     }
 
     const videos: TikTokVideo[] = data.data?.videos ?? [];
-
-    if (posts.length === 0 && videos.length === 0) {
-      // Build a diagnostic snapshot to surface in the error message
-      const diag = {
-        error: data.error ?? null,
-        has_more: data.data?.has_more ?? null,
-        cursor: data.data?.cursor ?? null,
-        response_keys: Object.keys(data),
-        data_keys: data.data ? Object.keys(data.data) : null,
-      };
-      throw new Error(
-        `TikTok returned 0 videos. This usually means the access token was issued before production approval. ` +
-        `Disconnect and reconnect your TikTok account in Settings to get a fresh token. ` +
-        `Debug: ${JSON.stringify(diag)}`
-      );
-    }
+    if (videos.length === 0) break;
 
     for (const video of videos) {
       const caption = `${video.title}\n${video.video_description}`;
