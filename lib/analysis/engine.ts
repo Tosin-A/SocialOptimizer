@@ -10,7 +10,15 @@ import {
   generateFixList,
 } from "@/lib/ai/claude";
 import { sendAnalysisReady } from "@/lib/email";
-import type { Post, Platform, ConnectedAccount, PlatformSignalWeight } from "@/types";
+import type {
+  Post,
+  Platform,
+  ConnectedAccount,
+  PlatformSignalWeight,
+  Insight,
+  RoadmapAction,
+  FixListItem,
+} from "@/types";
 
 interface EngineOptions {
   jobId: string;
@@ -21,6 +29,8 @@ interface EngineOptions {
 
 const PYTHON_ANALYSIS_TIMEOUT_MS = 12_000;
 const CLAUDE_RETRY_DELAYS_MS = [800, 1800];
+const ENGINE_RUNTIME_BUDGET_MS = 50_000;
+const FAST_FALLBACK_TRIGGER_MS = 36_000;
 
 // ─── Progress reporter ────────────────────────────────────────────────────────
 
@@ -69,6 +79,167 @@ async function retryClaudeCall<T>(fn: () => Promise<T>, label: string): Promise<
   }
 
   throw lastError instanceof Error ? lastError : new Error(`Unknown Claude error in ${label}`);
+}
+
+function shouldUseFastFallback(engineStartedAtMs: number): boolean {
+  return Date.now() - engineStartedAtMs > FAST_FALLBACK_TRIGGER_MS;
+}
+
+function buildFallbackInsightsAndRoadmap(input: {
+  platform: Platform;
+  niche: string;
+  growthScore: number;
+  avgEngagementRate: number;
+  hookStrengthScore: number;
+  ctaScore: number;
+  consistencyScore: number;
+  hashtagScore: number;
+  bestDays: string[];
+  avgPostsPerWeek: number;
+}): {
+  strengths: Insight[];
+  weaknesses: Insight[];
+  opportunities: Insight[];
+  roadmap: RoadmapAction[];
+  executive_summary: string;
+} {
+  const {
+    platform,
+    niche,
+    growthScore,
+    avgEngagementRate,
+    hookStrengthScore,
+    ctaScore,
+    consistencyScore,
+    hashtagScore,
+    bestDays,
+    avgPostsPerWeek,
+  } = input;
+
+  const engagementPct = (avgEngagementRate * 100).toFixed(2);
+  const strongestMetric = [
+    { key: "engagement", value: Math.round(avgEngagementRate * 100) },
+    { key: "hashtags", value: hashtagScore },
+    { key: "hooks", value: hookStrengthScore },
+    { key: "consistency", value: consistencyScore },
+    { key: "cta", value: ctaScore },
+  ].sort((a, b) => b.value - a.value)[0];
+
+  return {
+    strengths: [
+      {
+        title: `Strongest signal: ${strongestMetric.key}`,
+        description: `Your ${strongestMetric.key} signal is currently the strongest lever in this ${platform} profile, supported by recent post-level metrics.`,
+        impact: "high",
+        metric: `${strongestMetric.key} score ${strongestMetric.value}/100`,
+      },
+      {
+        title: "Audience response is measurable",
+        description: `Average engagement is ${engagementPct}%, which gives enough signal to optimize with clear before/after experiments.`,
+        impact: "medium",
+        metric: `Avg engagement ${engagementPct}%`,
+      },
+    ],
+    weaknesses: [
+      {
+        title: "Hook and CTA execution gap",
+        description: "Hook quality and CTA usage are not consistently strong enough to maximize distribution and conversion.",
+        impact: "high",
+        metric: `Hook ${hookStrengthScore}/100, CTA ${ctaScore}/100`,
+        recommendation: "Standardize first-line hooks and add a clear CTA to every post for the next 2 weeks.",
+      },
+      {
+        title: "Inconsistent publishing rhythm",
+        description: "Posting cadence is not yet stable, reducing repeat distribution momentum.",
+        impact: "medium",
+        metric: `Consistency ${consistencyScore}/100, ${avgPostsPerWeek.toFixed(2)} posts/week`,
+        recommendation: "Lock a fixed weekly schedule and publish on your best-performing days.",
+      },
+    ],
+    opportunities: [
+      {
+        title: `${niche} positioning can compound`,
+        description: `Doubling down on repeatable ${niche} formats and timing around ${bestDays.slice(0, 2).join(", ")} can improve consistency and reach.`,
+        impact: "high",
+      },
+    ],
+    roadmap: [
+      {
+        priority: 1,
+        action: "Rewrite opening line templates for your next 10 posts using question/stat hooks.",
+        expected_impact: "10-20 point hook score improvement",
+        timeframe: "7 days",
+        category: "content",
+      },
+      {
+        priority: 2,
+        action: "Add one explicit CTA (comment/save/share/follow) to every caption.",
+        expected_impact: "15-30% increase in CTA interaction rate",
+        timeframe: "7 days",
+        category: "engagement",
+      },
+      {
+        priority: 3,
+        action: "Publish on a fixed weekly calendar aligned to your best-performing days.",
+        expected_impact: "Higher consistency score and steadier reach",
+        timeframe: "14 days",
+        category: "posting",
+      },
+      {
+        priority: 4,
+        action: "Keep high-performing hashtag clusters and remove broad low-intent tags.",
+        expected_impact: "5-10 point hashtag score improvement",
+        timeframe: "14 days",
+        category: "hashtags",
+      },
+    ],
+    executive_summary: `Growth score is ${growthScore}/100. Engagement is currently ${engagementPct}% with the biggest upside in stronger hooks, explicit CTAs, and a stable posting cadence.`,
+  };
+}
+
+function buildFallbackFixList(input: {
+  hookStrengthScore: number;
+  ctaScore: number;
+  consistencyScore: number;
+  hashtagScore: number;
+  avgPostsPerWeek: number;
+}): FixListItem[] {
+  const { hookStrengthScore, ctaScore, consistencyScore, hashtagScore, avgPostsPerWeek } = input;
+
+  return [
+    {
+      rank: 1,
+      problem: "Hook quality is below growth potential.",
+      why_it_matters: "Weak openings lower watch retention and suppress distribution.",
+      action: "Start each post with a question, contrarian claim, or specific number in the first line.",
+      impact: "high",
+      metric_reference: `hook score ${hookStrengthScore}/100`,
+    },
+    {
+      rank: 2,
+      problem: "CTA usage is inconsistent.",
+      why_it_matters: "Without explicit prompts, fewer users take engagement actions.",
+      action: "Add exactly one CTA in every caption (comment/save/share/follow) for the next 10 posts.",
+      impact: "high",
+      metric_reference: `cta score ${ctaScore}/100`,
+    },
+    {
+      rank: 3,
+      problem: "Posting rhythm is not stable.",
+      why_it_matters: "Irregular cadence weakens repeat distribution patterns.",
+      action: "Commit to a fixed weekly publishing schedule and keep it for 4 weeks.",
+      impact: "medium",
+      metric_reference: `consistency ${consistencyScore}/100, ${avgPostsPerWeek.toFixed(2)} posts/week`,
+    },
+    {
+      rank: 4,
+      problem: "Hashtag mix still has optimization headroom.",
+      why_it_matters: "Tag quality influences discoverability and audience fit.",
+      action: "Retain top-performing tags and rotate out low-relevance broad tags weekly.",
+      impact: "medium",
+      metric_reference: `hashtag score ${hashtagScore}/100`,
+    },
+  ];
 }
 
 function estimateHookScore(caption: string | null): number {
@@ -296,6 +467,7 @@ function calcWeightedGrowthScore(signalWeights: PlatformSignalWeight[]): number 
 
 export async function runAnalysisEngine(options: EngineOptions): Promise<string> {
   const { jobId, account, pythonServiceUrl } = options;
+  const engineStartedAtMs = Date.now();
   // Filter out posts with invalid dates to prevent "Invalid time value" errors
   const posts = options.posts.filter((p) => !isNaN(new Date(p.posted_at).getTime()));
   const supabase = getSupabaseServiceClient();
@@ -496,47 +668,76 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     // ── Step 8: AI-generated insights ─────────────────────────────────────────
     await updateJobProgress(jobId, 75, "Generating strategic insights...");
 
-    const aiInsights = await retryClaudeCall(
-      () =>
-        generateInsightsAndRoadmap({
-          platform: account.platform,
-          niche: nicheResult.niche,
-          avg_engagement_rate: avgEngagementRate,
-          avg_hook_score: avgHookScore,
-          cta_usage_rate: ctaUsageRate,
-          posting_consistency: consistencyScore / 100,
-          hashtag_score: hashtagScore,
-          branding_score: brandingScore,
-          content_themes: nicheResult.themes,
-          top_performing_formats: topPerformingFormats.map(String),
-          best_days,
-          best_hours,
-          avg_posts_per_week,
-        }),
-      "generateInsightsAndRoadmap"
-    );
+    const aiBudgetExceeded =
+      Date.now() - engineStartedAtMs > ENGINE_RUNTIME_BUDGET_MS || shouldUseFastFallback(engineStartedAtMs);
 
-    // ── Generate ranked fix list ──────────────────────────────────────────────
-    const fixList = await retryClaudeCall(
-      () =>
-        generateFixList({
-          platform: account.platform,
-          niche: nicheResult.niche,
-          growth_score: growthScore,
-          hook_strength_score: hookStrengthScore,
-          cta_score: ctaScore,
-          hashtag_score: hashtagScore,
-          engagement_score: engagementScore,
-          consistency_score: consistencyScore,
-          branding_score: brandingScore,
-          avg_engagement_rate: avgEngagementRate,
-          avg_hook_score: avgHookScore,
-          cta_usage_rate: ctaUsageRate,
-          avg_posts_per_week,
-          platform_signal_weights: platformSignalWeights,
-        }),
-      "generateFixList"
-    );
+    const aiInsightsPromise = aiBudgetExceeded
+      ? Promise.resolve(
+          buildFallbackInsightsAndRoadmap({
+            platform: account.platform,
+            niche: nicheResult.niche,
+            growthScore,
+            avgEngagementRate,
+            hookStrengthScore,
+            ctaScore,
+            consistencyScore,
+            hashtagScore,
+            bestDays: best_days,
+            avgPostsPerWeek: avg_posts_per_week,
+          })
+        )
+      : retryClaudeCall(
+          () =>
+            generateInsightsAndRoadmap({
+              platform: account.platform,
+              niche: nicheResult.niche,
+              avg_engagement_rate: avgEngagementRate,
+              avg_hook_score: avgHookScore,
+              cta_usage_rate: ctaUsageRate,
+              posting_consistency: consistencyScore / 100,
+              hashtag_score: hashtagScore,
+              branding_score: brandingScore,
+              content_themes: nicheResult.themes,
+              top_performing_formats: topPerformingFormats.map(String),
+              best_days,
+              best_hours,
+              avg_posts_per_week,
+            }),
+          "generateInsightsAndRoadmap"
+        );
+
+    const fixListPromise = aiBudgetExceeded
+      ? Promise.resolve(
+          buildFallbackFixList({
+            hookStrengthScore,
+            ctaScore,
+            consistencyScore,
+            hashtagScore,
+            avgPostsPerWeek: avg_posts_per_week,
+          })
+        )
+      : retryClaudeCall(
+          () =>
+            generateFixList({
+              platform: account.platform,
+              niche: nicheResult.niche,
+              growth_score: growthScore,
+              hook_strength_score: hookStrengthScore,
+              cta_score: ctaScore,
+              hashtag_score: hashtagScore,
+              engagement_score: engagementScore,
+              consistency_score: consistencyScore,
+              branding_score: brandingScore,
+              avg_engagement_rate: avgEngagementRate,
+              avg_hook_score: avgHookScore,
+              cta_usage_rate: ctaUsageRate,
+              avg_posts_per_week,
+              platform_signal_weights: platformSignalWeights,
+            }),
+          "generateFixList"
+        );
+
+    const [aiInsights, fixList] = await Promise.all([aiInsightsPromise, fixListPromise]);
 
     // Hashtag breakdown
     const recommendedHashtags = hashtagAnalysis
