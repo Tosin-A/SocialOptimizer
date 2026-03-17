@@ -101,7 +101,7 @@ Return a JSON object with this exact structure:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "analyzeNicheAndThemes");
 }
 
 export async function analyzeHashtags(
@@ -154,7 +154,7 @@ Consider:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "analyzeHashtags");
 }
 
 export async function generateInsightsAndRoadmap(analysisData: {
@@ -246,7 +246,7 @@ Provide 2-3 strengths (high/medium impact only), 2-3 weaknesses (high/medium imp
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "generateInsightsAndRoadmap");
 }
 
 export async function analyzeHookStrength(transcript: string, caption: string): Promise<{
@@ -287,7 +287,7 @@ Hook scoring rubric:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "analyzeHookStrength");
 }
 
 // ─── Discover module AI functions ─────────────────────────────────────────────
@@ -330,7 +330,7 @@ Pattern tags should be reusable categories like "question-hook", "controversial-
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "generateFixList");
 }
 
 function multiplierLabel(outliers: Array<{ multiplier: number }>): string {
@@ -500,7 +500,7 @@ ${JSON.stringify(stats.map((s) => ({ ...s, recommendation: "specific recommendat
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "generateContent");
 }
 
 // ─── Ranked fix list ──────────────────────────────────────────────────────────
@@ -574,7 +574,7 @@ Rules:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "generatePersonalizedIdeas");
 }
 
 // ─── Content generation ───────────────────────────────────────────────────────
@@ -621,7 +621,7 @@ Return JSON array:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "scoreHooks");
 }
 
 export async function generateScoredHooks(
@@ -662,7 +662,7 @@ Sort by score descending.`,
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "buildStructuredCaption");
 }
 
 export async function generateStructuredCaption(
@@ -702,7 +702,7 @@ Return JSON:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "generatePostingTimeRecommendations");
 }
 
 export async function generateContent(
@@ -747,7 +747,7 @@ ${getGenerationSchema(request.content_type)}`,
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "discoverWinningFormats");
 }
 
 function getGenerationSchema(type: string): string {
@@ -826,7 +826,7 @@ Rules:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(extractJSON(text));
+  return parseJSONResponse(text, "replicateWinner");
 }
 
 // ─── Content Coach chat ───────────────────────────────────────────────────
@@ -906,4 +906,38 @@ function extractJSON(text: string): string {
   if (jsonStart !== -1) return text.slice(jsonStart);
 
   return text;
+}
+
+async function parseJSONResponse<T>(text: string, context: string): Promise<T> {
+  const extracted = extractJSON(text);
+
+  try {
+    return JSON.parse(extracted) as T;
+  } catch (initialError) {
+    const repairResponse = await client.messages.create({
+      model: CLASSIFY_MODEL,
+      max_tokens: 2048,
+      system:
+        "You are a strict JSON repair utility. Fix invalid JSON and return only valid JSON. Do not include markdown, commentary, or code fences.",
+      messages: [
+        {
+          role: "user",
+          content: `Repair this JSON so it parses correctly. Keep the same keys and values as much as possible.\n\nContext: ${context}\n\nInvalid JSON:\n${extracted}`,
+        },
+      ],
+    });
+
+    const repairedText = repairResponse.content[0]?.type === "text" ? repairResponse.content[0].text : "";
+    const repaired = extractJSON(repairedText);
+
+    try {
+      return JSON.parse(repaired) as T;
+    } catch (repairError) {
+      const initialMessage = initialError instanceof Error ? initialError.message : String(initialError);
+      const repairMessage = repairError instanceof Error ? repairError.message : String(repairError);
+      throw new Error(
+        `Failed to parse JSON for ${context}. Initial parse error: ${initialMessage}. Repair parse error: ${repairMessage}.`
+      );
+    }
+  }
 }
