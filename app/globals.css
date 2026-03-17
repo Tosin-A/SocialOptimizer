@@ -98,4 +98,9 @@
     background-size: 28px 28px;
   }
 
+  /* ── Lab background overflow clipping ──────────────────────────── */
+  .lab-bg::before {
+    overflow: hidden;
+  }
+
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Copy, TrendingUp, Sparkles } from "lucide-react";
+import { Copy, TrendingUp, Sparkles, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ReplicateWinnerOutput } from "@/types";
@@ -7,9 +7,12 @@ import type { ReplicateWinnerOutput } from "@/types";
 interface Props {
   winners: ReplicateWinnerOutput[];
   onCopy: (text: string) => void;
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
 }
 
-export default function ReplicateWinnerCard({ winners, onCopy }: Props) {
+export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys, savingKey }: Props) {
   return (
     <div className="space-y-4">
       {winners.map((w, i) => (
@@ -78,14 +81,33 @@ export default function ReplicateWinnerCard({ winners, onCopy }: Props) {
             {/* Format + copy all */}
             <div className="flex items-center justify-between pt-2 border-t border-white/5">
               <span className="text-xs text-muted-foreground capitalize">Format: {w.replicated_content.format}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-xs gap-1"
-                onClick={() => onCopy(`${w.replicated_content.hook}\n\n${w.replicated_content.caption}\n\n${w.replicated_content.hashtags.join(" ")}`)}
-              >
-                <Copy className="w-3 h-3" /> Copy all
-              </Button>
+              <div className="flex items-center gap-1">
+                {onSave && (() => {
+                  const key = `replicate-${i}`;
+                  const fullContent = `${w.replicated_content.hook}\n\n${w.replicated_content.caption}\n\n${w.replicated_content.script_outline}\n\n${w.replicated_content.hashtags.join(" ")}`;
+                  const isSaved = savedKeys?.has(key);
+                  return (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-xs gap-1"
+                      onClick={() => onSave(fullContent, key)}
+                      disabled={isSaved || savingKey === key}
+                    >
+                      {isSaved ? <BookmarkCheck className="w-3 h-3 text-brand-400" /> : <Bookmark className="w-3 h-3" />}
+                      {isSaved ? "Saved" : "Save"}
+                    </Button>
+                  );
+                })()}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs gap-1"
+                  onClick={() => onCopy(`${w.replicated_content.hook}\n\n${w.replicated_content.caption}\n\n${w.replicated_content.hashtags.join(" ")}`)}
+                >
+                  <Copy className="w-3 h-3" /> Copy all
+                </Button>
+              </div>
             </div>
 
             {/* Adaptation notes */}

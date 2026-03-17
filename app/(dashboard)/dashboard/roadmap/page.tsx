@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { Map, BarChart3, ChevronRight, Calendar } from "lucide-react";
 import type { RoadmapAction } from "@/types";
+import SavedIdeasSection from "@/components/dashboard/SavedIdeasSection";
 
 const CATEGORY_CONFIG: Record<string, { color: string; label: string }> = {
   content: { color: "bg-brand-600/20 text-brand-300 border-brand-600/30", label: "Content" },
@@ -148,6 +149,8 @@ export default async function RoadmapPage() {
           </p>
         </>
       )}
+
+      <SavedIdeasSection />
     </div>
   );
 }

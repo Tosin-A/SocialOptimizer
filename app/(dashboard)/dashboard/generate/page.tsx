@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Wand2, Loader2, Copy, ChevronDown, ChevronUp, History, Clock } from "lucide-react";
+import { Wand2, Loader2, Copy, ChevronDown, ChevronUp, History, Clock, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,6 +86,8 @@ export default function GeneratePage() {
   const [accounts, setAccounts] = useState<Array<{ id: string; platform: string; username: string }>>([]);
   const [selectedAccount, setSelectedAccount] = useState("");
   const [brandPillars, setBrandPillars] = useState<string[]>([]);
+  const [savedKeys, setSavedKeys] = useState<Set<string>>(new Set());
+  const [savingKey, setSavingKey] = useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -191,6 +193,29 @@ export default function GeneratePage() {
       else next.add(id);
       return next;
     });
+  };
+
+  const saveToIdeas = async (content: string, key: string) => {
+    if (savedKeys.has(key) || savingKey === key) return;
+    setSavingKey(key);
+    try {
+      const res = await fetch("/api/saved-ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content,
+          provider: "claude" as const,
+          platform,
+          niche: niche || undefined,
+        }),
+      });
+      if (res.ok) {
+        setSavedKeys((prev) => new Set(prev).add(key));
+        toast({ title: "Saved to your ideas" });
+      }
+    } finally {
+      setSavingKey(null);
+    }
   };
 
   return (
@@ -323,7 +348,7 @@ export default function GeneratePage() {
       </div>
 
       {/* Output */}
-      {output && <OutputDisplay output={output} copyToClipboard={copyToClipboard} />}
+      {output && <OutputDisplay output={output} copyToClipboard={copyToClipboard} onSave={saveToIdeas} savedKeys={savedKeys} savingKey={savingKey} />}
 
       </> /* end generate tab */}
 
@@ -423,7 +448,7 @@ export default function GeneratePage() {
 
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-white/5 pt-4">
-                    <OutputDisplay output={item.output} copyToClipboard={copyToClipboard} />
+                    <OutputDisplay output={item.output} copyToClipboard={copyToClipboard} onSave={saveToIdeas} savedKeys={savedKeys} savingKey={savingKey} />
                   </div>
                 )}
               </div>
@@ -452,19 +477,25 @@ export default function GeneratePage() {
 
 // ─── Unified Output Renderer ──────────────────────────────────────────────
 
-function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; copyToClipboard: (text: string) => void }) {
+function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }: {
+  output: EnhancedOutput;
+  copyToClipboard: (text: string) => void;
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
+}) {
   // Enhanced types
   if (isScoredHookArray(output)) {
-    return <ScoredHookList hooks={output} />;
+    return <ScoredHookList hooks={output} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} />;
   }
   if (isStructuredCaption(output)) {
-    return <StructuredCaptionCard caption={output} />;
+    return <StructuredCaptionCard caption={output} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} />;
   }
   if (isPersonalizedIdeaArray(output)) {
-    return <PersonalizedIdeaList ideas={output} />;
+    return <PersonalizedIdeaList ideas={output} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} />;
   }
   if (isReplicateWinnerArray(output)) {
-    return <ReplicateWinnerCard winners={output} onCopy={copyToClipboard} />;
+    return <ReplicateWinnerCard winners={output} onCopy={copyToClipboard} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} />;
   }
 
   // Basic GeneratedContentOutput
@@ -480,9 +511,12 @@ function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; co
               <div key={i} className="glass rounded-xl p-4 space-y-2">
                 <div className="flex items-start justify-between gap-4">
                   <p className="font-medium text-sm leading-relaxed">&ldquo;{hook.text}&rdquo;</p>
-                  <Button size="icon" variant="ghost" onClick={() => copyToClipboard(hook.text)} className="flex-shrink-0">
-                    <Copy className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <SaveButton contentKey={`hook-${i}`} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} content={hook.text} />
+                    <Button size="icon" variant="ghost" onClick={() => copyToClipboard(hook.text)}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                   <span className="bg-white/5 px-2 py-0.5 rounded">Type: {hook.type}</span>
@@ -505,20 +539,73 @@ function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; co
               <div key={i} className="glass rounded-xl p-4 space-y-3">
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{cap.caption}</p>
-                  <Button size="icon" variant="ghost" onClick={() => copyToClipboard(cap.caption)} className="flex-shrink-0">
-                    <Copy className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <SaveButton contentKey={`caption-${i}`} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} content={`${cap.caption}${cap.hashtags?.length ? `\n\n${cap.hashtags.join(' ')}` : ''}`} />
+                    <Button size="icon" variant="ghost" onClick={() => copyToClipboard(cap.caption)}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 {cap.cta && <p className="text-xs text-brand-400">CTA: {cap.cta}</p>}
-                <div className="flex flex-wrap gap-1">
-                  {cap.hashtags.slice(0, 15).map((tag) => (
-                    <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
-                  ))}
-                  {cap.hashtags.length > 15 && <span className="text-xs text-muted-foreground">+{cap.hashtags.length - 15} more</span>}
-                </div>
-                <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(`${cap.caption}\n\n${cap.hashtags.join(' ')}`)}>
-                  <Copy className="w-3 h-3" /> Copy caption + hashtags
+                {cap.hashtags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {cap.hashtags.slice(0, 15).map((tag) => (
+                      <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+                    ))}
+                    {cap.hashtags.length > 15 && <span className="text-xs text-muted-foreground">+{cap.hashtags.length - 15} more</span>}
+                  </div>
+                )}
+                <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(`${cap.caption}${cap.hashtags?.length ? `\n\n${cap.hashtags.join(' ')}` : ''}`)}>
+                  <Copy className="w-3 h-3" /> Copy caption{cap.hashtags?.length ? ' + hashtags' : ''}
                 </Button>
+              </div>
+            ))}
+          </div>
+        </OutputSection>
+      )}
+
+      {/* Scripts */}
+      {output.scripts && output.scripts.length > 0 && (
+        <OutputSection title="Video Scripts" count={output.scripts.length}>
+          <div className="space-y-4">
+            {output.scripts.map((script, i) => (
+              <div key={i} className="glass rounded-xl p-4 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Hook ({script.hook_duration})</p>
+                    <p className="font-medium text-sm">{script.hook}</p>
+                  </div>
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
+                    <SaveButton
+                      contentKey={`script-${i}`}
+                      onSave={onSave}
+                      savedKeys={savedKeys}
+                      savingKey={savingKey}
+                      content={`Hook: ${script.hook}\n\n${script.body_points?.map((p) => `[${p.timestamp}] ${p.content}`).join('\n') ?? ''}\n\nCTA: ${script.cta}`}
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => copyToClipboard(`Hook: ${script.hook}\n\n${script.body_points?.map((p) => `[${p.timestamp}] ${p.content}`).join('\n') ?? ''}\n\nCTA: ${script.cta}`)}
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+                {script.body_points?.length > 0 && (
+                  <div className="space-y-1.5 border-l-2 border-white/10 pl-3 ml-1">
+                    {script.body_points.map((point, j) => (
+                      <div key={j} className="text-sm">
+                        <span className="text-xs text-muted-foreground font-mono mr-2">{point.timestamp}</span>
+                        <span>{point.content}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <p className="text-brand-400">CTA: {script.cta}</p>
+                  <span className="bg-white/5 px-2 py-0.5 rounded">Total: {script.total_duration}</span>
+                </div>
               </div>
             ))}
           </div>
@@ -531,9 +618,12 @@ function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; co
           <div className="space-y-3">
             {output.video_ideas.map((idea, i) => (
               <div key={i} className="glass rounded-xl p-4 space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <h4 className="font-semibold text-sm">{idea.title}</h4>
-                  <span className="text-xs bg-white/5 px-2 py-0.5 rounded capitalize">{idea.format}</span>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <SaveButton contentKey={`idea-${i}`} onSave={onSave} savedKeys={savedKeys} savingKey={savingKey} content={`${idea.title}\nAngle: ${idea.angle}\nFormat: ${idea.format}\n${idea.why_it_works}`} />
+                    <span className="text-xs bg-white/5 px-2 py-0.5 rounded capitalize">{idea.format}</span>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground">Angle: {idea.angle}</p>
                 <p className="text-xs text-brand-300 italic">{idea.why_it_works}</p>
@@ -551,22 +641,50 @@ function OutputDisplay({ output, copyToClipboard }: { output: EnhancedOutput; co
               <div key={i} className="glass rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold text-sm">{set.name}</h4>
-                  <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(set.tags.join(' '))}>
-                    <Copy className="w-3 h-3" /> Copy all
-                  </Button>
+                  {set.tags?.length > 0 && (
+                    <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(set.tags.join(' '))}>
+                      <Copy className="w-3 h-3" /> Copy all
+                    </Button>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground">{set.strategy}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {set.tags.map((tag) => (
-                    <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
-                  ))}
-                </div>
+                {set.strategy && <p className="text-xs text-muted-foreground">{set.strategy}</p>}
+                {set.tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {set.tags.map((tag) => (
+                      <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </OutputSection>
       )}
     </div>
+  );
+}
+
+function SaveButton({ contentKey, onSave, savedKeys, savingKey, content }: {
+  contentKey: string;
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
+  content: string;
+}) {
+  if (!onSave) return null;
+  const isSaved = savedKeys?.has(contentKey);
+  const isSaving = savingKey === contentKey;
+  return (
+    <Button
+      size="icon"
+      variant="ghost"
+      onClick={() => onSave(content, contentKey)}
+      disabled={isSaved || isSaving}
+      className="flex-shrink-0"
+      title={isSaved ? "Saved" : "Save idea"}
+    >
+      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" /> : <Bookmark className="w-3.5 h-3.5" />}
+    </Button>
   );
 }
 

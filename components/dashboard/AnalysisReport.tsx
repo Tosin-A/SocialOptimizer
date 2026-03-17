@@ -180,7 +180,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             { label: "Niche", value: report.detected_niche },
             { label: "Avg Engagement", value: `${(report.avg_engagement_rate * 100).toFixed(2)}%` },
             { label: "Posts/Week", value: report.avg_posts_per_week.toFixed(1) },
-            { label: "Best Days", value: report.best_days.slice(0, 2).join(", ") },
+            { label: "Best Days", value: (report.best_days ?? []).slice(0, 2).join(", ") || "—" },
           ].map((m) => (
             <div key={m.label} className="text-center bg-white/5 rounded-lg p-3">
               <p className="text-xs text-muted-foreground mb-1">{m.label}</p>

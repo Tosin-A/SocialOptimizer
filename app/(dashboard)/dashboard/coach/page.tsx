@@ -43,13 +43,13 @@ export default function CoachPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <MessageSquare className="w-6 h-6 text-brand-400" /> Content Coach
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Ask specific questions about your page — the coach knows your metrics
+          Ask specific questions about your page — the coach knows your metrics. Type <kbd className="text-xs px-1 py-0.5 rounded bg-white/10 font-mono">/</kbd> for commands.
         </p>
       </div>
       <CoachChat accounts={accounts} />

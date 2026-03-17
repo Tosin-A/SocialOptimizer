@@ -385,6 +385,17 @@ export interface WinLibraryEntry {
   created_at: string;
 }
 
+export interface SavedIdea {
+  id: string;
+  user_id: string;
+  content: string;
+  provider: "claude" | "openai";
+  platform: string | null;
+  niche: string | null;
+  source_prompt: string | null;
+  created_at: string;
+}
+
 export interface ScoreAnnotation {
   id: string;
   user_id: string;
@@ -474,6 +485,7 @@ export interface CoachMessage {
   role: CoachMessageRole;
   content: string;
   timestamp: string;
+  provider?: "claude" | "openai";
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

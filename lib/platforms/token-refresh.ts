@@ -57,11 +57,13 @@ async function refreshTikTokToken(refreshToken: string): Promise<{
     throw new Error(`TikTok token refresh failed: ${err.error?.message ?? res.statusText}`);
   }
 
-  const data = await res.json();
+  const raw = await res.json();
+  // TikTok may nest tokens under { data: { ... } } or return them at top level
+  const tokenData = raw.data ?? raw;
   return {
-    access_token: data.data.access_token,
-    refresh_token: data.data.refresh_token,
-    expires_in: data.data.expires_in,
+    access_token: tokenData.access_token,
+    refresh_token: tokenData.refresh_token,
+    expires_in: tokenData.expires_in,
   };
 }
 

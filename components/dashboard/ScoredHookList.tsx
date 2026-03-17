@@ -1,5 +1,5 @@
 "use client";
-import { Copy, Sparkles } from "lucide-react";
+import { Copy, Sparkles, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ScoredHook } from "@/types";
 import { cn } from "@/lib/utils";
@@ -7,9 +7,12 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   hooks: ScoredHook[];
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
 }
 
-export default function ScoredHookList({ hooks }: Props) {
+export default function ScoredHookList({ hooks, onSave, savedKeys, savingKey }: Props) {
   const { toast } = useToast();
 
   if (!hooks?.length) return null;
@@ -41,14 +44,30 @@ export default function ScoredHookList({ hooks }: Props) {
               </div>
               <p className="text-sm font-medium leading-relaxed">&quot;{hook.text}&quot;</p>
             </div>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() => copyToClipboard(hook.text)}
-              className="flex-shrink-0"
-            >
-              <Copy className="w-3.5 h-3.5" />
-            </Button>
+            <div className="flex items-center gap-0.5 flex-shrink-0">
+              {onSave && (() => {
+                const key = `scored-hook-${i}`;
+                const isSaved = savedKeys?.has(key);
+                return (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => onSave(hook.text, key)}
+                    disabled={isSaved || savingKey === key}
+                    title={isSaved ? "Saved" : "Save idea"}
+                  >
+                    {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" /> : <Bookmark className="w-3.5 h-3.5" />}
+                  </Button>
+                );
+              })()}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => copyToClipboard(hook.text)}
+              >
+                <Copy className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex gap-4 text-xs">

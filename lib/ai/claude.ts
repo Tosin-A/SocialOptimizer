@@ -763,7 +763,7 @@ function getGenerationSchema(type: string): string {
     case "hashtags":
       return `Return JSON: { "hashtag_sets": [{ "name": "set name", "tags": ["#tag1",...30 tags], "strategy": "explanation of the hashtag strategy mix" }] }`;
     case "full_plan":
-      return `Return JSON with ALL keys: { "hooks": [...5 hooks], "captions": [...3 captions], "hashtag_sets": [...2 sets], "video_ideas": [...5 ideas] }`;
+      return `Return JSON with ALL keys: { "hooks": [...5 hooks using the hook schema above], "captions": [...3 captions using the caption schema above], "scripts": [...2 scripts using the script schema above], "hashtag_sets": [...2 sets using the hashtag_sets schema above], "video_ideas": [...5 ideas using the video_ideas schema above] }`;
     default:
       return `Return appropriate JSON for the content type.`;
   }

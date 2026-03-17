@@ -1,5 +1,5 @@
 "use client";
-import { Copy, FileText } from "lucide-react";
+import { Copy, FileText, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StructuredCaption } from "@/types";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   caption: StructuredCaption | null;
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
 }
 
 const sectionColors: Record<string, string> = {
@@ -21,7 +24,7 @@ const sectionLabels: Record<string, string> = {
   cta: "CTA",
 };
 
-export default function StructuredCaptionCard({ caption }: Props) {
+export default function StructuredCaptionCard({ caption, onSave, savedKeys, savingKey }: Props) {
   const { toast } = useToast();
 
   if (!caption) return null;
@@ -49,9 +52,27 @@ export default function StructuredCaptionCard({ caption }: Props) {
             {caption.overall_score}/100
           </span>
         </div>
-        <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(fullWithHashtags)}>
-          <Copy className="w-3 h-3" /> Copy all
-        </Button>
+        <div className="flex items-center gap-1">
+          {onSave && (() => {
+            const key = "structured-caption";
+            const isSaved = savedKeys?.has(key);
+            return (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs gap-1"
+                onClick={() => onSave(fullWithHashtags, key)}
+                disabled={isSaved || savingKey === key}
+              >
+                {isSaved ? <BookmarkCheck className="w-3 h-3 text-brand-400" /> : <Bookmark className="w-3 h-3" />}
+                {isSaved ? "Saved" : "Save"}
+              </Button>
+            );
+          })()}
+          <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={() => copyToClipboard(fullWithHashtags)}>
+            <Copy className="w-3 h-3" /> Copy all
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-3">

@@ -1,10 +1,14 @@
 "use client";
-import { Lightbulb, TrendingUp, Zap, Search } from "lucide-react";
+import { Lightbulb, TrendingUp, Zap, Search, Bookmark, BookmarkCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { PersonalizedIdea } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface Props {
   ideas: PersonalizedIdea[];
+  onSave?: (content: string, key: string) => Promise<void>;
+  savedKeys?: Set<string>;
+  savingKey?: string | null;
 }
 
 const sourceIcons = {
@@ -25,7 +29,7 @@ const engColors = {
   low: "text-muted-foreground",
 };
 
-export default function PersonalizedIdeaList({ ideas }: Props) {
+export default function PersonalizedIdeaList({ ideas, onSave, savedKeys, savingKey }: Props) {
   if (!ideas?.length) {
     return (
       <div className="glass rounded-2xl p-8 text-center">
@@ -43,9 +47,27 @@ export default function PersonalizedIdeaList({ ideas }: Props) {
           <div key={i} className="glass rounded-xl p-4 space-y-2">
             <div className="flex items-start justify-between gap-3">
               <h4 className="font-medium text-sm">{idea.title}</h4>
-              <span className={cn("text-xs capitalize font-mono", engColors[idea.estimated_engagement])}>
-                {idea.estimated_engagement}
-              </span>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {onSave && (() => {
+                  const key = `personalized-idea-${i}`;
+                  const isSaved = savedKeys?.has(key);
+                  return (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7"
+                      onClick={() => onSave(`${idea.title}\nAngle: ${idea.angle}\nFormat: ${idea.format}\n${idea.why_it_works}`, key)}
+                      disabled={isSaved || savingKey === key}
+                      title={isSaved ? "Saved" : "Save idea"}
+                    >
+                      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" /> : <Bookmark className="w-3.5 h-3.5" />}
+                    </Button>
+                  );
+                })()}
+                <span className={cn("text-xs capitalize font-mono", engColors[idea.estimated_engagement])}>
+                  {idea.estimated_engagement}
+                </span>
+              </div>
             </div>
             <p className="text-xs text-muted-foreground">{idea.angle}</p>
             <div className="flex items-center gap-2 flex-wrap">
