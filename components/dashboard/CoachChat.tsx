@@ -5,10 +5,13 @@ import { MessageSquare, AlertCircle, Sparkles, ArrowUp, Bookmark, BookmarkCheck 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
-import type { CoachMessage } from "@/types";
+import type { CoachMessage, CoachMessageRow } from "@/types";
 
 interface CoachChatProps {
   accounts: Array<{ id: string; platform: string; username: string }>;
+  conversationId: string | null;
+  onConversationCreated?: (id: string, title: string) => void;
+  onTitleGenerated?: (conversationId: string, title: string) => void;
 }
 
 interface CommandOption {
@@ -60,10 +63,11 @@ function TypingDots() {
   );
 }
 
-export default function CoachChat({ accounts }: CoachChatProps) {
+export default function CoachChat({ accounts, conversationId, onConversationCreated, onTitleGenerated }: CoachChatProps) {
   const [messages, setMessages] = useState<CoachMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState(accounts[0]?.id ?? "");
   const [showCommands, setShowCommands] = useState(false);
@@ -81,6 +85,45 @@ export default function CoachChat({ accounts }: CoachChatProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // Load messages when conversationId changes
+  useEffect(() => {
+    if (!conversationId) {
+      setMessages([]);
+      setSavedIndices(new Set());
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingHistory(true);
+    setError(null);
+
+    fetch(`/api/coach/conversations/${conversationId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        if (d.data?.messages) {
+          const loaded: CoachMessage[] = d.data.messages.map((m: CoachMessageRow) => ({
+            role: m.role,
+            content: m.content,
+            timestamp: m.created_at,
+            provider: m.provider,
+          }));
+          setMessages(loaded);
+        } else {
+          setMessages([]);
+        }
+        setSavedIndices(new Set());
+      })
+      .catch(() => {
+        if (!cancelled) setError("Failed to load conversation history");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingHistory(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [conversationId]);
 
   // Track / input for command palette
   useEffect(() => {
@@ -102,7 +145,6 @@ export default function CoachChat({ accounts }: CoachChatProps) {
 
     if (cmd.command === "/ideas") {
       setInput("");
-      // For /ideas, send a prompt to start idea generation
       sendMessage("Generate creative content ideas for my page", cmd.provider);
     } else if (cmd.command === "/plan") {
       setInput("");
@@ -114,6 +156,22 @@ export default function CoachChat({ accounts }: CoachChatProps) {
       setInput("");
       sendMessage("Why are my hooks underperforming?", cmd.provider);
     }
+  };
+
+  const createConversationAndSend = async (text: string, provider: "claude" | "openai"): Promise<string | null> => {
+    const res = await fetch("/api/coach/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account_id: selectedAccount || undefined }),
+    });
+    const d = await res.json();
+    if (!res.ok || !d.data) {
+      setError(d.error ?? "Failed to create conversation");
+      return null;
+    }
+    const newId = d.data.id as string;
+    onConversationCreated?.(newId, d.data.title);
+    return newId;
   };
 
   const sendMessage = async (content?: string, providerOverride?: "claude" | "openai") => {
@@ -132,8 +190,7 @@ export default function CoachChat({ accounts }: CoachChatProps) {
       provider,
     };
 
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
 
@@ -143,14 +200,20 @@ export default function CoachChat({ accounts }: CoachChatProps) {
     }
 
     try {
-      const res = await fetch("/api/coach", {
+      // Auto-create conversation if none selected
+      let activeConvId = conversationId;
+      if (!activeConvId) {
+        activeConvId = await createConversationAndSend(text, provider);
+        if (!activeConvId) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      const res = await fetch(`/api/coach/conversations/${activeConvId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-          account_id: selectedAccount || undefined,
-          provider,
-        }),
+        body: JSON.stringify({ content: text, provider }),
       });
 
       const data = await res.json();
@@ -164,12 +227,17 @@ export default function CoachChat({ accounts }: CoachChatProps) {
 
       const assistantMessage: CoachMessage = {
         role: "assistant",
-        content: data.data.reply,
-        timestamp: new Date().toISOString(),
-        provider: data.data.provider ?? provider,
+        content: data.data.assistantMessage.content,
+        timestamp: data.data.assistantMessage.created_at,
+        provider: data.data.assistantMessage.provider,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+
+      // Notify parent of auto-generated title
+      if (data.data.title && activeConvId) {
+        onTitleGenerated?.(activeConvId, data.data.title);
+      }
     } catch {
       setError("Failed to reach the coach. Check your connection and try again.");
     } finally {
@@ -236,7 +304,7 @@ export default function CoachChat({ accounts }: CoachChatProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] max-h-[700px]">
+    <div className="flex flex-col h-full">
       {/* Account selector */}
       {accounts.length > 1 && (
         <div className="mb-4">
@@ -264,7 +332,14 @@ export default function CoachChat({ accounts }: CoachChatProps) {
         className="flex-1 glass rounded-2xl flex flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {messages.length === 0 ? (
+          {loadingHistory ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+                Loading messages...
+              </div>
+            </div>
+          ) : messages.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
