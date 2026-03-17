@@ -20,6 +20,8 @@ interface EngineOptions {
   pythonServiceUrl: string;
 }
 
+const PYTHON_ANALYSIS_TIMEOUT_MS = 25_000;
+
 // ─── Progress reporter ────────────────────────────────────────────────────────
 
 async function updateJobProgress(
@@ -294,30 +296,40 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
     }> = [];
 
     try {
-      // Call Python service for transcript-based analysis
-      const pyResponse = await fetch(`${pythonServiceUrl}/analyze/posts`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Service-Secret": process.env.PYTHON_SERVICE_SECRET!,
-        },
-        body: JSON.stringify({
-          platform: account.platform,
-          posts: posts.slice(0, 30).map((p) => ({
-            id: p.id,
-            caption: p.caption,
-            media_url: p.media_url,
-            platform: account.platform,
-          })),
-        }),
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), PYTHON_ANALYSIS_TIMEOUT_MS);
 
-      if (pyResponse.ok) {
+      // Call Python service for transcript-based analysis
+      try {
+        const pyResponse = await fetch(`${pythonServiceUrl}/analyze/posts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Service-Secret": process.env.PYTHON_SERVICE_SECRET!,
+          },
+          body: JSON.stringify({
+            platform: account.platform,
+            posts: posts.slice(0, 30).map((p) => ({
+              id: p.id,
+              caption: p.caption,
+              media_url: p.media_url,
+              platform: account.platform,
+            })),
+          }),
+          signal: controller.signal,
+        });
+
+        if (!pyResponse.ok) {
+          throw new Error(`Python service returned ${pyResponse.status}`);
+        }
+
         const pyData = await pyResponse.json();
         hookScores = pyData.hook_scores ?? [];
         ctaDetected = pyData.cta_count ?? 0;
         sentimentScores = pyData.sentiment_scores ?? [];
         postAnalyses = pyData.post_analyses ?? [];
+      } finally {
+        clearTimeout(timeout);
       }
     } catch {
       // Python service unavailable — use fallback Claude-based hook analysis
