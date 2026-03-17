@@ -60,6 +60,17 @@ async function refreshTikTokToken(refreshToken: string): Promise<{
   const raw = await res.json();
   // TikTok may nest tokens under { data: { ... } } or return them at top level
   const tokenData = raw.data ?? raw;
+
+  // TikTok can return 200 with error_code in the body
+  if (raw.error || (tokenData.error_code && tokenData.error_code !== 0)) {
+    const errMsg = raw.error_description ?? tokenData.description ?? raw.error ?? "unknown error";
+    throw new Error(`TikTok token refresh failed: ${errMsg}. Please reconnect your TikTok account.`);
+  }
+
+  if (!tokenData.access_token) {
+    throw new Error("TikTok token refresh returned no access_token. Please reconnect your TikTok account.");
+  }
+
   return {
     access_token: tokenData.access_token,
     refresh_token: tokenData.refresh_token,

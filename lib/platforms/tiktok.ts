@@ -75,13 +75,26 @@ export async function fetchTikTokPosts(
 
     if (data.error && data.error.code !== "ok") {
       console.error("TikTok video/list error:", JSON.stringify(data.error));
+      // access_token_invalid or token_expired likely means user needs to reconnect
+      if (data.error.code === "access_token_invalid" || data.error.code === "token_expired") {
+        throw new Error(
+          `TikTok access token is invalid or expired. Please reconnect your TikTok account in Settings.`
+        );
+      }
       throw new Error(`TikTok API error: ${data.error.message ?? data.error.code}`);
     }
 
     const videos: TikTokVideo[] = data.data?.videos ?? [];
 
     if (posts.length === 0 && videos.length === 0) {
-      console.warn("TikTok video/list returned 0 videos. Full response:", JSON.stringify(data));
+      console.error(
+        "TikTok video/list returned 0 videos.",
+        "cursor:", cursor,
+        "has_more:", data.data?.has_more,
+        "error:", JSON.stringify(data.error ?? null),
+        "full response keys:", Object.keys(data),
+        "data keys:", data.data ? Object.keys(data.data) : "no data field"
+      );
     }
 
     for (const video of videos) {
