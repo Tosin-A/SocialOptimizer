@@ -176,7 +176,10 @@ export async function POST(req: NextRequest) {
           throw new Error(
             isCsvImport
               ? "No posts found. Import more data via CSV."
-              : `0 posts in database after platform fetch. Platform: ${account.platform}, account: @${account.username}. Reconnect your account in Settings to refresh your access token.`
+              : `0 posts in DB after fetch. Platform: ${account.platform}, @${account.username}. ` +
+                `isCsvImport: ${isCsvImport}, access_token prefix: ${account.access_token?.slice(0, 10)}..., ` +
+                `platform_user_id: ${account.platform_user_id}. ` +
+                `Reconnect your account in Settings.`
           );
         }
 
