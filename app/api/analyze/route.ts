@@ -66,6 +66,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Account not found or not connected" }, { status: 404 });
     }
 
+    // Preflight server config checks before creating a job / consuming usage.
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json(
+        {
+          error:
+            "Server misconfiguration: ANTHROPIC_API_KEY is not set. Add it in your deployment environment and redeploy.",
+        },
+        { status: 500 }
+      );
+    }
+
     // Check for in-progress job for this account
     const { data: existingJob } = await serviceClient
       .from("analysis_jobs")
