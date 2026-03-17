@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 
           if (posts.length > 0) {
             const { error: upsertError } = await serviceClient.from("posts").upsert(
-              posts.map((p) => ({ ...p, account_id })),
+              posts.map(({ id: _unusedId, ...postWithoutId }) => ({ ...postWithoutId, account_id })),
               { onConflict: "account_id,platform_post_id", ignoreDuplicates: false }
             );
             if (upsertError) {
