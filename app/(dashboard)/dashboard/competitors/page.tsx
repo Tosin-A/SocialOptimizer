@@ -86,7 +86,7 @@ function ComparisonPanel({ comparison, onClose }: { comparison: ComparisonResult
       </div>
 
       {/* Gap metrics row */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="bg-white/5 rounded-xl p-3 space-y-1">
           <p className="text-xs text-muted-foreground">Engagement gap</p>
           <DeltaBadge value={parseFloat((comparison.engagement_gap * 100).toFixed(2))} unit="pp" />
@@ -410,7 +410,7 @@ export default function CompetitorsPage() {
                 </div>
 
                 {/* Metrics */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4">
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Followers</div>
                     <div className="font-semibold">{c.followers ? formatNumber(c.followers) : "—"}</div>

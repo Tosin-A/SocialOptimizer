@@ -201,7 +201,7 @@ export default function TrackPage() {
           {showNewExp && (
             <div className="glass rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold">Start a new experiment</h3>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
                   <Input placeholder="e.g. Rewrite all hooks as questions" value={expName} onChange={(e) => setExpName(e.target.value)} />
@@ -294,7 +294,7 @@ export default function TrackPage() {
           {showNewWin && (
             <div className="glass rounded-2xl p-6 space-y-4">
               <h3 className="text-sm font-semibold">Save a win</h3>
-              <div className="grid sm:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="space-y-2">
                   <Label>Tag</Label>
                   <Input placeholder="e.g. hook-rewrite, hashtag-cut" value={winTag} onChange={(e) => setWinTag(e.target.value)} />

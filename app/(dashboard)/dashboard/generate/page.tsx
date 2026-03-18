@@ -253,7 +253,7 @@ export default function GeneratePage() {
       {tab === "generate" && <>
 
       {/* Config panel */}
-      <div className="glass rounded-2xl p-6 grid sm:grid-cols-2 gap-5">
+      <div className="glass rounded-2xl p-4 sm:p-6 grid sm:grid-cols-2 gap-5">
         <div className="space-y-2">
           <Label>Platform</Label>
           <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>

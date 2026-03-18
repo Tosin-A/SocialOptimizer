@@ -103,8 +103,8 @@ export default async function ReportsPage() {
             const date = new Date(r.created_at);
 
             return (
-              <div key={r.id} className="glass rounded-2xl p-5 hover:bg-white/[0.06] transition-colors">
-                <div className="flex items-start justify-between gap-4">
+              <div key={r.id} className="glass rounded-2xl p-4 sm:p-5 hover:bg-white/[0.06] transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                   {/* Left: account + niche */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -142,7 +142,7 @@ export default async function ReportsPage() {
                   </div>
 
                   {/* Right: date + actions */}
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                  <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2">
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
                       {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </span>

@@ -216,7 +216,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             </a>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
           {[
             { label: "Niche", value: report.detected_niche },
             { label: "Avg Engagement", value: `${(report.avg_engagement_rate * 100).toFixed(2)}%` },
@@ -241,7 +241,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-white/5 rounded-xl p-1 overflow-x-auto">
+      <div className="flex gap-1 bg-white/5 rounded-xl p-1 overflow-x-auto scrollbar-hide">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -258,7 +258,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
       {/* Tab content */}
       {tab === "overview" && (
-        <div className="glass rounded-2xl p-4 sm:p-6 space-y-4">
+        <div className="glass rounded-2xl p-3 sm:p-5 space-y-4">
           <h3 className="font-semibold text-sm">Score Breakdown</h3>
           <div className="space-y-3">
             {SCORE_ITEMS.map(({ key, label }) => (
@@ -313,7 +313,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "roadmap" && (
-        <div className="glass rounded-2xl p-4 sm:p-6">
+        <div className="glass rounded-2xl p-3 sm:p-5">
           <h3 className="font-semibold text-sm flex items-center gap-2 mb-6">
             <Map className="w-4 h-4 text-brand-400" /> Your prioritized growth roadmap
           </h3>
@@ -326,7 +326,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "posts" && (
-        <div className="glass rounded-2xl p-4 sm:p-6 space-y-3">
+        <div className="glass rounded-2xl p-3 sm:p-5 space-y-3">
           <h3 className="font-semibold text-sm mb-1">Post-level performance</h3>
           <p className="text-xs text-muted-foreground mb-4">Sort posts by key metrics. Top performers are highlighted green, underperformers red.</p>
 
@@ -342,7 +342,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                     )
                   }
                 >
-                  <SelectTrigger className="h-8 w-[180px] text-xs">
+                  <SelectTrigger className="h-8 w-full sm:w-[180px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -362,7 +362,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                   value={postSortDirection}
                   onValueChange={(value) => setPostSortDirection(value as "desc" | "asc")}
                 >
-                  <SelectTrigger className="h-8 w-[130px] text-xs">
+                  <SelectTrigger className="h-8 w-full sm:w-[130px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -395,7 +395,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                   <div
                     key={post.id}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl p-3 border text-xs transition-all",
+                      "flex items-center gap-2 sm:gap-3 rounded-xl p-2.5 sm:p-3 border text-xs transition-all",
                       post.performance === "top"
                         ? "border-neon-green/20 bg-neon-green/5"
                         : post.performance === "worst"
@@ -464,7 +464,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       )}
 
       {tab === "hashtags" && (
-        <div className="glass rounded-2xl p-4 sm:p-6 space-y-5">
+        <div className="glass rounded-2xl p-3 sm:p-5 space-y-5">
           <div>
             <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
               <Hash className="w-4 h-4 text-brand-400" /> Recommended hashtags to add

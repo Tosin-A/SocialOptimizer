@@ -32,7 +32,7 @@ export default function UpgradeGate({ feature, children, fallback }: Props) {
   if (fallback) return <>{fallback}</>;
 
   return (
-    <div className="relative rounded-xl border border-slate-700/50 bg-slate-900/50 p-8 text-center">
+    <div className="relative rounded-xl border border-slate-700/50 bg-slate-900/50 p-5 sm:p-8 text-center">
       <div className="flex flex-col items-center gap-3">
         <div className="rounded-full bg-slate-800 p-3">
           <Lock className="h-5 w-5 text-slate-400" />

@@ -112,7 +112,7 @@ export default async function DashboardPage() {
       {hasAccounts && hasReports && (
         <>
           {/* Top row: Growth score + metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             <GrowthScoreCard
               score={stats.growth_score}
               delta={stats.growth_score_delta}
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
           )}
 
           {/* Bottom row: Roadmap + Recent reports */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             <ImprovementRoadmap
               roadmap={latestReport?.improvement_roadmap ?? []}
               className="lg:col-span-2"

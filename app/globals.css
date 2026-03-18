@@ -103,4 +103,8 @@
     overflow: hidden;
   }
 
+  /* ── Scrollbar-hide — used on horizontal tab bars ────────────── */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
 }

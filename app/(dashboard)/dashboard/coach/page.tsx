@@ -144,7 +144,7 @@ export default function CoachPage() {
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="lg:hidden fixed inset-y-0 left-0 w-72 z-50 bg-slate-950 border-r border-white/5">
+            <div className="lg:hidden fixed inset-y-0 left-0 w-[85vw] max-w-72 z-50 bg-slate-950 border-r border-white/5">
               <CoachConversationList
                 conversations={conversations}
                 activeId={activeConversationId}

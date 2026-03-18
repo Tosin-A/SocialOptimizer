@@ -114,7 +114,7 @@ export default async function RoadmapPage() {
                   label: action.category,
                 };
                 return (
-                  <div key={i} className="p-5 flex gap-4 hover:bg-white/[0.02] transition-colors">
+                  <div key={i} className="p-4 sm:p-5 flex gap-3 sm:gap-4 hover:bg-white/[0.02] transition-colors">
                     <div className="flex flex-col items-center flex-shrink-0">
                       <div className="w-9 h-9 rounded-full border bg-brand-600/10 flex items-center justify-center text-sm font-bold text-brand-400">
                         {i + 1}

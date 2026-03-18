@@ -172,7 +172,7 @@ export default function DiscoverPage() {
         <div className="space-y-6">
           <div className="flex justify-end">
             <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-              <SelectTrigger className="w-64">
+              <SelectTrigger className="w-full sm:w-64">
                 <SelectValue placeholder="Select account..." />
               </SelectTrigger>
               <SelectContent>
@@ -186,7 +186,7 @@ export default function DiscoverPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+          <div className="flex gap-1 bg-white/5 rounded-xl p-1 overflow-x-auto scrollbar-hide">
             {tabs.map((t) => (
               <button
                 key={t.id}

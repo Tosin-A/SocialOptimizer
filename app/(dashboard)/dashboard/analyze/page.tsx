@@ -161,7 +161,7 @@ function AnalyzePageInner() {
       </div>
 
       {/* Control panel */}
-      <div className="glass rounded-2xl p-6">
+      <div className="glass rounded-2xl p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
           <div className="flex-1 space-y-2">
             <label className="text-sm font-medium">Select account to analyze</label>
