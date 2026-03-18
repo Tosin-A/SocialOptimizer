@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw, Bell } from "lucide-react";
 import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,6 +120,9 @@ function SettingsContent() {
   const [savingPillars, setSavingPillars] = useState(false);
   const [syncingPillars, setSyncingPillars] = useState(false);
   const [pillarsLoaded, setPillarsLoaded] = useState(false);
+  const [emailAnalysis, setEmailAnalysis] = useState(true);
+  const [emailDigest, setEmailDigest] = useState(true);
+  const [savingNotifs, setSavingNotifs] = useState(false);
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
   const searchParams = useSearchParams();
@@ -173,6 +176,16 @@ function SettingsContent() {
         if (pillarsData.data) setBrandPillars(pillarsData.data);
       } catch {}
       setPillarsLoaded(true);
+
+      // Fetch email notification preferences
+      try {
+        const notifsRes = await fetch("/api/notifications/preferences");
+        const notifsData = await notifsRes.json();
+        if (notifsData.data) {
+          setEmailAnalysis(notifsData.data.email_analysis_notifications);
+          setEmailDigest(notifsData.data.email_weekly_digest);
+        }
+      } catch {}
 
       // Handle return from Stripe checkout — poll until webhook updates the plan
       const upgradedTo = searchParams.get("upgraded");
@@ -586,6 +599,91 @@ function SettingsContent() {
           mode={accounts.length === 0 ? "initial" : "add"}
           connectedAccounts={accounts}
         />
+      </div>
+
+      {/* Email notifications */}
+      <div className="glass rounded-2xl p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
+          <Bell className="w-4 h-4" /> Email notifications
+        </h2>
+
+        <div className="space-y-3">
+          <label className="flex items-center justify-between cursor-pointer group">
+            <div>
+              <p className="text-sm font-medium">Analysis complete</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Get emailed when your analysis report is ready</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={emailAnalysis}
+              disabled={savingNotifs}
+              onClick={async () => {
+                const next = !emailAnalysis;
+                setEmailAnalysis(next);
+                setSavingNotifs(true);
+                try {
+                  const res = await fetch("/api/notifications/preferences", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email_analysis_notifications: next }),
+                  });
+                  if (!res.ok) throw new Error();
+                  toast({ title: next ? "Analysis emails enabled" : "Analysis emails disabled" });
+                } catch {
+                  setEmailAnalysis(!next);
+                  toast({ title: "Failed to update", variant: "destructive" });
+                } finally {
+                  setSavingNotifs(false);
+                }
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                emailAnalysis ? "bg-brand-500" : "bg-white/10"
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                emailAnalysis ? "translate-x-6" : "translate-x-1"
+              }`} />
+            </button>
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer group">
+            <div>
+              <p className="text-sm font-medium">Weekly digest</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Monday summary of your growth scores and engagement</p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={emailDigest}
+              disabled={savingNotifs}
+              onClick={async () => {
+                const next = !emailDigest;
+                setEmailDigest(next);
+                setSavingNotifs(true);
+                try {
+                  const res = await fetch("/api/notifications/preferences", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email_weekly_digest: next }),
+                  });
+                  if (!res.ok) throw new Error();
+                  toast({ title: next ? "Weekly digest enabled" : "Weekly digest disabled" });
+                } catch {
+                  setEmailDigest(!next);
+                  toast({ title: "Failed to update", variant: "destructive" });
+                } finally {
+                  setSavingNotifs(false);
+                }
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                emailDigest ? "bg-brand-500" : "bg-white/10"
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                emailDigest ? "translate-x-6" : "translate-x-1"
+              }`} />
+            </button>
+          </label>
+        </div>
       </div>
 
       {/* Danger zone */}

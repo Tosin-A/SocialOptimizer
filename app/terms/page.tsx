@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, BarChart3 } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Terms of Service | CloutAI" };
+export const metadata = { title: "Terms of Service | CLOUT" };
 
 export default function TermsPage() {
   return (
@@ -9,11 +10,8 @@ export default function TermsPage() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
         <div className="max-w-3xl mx-auto px-6 flex items-center justify-between h-14">
-          <Link href="/" className="flex items-center gap-2.5 font-semibold text-sm">
-            <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
-              <BarChart3 className="w-4 h-4 text-white" />
-            </div>
-            CloutAI
+          <Link href="/" className="flex items-center">
+            <Image src="/logo.png" alt="CLOUT" width={80} height={24} className="rounded-sm" />
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back
@@ -28,20 +26,20 @@ export default function TermsPage() {
           <p className="text-sm text-muted-foreground">Last updated: February 27, 2026</p>
         </div>
 
-        <Section title="1. What CloutAI is">
-          <p>CloutAI is a social media analysis tool. It connects to your TikTok, Instagram, YouTube, and Facebook accounts, fetches post-level performance data, runs it through an AI analysis pipeline, and returns metric-backed growth recommendations.</p>
+        <Section title="1. What CLOUT is">
+          <p>CLOUT is a social media analysis tool. It connects to your TikTok, Instagram, YouTube, and Facebook accounts, fetches post-level performance data, runs it through an AI analysis pipeline, and returns metric-backed growth recommendations.</p>
           <p>It is not a social media scheduler, content management system, or posting tool. It does not post, edit, or delete anything on your social media accounts. Access is read-only.</p>
         </Section>
 
         <Section title="2. Your account">
           <p>You must provide a valid email address to create an account. You&apos;re responsible for keeping your login credentials secure. If you suspect unauthorized access, change your password immediately and email us.</p>
-          <p>One person, one account. Sharing accounts is not permitted. Agency plans allow multiple connected social media accounts under a single CloutAI login.</p>
+          <p>One person, one account. Sharing accounts is not permitted. Agency plans allow multiple connected social media accounts under a single CLOUT login.</p>
         </Section>
 
         <Section title="3. Acceptable use">
           <p>You agree not to:</p>
           <ul className="list-disc pl-5 space-y-1.5 text-muted-foreground text-sm">
-            <li>Use CloutAI to harass, stalk, or monitor individuals without their consent.</li>
+            <li>Use CLOUT to harass, stalk, or monitor individuals without their consent.</li>
             <li>Attempt to access other users&apos; data or accounts.</li>
             <li>Reverse-engineer, scrape, or systematically extract data from our APIs beyond normal product use.</li>
             <li>Use automated tools (bots, scripts) to interact with the service beyond normal browser usage.</li>
@@ -58,16 +56,16 @@ export default function TermsPage() {
         </Section>
 
         <Section title="5. What you own">
-          <p><strong>Your data is yours.</strong> Your social media data, analysis reports, and generated content belong to you. We claim no ownership over any content you create or import into CloutAI.</p>
+          <p><strong>Your data is yours.</strong> Your social media data, analysis reports, and generated content belong to you. We claim no ownership over any content you create or import into CLOUT.</p>
           <p>You grant us a limited license to process your data solely for the purpose of providing the service: running analyses, generating content, and displaying results in your dashboard. This license ends when you delete your account.</p>
         </Section>
 
         <Section title="6. What we own">
-          <p>The CloutAI application, its design, code, scoring algorithms, analysis prompts, and brand are our intellectual property. Your use of the service does not grant you any rights to these beyond normal product access.</p>
+          <p>The CLOUT application, its design, code, scoring algorithms, analysis prompts, and brand are our intellectual property. Your use of the service does not grant you any rights to these beyond normal product access.</p>
         </Section>
 
         <Section title="7. AI-generated content">
-          <p>Content produced by our AI generator (hooks, captions, scripts, hashtag sets) is generated by Claude (Anthropic). You&apos;re free to use generated content for any purpose, commercial or personal, without attribution to CloutAI.</p>
+          <p>Content produced by our AI generator (hooks, captions, scripts, hashtag sets) is generated by Claude (Anthropic). You&apos;re free to use generated content for any purpose, commercial or personal, without attribution to CLOUT.</p>
           <p>AI output is not guaranteed to be unique, accurate, or free of errors. You should review and edit generated content before using it. We are not responsible for the performance of content you publish based on our suggestions.</p>
         </Section>
 
@@ -87,7 +85,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="11. Limitation of liability">
-          <p>CloutAI is provided &quot;as is.&quot; To the maximum extent permitted by law, we disclaim all warranties, express or implied. Our total liability for any claim arising from your use of the service is limited to the amount you&apos;ve paid us in the 12 months preceding the claim.</p>
+          <p>CLOUT is provided &quot;as is.&quot; To the maximum extent permitted by law, we disclaim all warranties, express or implied. Our total liability for any claim arising from your use of the service is limited to the amount you&apos;ve paid us in the 12 months preceding the claim.</p>
           <p>We are not liable for indirect, incidental, consequential, or punitive damages, including lost revenue, lost followers, or missed opportunities.</p>
         </Section>
 
@@ -123,7 +121,7 @@ function Footer() {
   return (
     <footer className="border-t border-white/[0.05] py-8 px-6">
       <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
-        <span>CloutAI © 2026</span>
+        <span>CLOUT © 2026</span>
         <div className="flex gap-6 text-xs">
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="text-foreground font-medium">Terms</Link>

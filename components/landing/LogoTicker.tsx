@@ -43,7 +43,7 @@ export default function LogoTicker() {
           scaleOnHover
           fadeOut
           fadeOutColor="#080f1e"
-          ariaLabel="Companies using CloutAI"
+          ariaLabel="Companies using CLOUT"
         />
       </div>
     </div>

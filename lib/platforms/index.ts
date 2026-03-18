@@ -38,15 +38,24 @@ export async function getProfileForPlatform(platform: Platform, token: string) {
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
 
 export const PLATFORM_OAUTH_URLS: Record<Platform, (state: string) => string> = {
-  tiktok: (state) =>
-    `https://www.tiktok.com/v2/auth/authorize?client_key=${process.env.TIKTOK_CLIENT_KEY}&response_type=code&scope=user.info.basic,user.info.profile,user.info.stats,video.list&redirect_uri=${APP_URL}/api/connect/tiktok/callback&state=${state}`,
+  tiktok: (state) => {
+    const redirectUri = encodeURIComponent(`${APP_URL}/api/connect/tiktok/callback`);
+    return `https://www.tiktok.com/v2/auth/authorize?client_key=${process.env.TIKTOK_CLIENT_KEY}&response_type=code&scope=user.info.basic,user.info.profile,user.info.stats,video.list&redirect_uri=${redirectUri}&state=${state}`;
+  },
 
-  instagram: (state) =>
-    `https://api.instagram.com/oauth/authorize?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${APP_URL}/api/connect/instagram/callback&scope=instagram_basic,instagram_manage_insights&response_type=code&state=${state}`,
+  instagram: (state) => {
+    const redirectUri = encodeURIComponent(`${APP_URL}/api/connect/instagram/callback`);
+    return `https://api.instagram.com/oauth/authorize?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${redirectUri}&scope=instagram_basic,instagram_manage_insights&response_type=code&state=${state}`;
+  },
 
-  youtube: (state) =>
-    `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${APP_URL}/api/connect/youtube/callback&response_type=code&scope=https://www.googleapis.com/auth/youtube.readonly%20https://www.googleapis.com/auth/yt-analytics.readonly&access_type=offline&prompt=consent&state=${state}`,
+  youtube: (state) => {
+    const redirectUri = encodeURIComponent(`${APP_URL}/api/connect/youtube/callback`);
+    const scope = encodeURIComponent("https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly");
+    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&state=${state}`;
+  },
 
-  facebook: (state) =>
-    `https://www.facebook.com/v21.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${APP_URL}/api/connect/facebook/callback&scope=pages_read_engagement,pages_read_user_content&state=${state}`,
+  facebook: (state) => {
+    const redirectUri = encodeURIComponent(`${APP_URL}/api/connect/facebook/callback`);
+    return `https://www.facebook.com/v21.0/dialog/oauth?client_id=${process.env.FACEBOOK_APP_ID}&redirect_uri=${redirectUri}&scope=pages_read_engagement,pages_read_user_content&state=${state}`;
+  },
 };

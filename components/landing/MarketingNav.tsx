@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3 } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MobileMenu from "./MobileMenu";
 
@@ -16,11 +17,8 @@ export default function MarketingNav() {
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold text-sm">
-          <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
-            <BarChart3 className="w-4 h-4 text-white" />
-          </div>
-          CloutAI
+        <Link href="/" className="flex items-center">
+          <Image src="/logo.png" alt="CLOUT" width={100} height={30} className="rounded-sm" />
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">

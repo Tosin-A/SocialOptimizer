@@ -906,11 +906,11 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
 
       const { data: userData } = await supabase
         .from("users")
-        .select("auth_id")
+        .select("auth_id, email_analysis_notifications")
         .eq("id", account.user_id)
         .single();
 
-      if (userData) {
+      if (userData && userData.email_analysis_notifications !== false) {
         const authClient = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3 } from "lucide-react";
+import Image from "next/image";
 import gsap from "gsap";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -151,10 +151,7 @@ export default function CardNav() {
 
           {/* Logo */}
           <Link href="/" className="card-nav-logo" onClick={() => setIsOpen(false)}>
-            <div className="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center flex-shrink-0">
-              <BarChart3 className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className={scrolled ? "hidden sm:inline" : ""}>CloutAI</span>
+            <Image src="/logo.png" alt="CLOUT" width={72} height={22} className="rounded-sm flex-shrink-0" />
           </Link>
 
           {/* Auth buttons */}

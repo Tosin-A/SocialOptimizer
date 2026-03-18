@@ -21,9 +21,9 @@ function getTransporter(): Transporter {
 
 function getFromAddress(): string {
   const raw = process.env.EMAIL_FROM;
-  if (!raw) return `CloutAI <${process.env.GMAIL_USER}>`;
+  if (!raw) return `CLOUT <${process.env.GMAIL_USER}>`;
   if (raw.includes("<")) return raw;
-  return `CloutAI <${raw}>`;
+  return `CLOUT <${raw}>`;
 }
 
 const FROM = getFromAddress();
@@ -66,9 +66,9 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#f8fafc;margin:0;padding:32px 16px;">
   <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
 
-    <div style="background:#1e1b4b;padding:28px 32px;">
-      <div style="font-weight:800;font-size:20px;color:#818cf8;letter-spacing:-0.5px;">CloutAI</div>
-      <div style="color:#c7d2fe;font-size:13px;margin-top:4px;">Your analysis is ready</div>
+    <div style="background:#000;padding:28px 32px;">
+      <img src="${APP_URL}/logo.png" alt="CLOUT" width="120" height="36" style="display:block;" />
+      <div style="color:#c7d2fe;font-size:13px;margin-top:8px;">Your analysis is ready</div>
     </div>
 
     <div style="padding:28px 32px;">
@@ -97,7 +97,7 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
         Download PDF report
       </a>
       <a href="${websiteUrl}" style="display:block;border:1px solid #cbd5e1;color:#334155;text-decoration:none;text-align:center;padding:12px 24px;border-radius:8px;font-weight:600;font-size:13px;">
-        Open CloutAI
+        Open CLOUT
       </a>
       <p style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;">
         PDF opens in a print-friendly view. Use Save as PDF in your browser.
@@ -167,9 +167,9 @@ export async function sendWeeklyDigest(opts: WeeklyDigestOptions) {
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#f8fafc;margin:0;padding:32px 16px;">
   <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
 
-    <div style="background:#1e1b4b;padding:28px 32px;">
-      <div style="font-weight:800;font-size:20px;color:#818cf8;">CloutAI</div>
-      <div style="color:#c7d2fe;font-size:13px;margin-top:4px;">Weekly performance digest</div>
+    <div style="background:#000;padding:28px 32px;">
+      <img src="${APP_URL}/logo.png" alt="CLOUT" width="120" height="36" style="display:block;" />
+      <div style="color:#c7d2fe;font-size:13px;margin-top:8px;">Weekly performance digest</div>
     </div>
 
     <div style="padding:28px 32px;">
@@ -203,7 +203,7 @@ export async function sendWeeklyDigest(opts: WeeklyDigestOptions) {
   return getTransporter().sendMail({
     from: FROM,
     to: opts.to,
-    subject: `Your weekly CloutAI digest`,
+    subject: `Your weekly CLOUT digest`,
     html,
   });
 }

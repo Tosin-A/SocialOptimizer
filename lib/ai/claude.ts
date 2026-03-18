@@ -831,7 +831,7 @@ Rules:
 
 // ─── Content Coach chat ───────────────────────────────────────────────────
 
-const COACH_SYSTEM_PROMPT = `You are a content coach inside CloutAI — a data-driven social media analysis tool.
+const COACH_SYSTEM_PROMPT = `You are a content coach inside CLOUT — a data-driven social media analysis tool.
 
 You operate in two modes depending on what data is available:
 

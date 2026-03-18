@@ -17,18 +17,29 @@ function isAuthorized(req: NextRequest): boolean {
   return auth === `Bearer ${secret}`;
 }
 
+// Vercel Cron invokes routes with GET — delegate to the shared handler
+export async function GET(req: NextRequest) {
+  return handleDigest(req);
+}
+
+// Allow manual POST triggers (e.g. from an admin panel)
 export async function POST(req: NextRequest) {
+  return handleDigest(req);
+}
+
+async function handleDigest(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const supabase = getSupabaseServiceClient();
 
-  // Fetch all users who have at least one analysis report
+  // Fetch all users who have at least one analysis and haven't opted out
   const { data: users } = await supabase
     .from("users")
     .select("id, auth_id")
-    .gt("analyses_used", 0);
+    .gt("analyses_used", 0)
+    .neq("email_weekly_digest", false);
 
   if (!users || users.length === 0) {
     return NextResponse.json({ sent: 0 });

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "CloutAI | Content analytics for serious creators";
+export const alt = "CLOUT | Content analytics for serious creators";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -111,8 +111,8 @@ export default function OGImage() {
               <polyline points="16 7 22 7 22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <span style={{ color: "#818cf8", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            CloutAI
+          <span style={{ color: "#818cf8", fontSize: 22, fontWeight: 800, letterSpacing: "0.02em" }}>
+            CLOUT
           </span>
         </div>
 

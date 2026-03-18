@@ -63,7 +63,7 @@ export default function ExportCSVButton({ reports }: { reports: ReportRow[] }) {
     const url  = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href     = url;
-    link.download = `cloutai-reports-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `clout-reports-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };

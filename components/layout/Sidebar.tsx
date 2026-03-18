@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   BarChart3, Home, Users, Wand2, Settings,
   TrendingUp, ChevronRight, LogOut, FileText, X,
@@ -54,11 +55,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     <>
       {/* Logo */}
       <div className="p-5 border-b border-white/5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-110 hover:brightness-125">
-            <TrendingUp className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold">CloutAI</span>
+        <Link href="/" className="flex items-center" onClick={onClose}>
+          <Image
+            src="/logo.png"
+            alt="CLOUT"
+            width={110}
+            height={34}
+            className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
+          />
         </Link>
         {/* Close button — mobile only */}
         {onClose && (

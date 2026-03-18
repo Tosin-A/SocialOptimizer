@@ -2,7 +2,8 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { BarChart3, Mail, Lock, User, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+import { Mail, Lock, User, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,11 +109,8 @@ function SignupContent() {
       <div className="w-full max-w-md relative">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 rounded-md bg-brand-500 flex items-center justify-center">
-              <BarChart3 className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-semibold text-base">CloutAI</span>
+          <Link href="/" className="inline-flex items-center mb-6">
+            <Image src="/logo.png" alt="CLOUT" width={90} height={28} className="rounded-sm" />
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Start growing today</h1>
           <p className="text-muted-foreground text-sm mt-1">
