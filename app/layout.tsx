@@ -19,8 +19,8 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SocialOptimizer | Content analytics for serious creators",
-    template: "%s | SocialOptimizer",
+    default: "CloutAI | Content analytics for serious creators",
+    template: "%s | CloutAI",
   },
   description:
     "Analyze 90 days of TikTok, Instagram, YouTube, and Facebook content. Get a ranked list of exactly what's costing you growth, backed by data from 2,000+ accounts.",
@@ -32,18 +32,18 @@ export const metadata: Metadata = {
     "content analysis",
     "creator analytics",
   ],
-  authors: [{ name: "SocialOptimizer" }],
+  authors: [{ name: "CloutAI" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "SocialOptimizer | Content analytics for serious creators",
+    title: "CloutAI | Content analytics for serious creators",
     description:
       "Analyze 90 days of your posts across 4 platforms. Get a ranked fix list, not a generic report.",
-    siteName: "SocialOptimizer",
+    siteName: "CloutAI",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SocialOptimizer",
+    title: "CloutAI",
     description: "Content analytics for serious creators.",
   },
   robots: { index: true, follow: true },

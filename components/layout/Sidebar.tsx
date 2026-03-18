@@ -58,7 +58,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-110 hover:brightness-125">
             <TrendingUp className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold">SocialOptimizer</span>
+          <span className="font-bold">CloutAI</span>
         </Link>
         {/* Close button — mobile only */}
         {onClose && (

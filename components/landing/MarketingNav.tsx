@@ -20,7 +20,7 @@ export default function MarketingNav() {
           <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
             <BarChart3 className="w-4 h-4 text-white" />
           </div>
-          SocialOptimizer
+          CloutAI
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">

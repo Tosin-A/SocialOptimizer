@@ -154,7 +154,7 @@ export default function CardNav() {
             <div className="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center flex-shrink-0">
               <BarChart3 className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className={scrolled ? "hidden sm:inline" : ""}>SocialOptimizer</span>
+            <span className={scrolled ? "hidden sm:inline" : ""}>CloutAI</span>
           </Link>
 
           {/* Auth buttons */}

@@ -75,7 +75,7 @@ function LoginContent() {
             <div className="w-8 h-8 rounded-md bg-brand-500 flex items-center justify-center">
               <BarChart3 className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-base">SocialOptimizer</span>
+            <span className="font-semibold text-base">CloutAI</span>
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground text-sm mt-1">Sign in to your analytics dashboard</p>

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "SocialOptimizer | Content analytics for serious creators";
+export const alt = "CloutAI | Content analytics for serious creators";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -112,7 +112,7 @@ export default function OGImage() {
             </svg>
           </div>
           <span style={{ color: "#818cf8", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em" }}>
-            SocialOptimizer
+            CloutAI
           </span>
         </div>
 

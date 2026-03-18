@@ -94,7 +94,7 @@ export default function HeroSection() {
               <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
             </div>
             <span className="font-mono text-xs text-muted-foreground ml-2 hidden sm:inline">
-              socialoptimizer &middot; @cookswithjordan &middot; instagram &middot; 90-day analysis
+              cloutai &middot; @cookswithjordan &middot; instagram &middot; 90-day analysis
             </span>
             <div className="ml-auto flex items-center gap-1.5 text-[10px] font-mono text-status-good">
               <span className="w-1.5 h-1.5 rounded-full bg-status-good" />

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BarChart3 } from "lucide-react";
 
-export const metadata = { title: "Privacy Policy | SocialOptimizer" };
+export const metadata = { title: "Privacy Policy | CloutAI" };
 
 export default function PrivacyPage() {
   return (
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
             <div className="w-7 h-7 rounded-md bg-brand-500 flex items-center justify-center">
               <BarChart3 className="w-4 h-4 text-white" />
             </div>
-            SocialOptimizer
+            CloutAI
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="3. Third-party services">
-          <p>We use the following services to operate SocialOptimizer:</p>
+          <p>We use the following services to operate CloutAI:</p>
           <ul className="list-disc pl-5 space-y-1.5 text-muted-foreground text-sm">
             <li><strong>Supabase</strong>: Authentication and database hosting (PostgreSQL with row-level security).</li>
             <li><strong>Anthropic (Claude)</strong>: AI analysis and content generation. Post captions and metadata are sent to Claude&apos;s API for processing. Anthropic does not use API inputs to train models.</li>
@@ -83,11 +83,11 @@ export default function PrivacyPage() {
             <li><strong>Delete</strong> your data. Delete your entire account from Settings. This is permanent.</li>
             <li><strong>Disconnect</strong> platforms. Revoke our access at any time from Settings.</li>
           </ul>
-          <p>If you have questions about your data, email <a href="mailto:hi@socialoptimizer.co" className="text-brand-400 hover:text-brand-300 transition-colors">hi@socialoptimizer.co</a>.</p>
+          <p>If you have questions about your data, email <a href="mailto:hi@cloutai.co.uk" className="text-brand-400 hover:text-brand-300 transition-colors">hi@cloutai.co.uk</a>.</p>
         </Section>
 
         <Section title="9. Changes to this policy">
-          <p>If we make material changes, we&apos;ll notify you by email. Continued use of SocialOptimizer after changes constitutes acceptance.</p>
+          <p>If we make material changes, we&apos;ll notify you by email. Continued use of CloutAI after changes constitutes acceptance.</p>
         </Section>
       </article>
 
@@ -109,7 +109,7 @@ function Footer() {
   return (
     <footer className="border-t border-white/[0.05] py-8 px-6">
       <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
-        <span>SocialOptimizer © 2026</span>
+        <span>CloutAI © 2026</span>
         <div className="flex gap-6 text-xs">
           <Link href="/privacy" className="text-foreground font-medium">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>

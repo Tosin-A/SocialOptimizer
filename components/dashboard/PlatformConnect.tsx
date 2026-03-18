@@ -19,7 +19,7 @@ const PLATFORMS = [
     desc: "Optimize your Reels, Stories, and Posts for maximum reach",
     color: "from-purple-500/20 to-pink-500/20 border-purple-500/30",
     btnColor: "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600",
-    comingSoon: false,
+    comingSoon: true,
   },
   {
     id: "youtube",
