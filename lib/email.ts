@@ -1,18 +1,33 @@
 // ════════════════════════════════════════════════════════════════════════════
-// Email — Resend client + transactional email templates
+// Email — Nodemailer (Gmail SMTP) + transactional email templates
 // ════════════════════════════════════════════════════════════════════════════
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import type { Transporter } from "nodemailer";
 
-let _resend: Resend | null = null;
-function getResend(): Resend {
-  if (!_resend) {
-    _resend = new Resend(process.env.RESEND_API_KEY);
+let _transporter: Transporter | null = null;
+function getTransporter(): Transporter {
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
   }
-  return _resend;
+  return _transporter;
 }
-const FROM = process.env.EMAIL_FROM ?? "SocialOptimizer <noreply@socialoptimizer.com>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://socialoptimizer.com";
+
+function getFromAddress(): string {
+  const raw = process.env.EMAIL_FROM;
+  if (!raw) return `CloutAI <${process.env.GMAIL_USER}>`;
+  if (raw.includes("<")) return raw;
+  return `CloutAI <${raw}>`;
+}
+
+const FROM = getFromAddress();
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.cloutai.co.uk";
 
 // ─── Analysis complete ────────────────────────────────────────────────────────
 
@@ -52,7 +67,7 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
   <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
 
     <div style="background:#1e1b4b;padding:28px 32px;">
-      <div style="font-weight:800;font-size:20px;color:#818cf8;letter-spacing:-0.5px;">SocialOptimizer</div>
+      <div style="font-weight:800;font-size:20px;color:#818cf8;letter-spacing:-0.5px;">CloutAI</div>
       <div style="color:#c7d2fe;font-size:13px;margin-top:4px;">Your analysis is ready</div>
     </div>
 
@@ -82,7 +97,7 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
         Download PDF report
       </a>
       <a href="${websiteUrl}" style="display:block;border:1px solid #cbd5e1;color:#334155;text-decoration:none;text-align:center;padding:12px 24px;border-radius:8px;font-weight:600;font-size:13px;">
-        Open SocialOptimizer
+        Open CloutAI
       </a>
       <p style="font-size:11px;color:#94a3b8;margin:12px 0 0;text-align:center;">
         PDF opens in a print-friendly view. Use Save as PDF in your browser.
@@ -102,7 +117,7 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
 </body>
 </html>`;
 
-  return getResend().emails.send({
+  return getTransporter().sendMail({
     from: FROM,
     to: opts.to,
     subject: `Your ${opts.platform} analysis is ready — Growth Score: ${opts.growthScore}/100`,
@@ -153,7 +168,7 @@ export async function sendWeeklyDigest(opts: WeeklyDigestOptions) {
   <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
 
     <div style="background:#1e1b4b;padding:28px 32px;">
-      <div style="font-weight:800;font-size:20px;color:#818cf8;">SocialOptimizer</div>
+      <div style="font-weight:800;font-size:20px;color:#818cf8;">CloutAI</div>
       <div style="color:#c7d2fe;font-size:13px;margin-top:4px;">Weekly performance digest</div>
     </div>
 
@@ -185,10 +200,10 @@ export async function sendWeeklyDigest(opts: WeeklyDigestOptions) {
 </body>
 </html>`;
 
-  return getResend().emails.send({
+  return getTransporter().sendMail({
     from: FROM,
     to: opts.to,
-    subject: `Your weekly SocialOptimizer digest`,
+    subject: `Your weekly CloutAI digest`,
     html,
   });
 }
