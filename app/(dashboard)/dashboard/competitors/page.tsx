@@ -146,6 +146,7 @@ export default function CompetitorsPage() {
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [autoPicking, setAutoPicking] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [platform, setPlatform] = useState<Platform>("instagram");
   const [username, setUsername] = useState("");
@@ -203,6 +204,41 @@ export default function CompetitorsPage() {
       });
     } finally {
       setAdding(false);
+    }
+  };
+
+  const autoPickCompetitor = async () => {
+    setAutoPicking(true);
+    try {
+      const res = await fetch("/api/competitors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform: "tiktok", auto_pick: true }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to auto-pick competitor");
+
+      const pickedUsername = typeof data.suggested_username === "string" ? data.suggested_username : null;
+      toast({
+        title: "Competitor added",
+        description: pickedUsername
+          ? `Picked @${pickedUsername} based on your niche and added to tracking.`
+          : "A high-performing competitor was selected and added to tracking.",
+      });
+
+      setShowForm(false);
+      setPlatform("instagram");
+      setUsername("");
+      loadCompetitors();
+    } catch (err: unknown) {
+      toast({
+        title: "Auto-pick failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setAutoPicking(false);
     }
   };
 
@@ -312,7 +348,22 @@ export default function CompetitorsPage() {
                 Track account
               </Button>
             </div>
+            <div className="flex items-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2 w-full sm:w-auto border-white/10 hover:border-brand-500/50"
+                disabled={autoPicking}
+                onClick={autoPickCompetitor}
+              >
+                {autoPicking && <Loader2 className="w-4 h-4 animate-spin" />}
+                Pick for me (TikTok)
+              </Button>
+            </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Auto-pick uses your latest detected niche to choose a high-performing public TikTok creator.
+          </p>
         </form>
       )}
 
@@ -334,6 +385,15 @@ export default function CompetitorsPage() {
           </p>
           <Button onClick={() => setShowForm(true)} className="gap-2">
             <Plus className="w-4 h-4" /> Add your first competitor
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2 ml-2 border-white/10 hover:border-brand-500/50"
+            onClick={autoPickCompetitor}
+            disabled={autoPicking}
+          >
+            {autoPicking ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+            Pick one for me
           </Button>
         </div>
       )}

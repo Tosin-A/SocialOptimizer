@@ -3,10 +3,159 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
-const AddCompetitorSchema = z.object({
-  platform: z.enum(["tiktok", "instagram", "youtube", "facebook"]),
+const PlatformSchema = z.enum(["tiktok", "instagram", "youtube", "facebook"]);
+
+const ManualAddCompetitorSchema = z.object({
+  platform: PlatformSchema,
   username: z.string().min(1).max(100),
 });
+
+const AutoPickCompetitorSchema = z.object({
+  platform: PlatformSchema.default("tiktok"),
+  auto_pick: z.literal(true),
+  niche: z.string().min(2).max(100).optional(),
+});
+
+const AddCompetitorSchema = z.union([ManualAddCompetitorSchema, AutoPickCompetitorSchema]);
+
+interface ResearchVideo {
+  id?: string;
+  like_count?: number;
+  username?: string;
+}
+
+interface ResearchUserInfo {
+  username: string;
+  display_name: string | null;
+  followers: number | null;
+  niche: string | null;
+}
+
+function formatDateYYYYMMDD(date: Date): string {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}${m}${d}`;
+}
+
+async function getResearchAccessToken(): Promise<string> {
+  const clientKey = process.env.TIKTOK_RESEARCH_CLIENT_KEY ?? process.env.TIKTOK_CLIENT_KEY;
+  const clientSecret = process.env.TIKTOK_RESEARCH_CLIENT_SECRET ?? process.env.TIKTOK_CLIENT_SECRET;
+  if (!clientKey || !clientSecret) {
+    throw new Error("TikTok Research API credentials are not configured.");
+  }
+
+  const body = new URLSearchParams({
+    client_key: clientKey,
+    client_secret: clientSecret,
+    grant_type: "client_credentials",
+  });
+
+  const res = await fetch("https://open.tiktokapis.com/v2/oauth/token/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+
+  const raw = await res.json().catch(() => null);
+  if (!res.ok) {
+    throw new Error("Failed to authenticate with TikTok Research API.");
+  }
+
+  const token = (raw?.data?.access_token as string | undefined) ?? (raw?.access_token as string | undefined);
+  if (!token) {
+    throw new Error("TikTok Research API did not return an access token.");
+  }
+
+  return token;
+}
+
+async function queryResearchVideos(
+  accessToken: string,
+  niche: string
+): Promise<ResearchVideo[]> {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setUTCDate(startDate.getUTCDate() - 30);
+
+  const payload = {
+    query: {
+      and: [
+        { operation: "EQ", field_name: "keyword", field_values: [niche] },
+      ],
+    },
+    max_count: 100,
+    cursor: 0,
+    start_date: formatDateYYYYMMDD(startDate),
+    end_date: formatDateYYYYMMDD(endDate),
+    is_random: true,
+  };
+
+  const res = await fetch("https://open.tiktokapis.com/v2/research/video/query/?fields=id,like_count,username", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("TikTok Research API video query failed.");
+  }
+
+  const json = await res.json().catch(() => ({} as Record<string, unknown>));
+  const videos = (json?.data?.videos as ResearchVideo[] | undefined) ?? [];
+  return videos;
+}
+
+async function queryResearchUserInfo(
+  accessToken: string,
+  username: string
+): Promise<ResearchUserInfo | null> {
+  const res = await fetch(
+    "https://open.tiktokapis.com/v2/research/user/info/?fields=display_name,bio_description,follower_count,username",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    }
+  );
+
+  if (!res.ok) return null;
+
+  const json = await res.json().catch(() => null);
+  const data = json?.data as {
+    username?: string;
+    display_name?: string;
+    bio_description?: string;
+    follower_count?: number;
+  } | undefined;
+  if (!data?.username) return null;
+
+  return {
+    username: data.username,
+    display_name: data.display_name ?? null,
+    followers: typeof data.follower_count === "number" ? data.follower_count : null,
+    niche: data.bio_description ?? null,
+  };
+}
+
+function pickRandomCandidateFromTop(videos: ResearchVideo[]): string | null {
+  const ranked = videos
+    .filter((v) => typeof v.username === "string" && v.username.length > 0)
+    .sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0));
+
+  const unique = Array.from(new Set(ranked.map((v) => v.username as string)));
+  if (unique.length === 0) return null;
+
+  const topSlice = unique.slice(0, Math.min(10, unique.length));
+  const randomIndex = Math.floor(Math.random() * topSlice.length);
+  return topSlice[randomIndex] ?? null;
+}
 
 export async function POST(req: NextRequest) {
   const supabase = await getSupabaseServerClient();
@@ -56,14 +205,94 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  let targetPlatform = parsed.data.platform;
+  let targetUsername = "username" in parsed.data ? parsed.data.username : "";
+  let suggested = false;
+  let researchUser: ResearchUserInfo | null = null;
+
+  if ("auto_pick" in parsed.data && parsed.data.auto_pick) {
+    targetPlatform = "tiktok";
+
+    const explicitNiche = parsed.data.niche?.trim();
+    let detectedNiche = explicitNiche;
+    if (!detectedNiche) {
+      const { data: latestReport } = await serviceClient
+        .from("analysis_reports")
+        .select("detected_niche")
+        .eq("user_id", dbUser.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      detectedNiche = latestReport?.detected_niche?.trim() ?? "";
+    }
+
+    if (!detectedNiche) {
+      return NextResponse.json(
+        { error: "Run at least one analysis first so we can infer your niche before auto-picking a competitor." },
+        { status: 400 }
+      );
+    }
+
+    const accessToken = await getResearchAccessToken();
+    const videos = await queryResearchVideos(accessToken, detectedNiche);
+    const candidate = pickRandomCandidateFromTop(videos);
+    if (!candidate) {
+      return NextResponse.json(
+        { error: `No strong TikTok candidates found for niche "${detectedNiche}". Try a broader niche keyword.` },
+        { status: 404 }
+      );
+    }
+
+    // Avoid selecting an account the user already tracks.
+    const { data: existingCompetitors } = await serviceClient
+      .from("competitors")
+      .select("username")
+      .eq("user_id", dbUser.id)
+      .eq("platform", "tiktok");
+    const existingSet = new Set((existingCompetitors ?? []).map((row) => row.username.toLowerCase()));
+    if (existingSet.has(candidate.toLowerCase())) {
+      const fallback = Array.from(
+        new Set(
+          videos
+            .map((v) => v.username)
+            .filter((name): name is string => typeof name === "string" && name.length > 0)
+            .filter((name) => !existingSet.has(name.toLowerCase()))
+        )
+      )[0];
+      if (!fallback) {
+        return NextResponse.json(
+          { error: "All suggested competitors for this niche are already in your list." },
+          { status: 409 }
+        );
+      }
+      targetUsername = fallback;
+    } else {
+      targetUsername = candidate;
+    }
+
+    researchUser = await queryResearchUserInfo(accessToken, targetUsername);
+    suggested = true;
+  }
+
   // Fetch competitor data via Python service
-  let competitorData: any = {
-    platform_user_id: parsed.data.username,
-    username: parsed.data.username,
-    display_name: null,
+  let competitorData: {
+    platform_user_id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    followers: number | null;
+    niche: string | null;
+    avg_engagement_rate: number | null;
+    posts_per_week: number | null;
+    top_hashtags: string[];
+    content_formats: string[];
+  } = {
+    platform_user_id: targetUsername,
+    username: targetUsername,
+    display_name: researchUser?.display_name ?? null,
     avatar_url: null,
-    followers: null,
-    niche: null,
+    followers: researchUser?.followers ?? null,
+    niche: researchUser?.niche ?? null,
     avg_engagement_rate: null,
     posts_per_week: null,
     top_hashtags: [],
@@ -81,20 +310,24 @@ export async function POST(req: NextRequest) {
           "X-Service-Secret": process.env.PYTHON_SERVICE_SECRET!,
         },
         body: JSON.stringify({
-          platform: parsed.data.platform,
-          username: parsed.data.username,
+          platform: targetPlatform,
+          username: targetUsername,
         }),
       }
     );
     if (pyRes.ok) {
-      const scraped = await pyRes.json();
-      competitorData = { ...competitorData, ...scraped };
+      const scraped = await pyRes.json() as Partial<typeof competitorData>;
+      competitorData = {
+        ...competitorData,
+        ...scraped,
+        username: targetUsername,
+      };
       // Check if scraper returned meaningful data
       if (!scraped.followers && !scraped.display_name) {
         scrapePartial = true;
       }
     } else {
-      console.error(`Scrape failed with status ${pyRes.status} for ${parsed.data.platform}/${parsed.data.username}`);
+      console.error(`Scrape failed with status ${pyRes.status} for ${targetPlatform}/${targetUsername}`);
       scrapePartial = true;
     }
   } catch (err) {
@@ -106,9 +339,9 @@ export async function POST(req: NextRequest) {
     .from("competitors")
     .upsert({
       user_id: dbUser.id,
-      platform: parsed.data.platform,
+      platform: targetPlatform,
       platform_user_id: competitorData.platform_user_id,
-      username: parsed.data.username,
+      username: targetUsername,
       display_name: competitorData.display_name,
       avatar_url: competitorData.avatar_url,
       followers: competitorData.followers,
@@ -127,10 +360,22 @@ export async function POST(req: NextRequest) {
   await serviceClient.from("usage_events").insert({
     user_id: dbUser.id,
     event_type: "competitor_added",
-    metadata: { platform: parsed.data.platform, username: parsed.data.username },
+    metadata: {
+      platform: targetPlatform,
+      username: targetUsername,
+      suggested,
+    },
   });
 
-  return NextResponse.json({ data: competitor, scrapePartial }, { status: 201 });
+  return NextResponse.json(
+    {
+      data: competitor,
+      scrapePartial,
+      suggested,
+      suggested_username: suggested ? targetUsername : null,
+    },
+    { status: 201 }
+  );
 }
 
 export async function GET(req: NextRequest) {
