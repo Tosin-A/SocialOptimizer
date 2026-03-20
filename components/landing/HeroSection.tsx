@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SIGNALS, FIXES } from "@/lib/data/landing";
 import MetricBar from "./MetricBar";
 import ScoreRing from "./ScoreRing";
-import TextPressure from "./TextPressure";
+import BlurText from "./BlurText";
 import GradualBlur from "./GradualBlur";
 import StarBorder from "@/components/ui/StarBorder";
 
@@ -37,18 +37,19 @@ export default function HeroSection() {
           Content analytics &middot; TikTok &middot; Instagram &middot; YouTube &middot; Facebook
         </div>
 
-        {/* Headline — TextPressure on desktop, plain on mobile */}
+        {/* Headline — BlurText animation on desktop, plain on mobile */}
         <div className="hidden md:block mb-6 max-w-4xl">
-          <TextPressure
-            text="Know exactly what's costing you growth."
-            weight={true}
-            width={false}
-            italic={false}
+          <BlurText
+            text="The creators outgrowing you aren't luckier. They're more informed."
+            delay={150}
+            animateBy="words"
+            direction="top"
+            className="text-4xl lg:text-5xl xl:text-6xl font-semibold leading-[1.08] tracking-tight text-slate-100"
           />
         </div>
         <h1 className="md:hidden text-2xl sm:text-3xl font-semibold leading-[1.06] tracking-tight mb-6 max-w-3xl">
-          Know exactly what&apos;s<br />
-          costing you growth.
+          The creators outgrowing you<br />
+          aren&apos;t luckier. They&apos;re more informed.
         </h1>
 
         <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-10 max-w-2xl">

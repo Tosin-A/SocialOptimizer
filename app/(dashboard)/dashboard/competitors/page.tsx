@@ -44,6 +44,16 @@ interface ComparisonResult {
   competitor: Competitor;
 }
 
+async function parseJsonSafely<T>(res: Response): Promise<T | null> {
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 const PLATFORM_LABELS: Record<Platform, string> = {
   tiktok: "TikTok",
   instagram: "Instagram",
@@ -162,8 +172,8 @@ export default function CompetitorsPage() {
   const loadCompetitors = async () => {
     try {
       const res = await fetch("/api/competitors");
-      const data = await res.json();
-      setCompetitors(data.data ?? []);
+      const data = await parseJsonSafely<{ data?: Competitor[] }>(res);
+      setCompetitors(data?.data ?? []);
     } catch {
       // silently fail — we'll show empty state
     } finally {
@@ -183,9 +193,11 @@ export default function CompetitorsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ platform, username: username.replace("@", "").trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to add competitor");
-      if (data.scrapePartial) {
+      const data = await parseJsonSafely<{ scrapePartial?: boolean; error?: string }>(res);
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Failed to add competitor");
+      }
+      if (data?.scrapePartial) {
         toast({
           title: "Competitor added — limited data",
           description: `@${username} was added but profile data couldn't be fully scraped. Try refreshing later.`,
@@ -216,10 +228,12 @@ export default function CompetitorsPage() {
         body: JSON.stringify({ platform: "tiktok", auto_pick: true }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to auto-pick competitor");
+      const data = await parseJsonSafely<{ suggested_username?: string; error?: string }>(res);
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Failed to auto-pick competitor");
+      }
 
-      const pickedUsername = typeof data.suggested_username === "string" ? data.suggested_username : null;
+      const pickedUsername = typeof data?.suggested_username === "string" ? data.suggested_username : null;
       toast({
         title: "Competitor added",
         description: pickedUsername
@@ -246,9 +260,11 @@ export default function CompetitorsPage() {
     setComparing(competitorId);
     try {
       const res = await fetch(`/api/competitors/${competitorId}/compare`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Comparison failed");
-      setComparisons((prev) => ({ ...prev, [competitorId]: data.data }));
+      const data = await parseJsonSafely<{ data?: ComparisonResult; error?: string }>(res);
+      if (!res.ok) throw new Error(data?.error ?? "Comparison failed");
+      if (!data?.data) throw new Error("Comparison returned no data");
+      const comparison = data.data;
+      setComparisons((prev) => ({ ...prev, [competitorId]: comparison }));
       setExpandedComparisons((prev) => new Set([...prev, competitorId]));
     } catch (err: unknown) {
       toast({
@@ -265,9 +281,10 @@ export default function CompetitorsPage() {
     setRefreshing(competitorId);
     try {
       const res = await fetch(`/api/competitors/${competitorId}/refresh`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Refresh failed");
-      const updated = data.data as Competitor;
+      const data = await parseJsonSafely<{ data?: Competitor; error?: string }>(res);
+      if (!res.ok) throw new Error(data?.error ?? "Refresh failed");
+      if (!data?.data) throw new Error("Refresh returned no competitor data");
+      const updated = data.data;
       // Replace the competitor entirely with the fresh DB row
       setCompetitors((prev) =>
         prev.map((c) => (c.id === competitorId ? updated : c))

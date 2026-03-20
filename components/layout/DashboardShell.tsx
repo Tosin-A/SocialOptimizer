@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
@@ -11,13 +12,26 @@ export default function DashboardShell({
   user: User;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false);
+  const canCollapseSidebar = pathname.startsWith("/dashboard/coach");
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={canCollapseSidebar ? desktopSidebarCollapsed : false}
+      />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <Header user={user} onMenuClick={() => setSidebarOpen(true)} />
+        <Header
+          user={user}
+          onMenuClick={() => setSidebarOpen(true)}
+          canToggleDesktopSidebar={canCollapseSidebar}
+          desktopSidebarCollapsed={desktopSidebarCollapsed}
+          onDesktopSidebarToggle={() => setDesktopSidebarCollapsed((prev) => !prev)}
+        />
         <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6">
           {children}
         </main>

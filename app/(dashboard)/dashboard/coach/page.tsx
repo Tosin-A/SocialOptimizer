@@ -107,27 +107,20 @@ export default function CoachPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto h-[calc(100vh-6rem)] flex flex-col">
-      <div className="mb-4 flex-shrink-0 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-brand-400" /> Content Coach
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Ask specific questions about your page — the coach knows your metrics. Type <kbd className="text-xs px-1 py-0.5 rounded bg-white/10 font-mono">/</kbd> for commands.
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-[1400px] h-[calc(100vh-4.75rem)] flex flex-col">
+      <div className="mb-2 flex-shrink-0 flex items-center justify-end">
         <button
           onClick={() => setSidebarOpen(true)}
           className="lg:hidden p-2 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors"
+          aria-label="Open conversations"
         >
           <PanelLeftOpen className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 flex gap-4">
+      <div className="flex-1 min-h-0 flex gap-3">
         {/* Conversation sidebar — desktop */}
-        <div className="hidden lg:block w-72 flex-shrink-0 glass rounded-2xl overflow-hidden">
+        <div className="hidden lg:block w-64 xl:w-72 flex-shrink-0 glass rounded-2xl overflow-hidden">
           <CoachConversationList
             conversations={conversations}
             activeId={activeConversationId}
@@ -158,7 +151,7 @@ export default function CoachPage() {
         )}
 
         {/* Chat panel */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 min-h-0">
           <CoachChat
             accounts={accounts}
             conversationId={activeConversationId}

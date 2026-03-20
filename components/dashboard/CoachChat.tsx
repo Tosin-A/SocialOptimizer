@@ -304,13 +304,13 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Account selector */}
       {accounts.length > 1 && (
-        <div className="mb-4">
+        <div className="mb-3 px-1">
           <Label className="text-xs text-muted-foreground mb-1.5 block">Coaching based on data from</Label>
           <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-            <SelectTrigger className="w-full sm:w-72">
+            <SelectTrigger className="w-full sm:w-80 bg-white/5 border-white/10">
               <SelectValue placeholder="Select account..." />
             </SelectTrigger>
             <SelectContent>
@@ -329,9 +329,9 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 glass rounded-2xl flex flex-col overflow-hidden"
+        className="flex-1 min-h-0 glass rounded-2xl flex flex-col overflow-hidden"
       >
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-7 space-y-6">
           {loadingHistory ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -392,7 +392,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                    className={`max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-3.5 text-sm leading-relaxed ${
                       msg.role === "user"
                         ? "bg-brand-600/30 text-foreground rounded-br-md"
                         : "bg-white/5 text-foreground rounded-bl-md"
@@ -467,8 +467,8 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         </div>
 
         {/* Input area */}
-        <div className="border-t border-white/5 p-4">
-          <div className="relative">
+        <div className="border-t border-white/5 px-4 py-4 md:px-6 md:py-5">
+          <div className="relative mx-auto w-full max-w-4xl">
             {/* Command palette */}
             <AnimatePresence>
               {showCommands && filteredCommands.length > 0 && (
@@ -498,7 +498,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
               )}
             </AnimatePresence>
 
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-2.5">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -506,14 +506,14 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your content performance... Type / for commands"
                 rows={1}
-                className="flex-1 resize-none bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-brand-500/50 focus:border-brand-500/50 transition-colors"
+                className="flex-1 resize-none bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-brand-500/50 focus:border-brand-500/50 transition-colors"
                 disabled={loading}
               />
               <motion.button
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || loading}
                 whileTap={{ scale: 0.95 }}
-                className="h-[46px] w-[46px] rounded-xl flex-shrink-0 flex items-center justify-center bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:hover:bg-brand-600 transition-colors"
+                className="h-[48px] w-[48px] rounded-2xl flex-shrink-0 flex items-center justify-center bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:hover:bg-brand-600 transition-colors"
               >
                 <AnimatePresence mode="wait">
                   {loading ? (
@@ -539,7 +539,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
               </motion.button>
             </div>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-2">
+          <p className="mx-auto w-full max-w-4xl text-[11px] text-muted-foreground mt-2">
             Shift+Enter for new line. Type <kbd className="font-mono text-brand-400">/</kbd> for commands.
           </p>
         </div>

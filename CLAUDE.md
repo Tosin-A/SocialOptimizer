@@ -1,3 +1,8 @@
+---
+description: 
+alwaysApply: true
+---
+
 # CLAUDE.md — SocialOptimizer
 
 Internal engineering reference. Read this before touching any code.

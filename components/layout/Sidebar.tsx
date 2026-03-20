@@ -37,9 +37,10 @@ interface SidebarProps {
   /** Mobile: controlled open state from parent layout */
   open?: boolean;
   onClose?: () => void;
+  collapsed?: boolean;
 }
 
-export default function Sidebar({ open, onClose }: SidebarProps) {
+export default function Sidebar({ open, onClose, collapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const router   = useRouter();
   const supabase = getSupabaseBrowserClient();
@@ -54,15 +55,21 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const navContent = (
     <>
       {/* Logo */}
-      <div className="p-5 border-b border-white/5 flex items-center justify-between">
+      <div className={cn("border-b border-white/5 flex items-center justify-between", collapsed ? "p-3" : "p-5")}>
         <Link href="/" className="flex items-center" onClick={onClose}>
-          <Image
-            src="/logo.png"
-            alt="CLOUT"
-            width={110}
-            height={34}
-            className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
-          />
+          {collapsed ? (
+            <div className="w-10 h-10 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center text-sm font-bold text-slate-300">
+              C
+            </div>
+          ) : (
+            <Image
+              src="/logo.png"
+              alt="CLOUT"
+              width={110}
+              height={34}
+              className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
+            />
+          )}
         </Link>
         {/* Close button — mobile only */}
         {onClose && (
@@ -77,7 +84,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className={cn("flex-1 space-y-1", collapsed ? "p-2" : "p-3")}>
         {NAV.map(({ href, icon: Icon, label, gate }) => {
           const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href));
           const locked = gate ? !access[gate] : false;
@@ -87,29 +94,35 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               href={href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                "flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                collapsed ? "justify-center gap-0" : "gap-3",
                 active
                   ? "bg-brand-600/20 text-brand-300 border border-brand-600/30"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               )}
+              title={collapsed ? label : undefined}
             >
               <Icon className={cn("w-4 h-4", active ? "text-brand-400" : "")} />
-              {label}
-              {locked && <Lock className="w-3 h-3 ml-auto text-slate-500" />}
-              {active && !locked && <ChevronRight className="w-3 h-3 ml-auto text-brand-400" />}
+              {!collapsed && label}
+              {!collapsed && locked && <Lock className="w-3 h-3 ml-auto text-slate-500" />}
+              {!collapsed && active && !locked && <ChevronRight className="w-3 h-3 ml-auto text-brand-400" />}
             </Link>
           );
         })}
       </nav>
 
       {/* Sign out */}
-      <div className="p-3 border-t border-white/5">
+      <div className={cn("border-t border-white/5", collapsed ? "p-2" : "p-3")}>
         <button
           onClick={signOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+          className={cn(
+            "w-full flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all",
+            collapsed ? "justify-center gap-0" : "gap-3"
+          )}
+          title={collapsed ? "Sign out" : undefined}
         >
           <LogOut className="w-4 h-4" />
-          Sign out
+          {!collapsed && "Sign out"}
         </button>
       </div>
     </>
@@ -118,7 +131,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — always visible on lg+ */}
-      <aside className="hidden lg:flex w-64 flex-shrink-0 border-r border-white/5 flex-col h-full bg-background">
+      <aside className={cn("hidden lg:flex flex-shrink-0 border-r border-white/5 flex-col h-full bg-background transition-[width] duration-200", collapsed ? "w-[78px]" : "w-64")}>
         {navContent}
       </aside>
 
