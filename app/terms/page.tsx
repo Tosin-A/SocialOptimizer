@@ -11,7 +11,7 @@ export default function TermsPage() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
         <div className="max-w-3xl mx-auto px-6 flex items-center justify-between h-14">
           <Link href="/" className="flex items-center">
-            <Image src="/logo.png" alt="CLOUT" width={80} height={24} className="rounded-sm" />
+            <Image src="/logo.png" alt="CLOUT" width={80} height={24} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)]" />
           </Link>
           <Link href="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" /> Back

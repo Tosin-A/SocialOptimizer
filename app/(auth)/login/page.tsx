@@ -73,7 +73,7 @@ function LoginContent() {
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center mb-6">
-            <Image src="/logo.png" alt="CLOUT" width={90} height={28} className="rounded-sm" />
+            <Image src="/logo.png" alt="CLOUT" width={90} height={28} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)]" />
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="text-muted-foreground text-sm mt-1">Sign in to your analytics dashboard</p>

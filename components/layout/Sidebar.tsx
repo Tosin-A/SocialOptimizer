@@ -67,7 +67,7 @@ export default function Sidebar({ open, onClose, collapsed = false }: SidebarPro
               alt="CLOUT"
               width={110}
               height={34}
-              className="flex-shrink-0 transition-transform duration-200 hover:scale-105"
+              className="flex-shrink-0 rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)] transition-transform duration-200 hover:scale-105"
             />
           )}
         </Link>

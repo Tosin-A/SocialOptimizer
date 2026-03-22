@@ -151,7 +151,7 @@ export default function CardNav() {
 
           {/* Logo */}
           <Link href="/" className="card-nav-logo" onClick={() => setIsOpen(false)}>
-            <Image src="/logo.png" alt="CLOUT" width={72} height={22} className="rounded-sm flex-shrink-0" />
+            <Image src="/logo.png" alt="CLOUT" width={72} height={22} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)] flex-shrink-0" />
           </Link>
 
           {/* Auth buttons */}

@@ -18,7 +18,7 @@ export default function MarketingNav() {
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-14">
         <Link href="/" className="flex items-center">
-          <Image src="/logo.png" alt="CLOUT" width={100} height={30} className="rounded-sm" />
+          <Image src="/logo.png" alt="CLOUT" width={100} height={30} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)]" />
         </Link>
 
         <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
