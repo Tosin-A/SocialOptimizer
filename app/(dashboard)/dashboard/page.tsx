@@ -10,12 +10,13 @@ import AnalysisUsageBadge from "@/components/dashboard/AnalysisUsageBadge";
 import OnboardingSteps from "@/components/dashboard/OnboardingSteps";
 import FirstAnalysisPrompt from "@/components/dashboard/FirstAnalysisPrompt";
 import ScoreHistoryChart from "@/components/dashboard/ScoreHistoryChart";
+import UpgradeCard from "@/components/dashboard/UpgradeCard";
 import type { DashboardStats } from "@/types";
 
 async function getDashboardData(userId: string) {
   const serviceClient = getSupabaseServiceClient();
 
-  const [accountsResult, latestReportResult] = await Promise.all([
+  const [accountsResult, latestReportResult, userResult] = await Promise.all([
     serviceClient
       .from("connected_accounts")
       .select("id, platform, username, avatar_url, followers, is_active")
@@ -31,6 +32,11 @@ async function getDashboardData(userId: string) {
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(5),
+    serviceClient
+      .from("users")
+      .select("plan, analyses_limit")
+      .eq("id", userId)
+      .single(),
   ]);
 
   const accounts = accountsResult.data ?? [];
@@ -50,7 +56,10 @@ async function getDashboardData(userId: string) {
     last_analysis_at: latest?.created_at ?? null,
   };
 
-  return { accounts, reports, stats, latestReport: latest };
+  const userPlan = userResult.data?.plan ?? "free";
+  const analysesLimit = userResult.data?.analyses_limit ?? 1;
+
+  return { accounts, reports, stats, latestReport: latest, userPlan, analysesLimit };
 }
 
 export default async function DashboardPage() {
@@ -72,7 +81,7 @@ export default async function DashboardPage() {
     { revalidate: 60, tags: [`dashboard:${dbUser.id}`] }
   );
 
-  const { accounts, reports, stats, latestReport } = await getCachedDashboardData(dbUser.id);
+  const { accounts, reports, stats, latestReport, userPlan, analysesLimit } = await getCachedDashboardData(dbUser.id);
   const hasAccounts = accounts.length > 0;
   const hasReports = reports.length > 0;
   const isOnboarding = !hasAccounts || !hasReports;
@@ -138,6 +147,11 @@ export default async function DashboardPage() {
             <RecentReports reports={reports as any[]} />
           </div>
         </>
+      )}
+
+      {/* Upgrade nudge for free users */}
+      {userPlan === "free" && hasReports && (
+        <UpgradeCard analysesLimit={analysesLimit} />
       )}
     </div>
   );

@@ -26,6 +26,7 @@ export interface FeatureAccess {
 
   // Coach
   coach: boolean;
+  coach_messages_per_month: number;   // -1 = unlimited
 }
 
 const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
@@ -33,13 +34,14 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     analyses_per_month: 1,
     score_history: "last_only",
     discover: false,
-    generate_ideas_per_month: 5,
+    generate_ideas_per_month: 3,
     hook_writer: false,
     caption_builder: false,
     track: false,
     competitors: false,
     competitors_limit: 0,
     coach: false,
+    coach_messages_per_month: 0,
   },
   starter: {
     analyses_per_month: 10,
@@ -52,6 +54,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     competitors: false,
     competitors_limit: 0,
     coach: true,
+    coach_messages_per_month: 50,
   },
   pro: {
     analyses_per_month: 20,
@@ -64,6 +67,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     competitors: true,
     competitors_limit: 3,
     coach: true,
+    coach_messages_per_month: 200,
   },
   agency: {
     analyses_per_month: 50,
@@ -76,6 +80,7 @@ const PLAN_ACCESS: Record<PlanType, FeatureAccess> = {
     competitors: true,
     competitors_limit: 50,
     coach: true,
+    coach_messages_per_month: -1,
   },
 };
 

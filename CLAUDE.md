@@ -209,6 +209,8 @@ The current model is `claude-opus-4-6`. Don't downgrade to Haiku or Sonnet for a
 
 - `StarBorder` (`components/ui/StarBorder.tsx`) — animated glowing border effect for CTA buttons. Default color: `#a855f7` (neon-purple).
 - `GradualBlur` (`components/landing/GradualBlur.tsx`) — configurable blur overlay for hero sections.
+- `UpgradeGate` (`components/dashboard/UpgradeGate.tsx`) — plan-gated feature wrapper. Supports a `teaser` prop for blurred preview content with gradient overlay + upgrade CTA. Without `teaser`, falls back to a simple lock icon card.
+- `UpgradeCard` (`components/dashboard/UpgradeCard.tsx`) — "You're leaving data on the table" nudge card for free users on the dashboard home.
 
 ### UI philosophy
 
@@ -232,12 +234,12 @@ Framer Motion is installed. Use it for meaningful transitions (page-level, modal
 
 Plans are defined in `lib/stripe.ts` and enforced via `lib/plans/feature-gate.ts`.
 
-| Plan | Analyses/mo | Platforms | Competitors | Content Gens |
-|------|------------|-----------|-------------|-------------|
-| Free | 1 | 1 | 0 | 5 |
-| Starter ($19) | 10 | 2 | 0 | 50 |
-| Pro ($49) | 20 | 4 | 3 | unlimited |
-| Agency ($199) | 50 | 10 | 50 | unlimited |
+| Plan | Analyses/mo | Platforms | Competitors | Content Gens | Coach Msgs/mo |
+|------|------------|-----------|-------------|-------------|---------------|
+| Free | 1 | 1 | 0 | 3 | 0 (locked) |
+| Starter ($19) | 10 | 2 | 0 | 50 | 50 |
+| Pro ($49) | 20 | 4 | 3 | unlimited | 200 |
+| Agency ($199) | 50 | 10 | 50 | unlimited | unlimited |
 
 **Usage tracking:** `analyses_used` and `analyses_limit` columns on the `users` table. Incremented in `/api/analyze` before creating the job. Checked with `analyses_used >= analyses_limit` (returns 402).
 
@@ -246,6 +248,12 @@ Plans are defined in `lib/stripe.ts` and enforced via `lib/plans/feature-gate.ts
 **Feature gating:** Two layers:
 - Server-side: `lib/plans/feature-gate.ts` (`canAccess(plan, feature)`)
 - Client-side: `hooks/use-feature-access.ts` + `components/dashboard/UpgradeGate.tsx`
+
+**Free-to-paid conversion:** Gated features show blurred teaser previews instead of blank lock walls. `UpgradeGate` accepts an optional `teaser` prop (ReactNode) — when provided, it renders the teaser blurred with a gradient overlay and upgrade CTA on top. Each gated page (Discover, Coach, Track, Competitors) provides feature-specific mock content as teasers so free users see what they'd unlock.
+
+Additional conversion components:
+- `components/dashboard/UpgradeCard.tsx` — "What you're missing" card shown on the dashboard home for free users after their first report. Lists specific features and limits they'd gain by upgrading.
+- `components/dashboard/AnalysisUsageBadge.tsx` — Shows amber-colored upgrade prompt when the user has 0 analyses left (especially prominent for free users).
 
 ---
 

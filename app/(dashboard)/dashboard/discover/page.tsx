@@ -10,6 +10,59 @@ import NicheSaturationCard from "@/components/dashboard/NicheSaturationCard";
 import FormatPatternLibrary from "@/components/dashboard/FormatPatternLibrary";
 import type { OutlierPost, TrendItem, NicheSaturation, FormatPattern, Platform } from "@/types";
 import UpgradeGate from "@/components/dashboard/UpgradeGate";
+import { TrendingUp, Flame, BarChart2, Layers } from "lucide-react";
+
+function DiscoverTeaser() {
+  return (
+    <div className="space-y-6">
+      {/* Mock tab bar */}
+      <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+        {["Outliers", "Trends", "Niche Saturation", "Format Library"].map((label, i) => (
+          <div
+            key={label}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium text-center ${
+              i === 0 ? "bg-brand-600 text-white" : "text-muted-foreground"
+            }`}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* Mock outlier cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[
+          { title: "Why I quit my 9-5 at 22", views: "2.4M", ratio: "47x", icon: Flame },
+          { title: "3 habits that changed everything", views: "891K", ratio: "23x", icon: TrendingUp },
+          { title: "POV: you finally get it", views: "1.1M", ratio: "31x", icon: Flame },
+          { title: "Nobody talks about this hack", views: "456K", ratio: "12x", icon: TrendingUp },
+        ].map((item) => (
+          <div key={item.title} className="glass rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <item.icon className="w-3.5 h-3.5 text-brand-400" />
+              <span className="font-mono text-brand-400">{item.ratio}</span> avg performance
+            </div>
+            <p className="text-sm font-medium truncate">{item.title}</p>
+            <p className="text-xs text-muted-foreground">{item.views} views</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Mock trend items */}
+      <div className="glass rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <BarChart2 className="w-4 h-4 text-brand-400" /> Trending in your niche
+        </div>
+        {["#delusionalmindset", "#softlife", "#morningroutine"].map((tag) => (
+          <div key={tag} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+            <span className="text-sm font-mono">{tag}</span>
+            <span className="text-xs text-emerald-400">+340% velocity</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface Account {
   id: string;
@@ -168,7 +221,7 @@ export default function DiscoverPage() {
         </p>
       </div>
 
-      <UpgradeGate feature="discover">
+      <UpgradeGate feature="discover" teaser={<DiscoverTeaser />}>
         <div className="space-y-6">
           <div className="flex justify-end">
             <Select value={selectedAccount} onValueChange={setSelectedAccount}>

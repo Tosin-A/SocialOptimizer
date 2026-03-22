@@ -5,7 +5,7 @@ import { generateIdeas } from "@/lib/ai/openai";
 import { buildAnalysisContext } from "@/lib/ai/analysisContext";
 import { z } from "zod";
 import type { AnalysisReport, PlanType, CoachMessageRow } from "@/types";
-import { canAccess } from "@/lib/plans/feature-gate";
+import { canAccess, getFeatureAccess } from "@/lib/plans/feature-gate";
 
 const MessageSchema = z.object({
   content: z.string().min(1).max(2000),
@@ -46,6 +46,37 @@ export async function POST(
 
     if (!canAccess(dbUser.plan as PlanType, "coach")) {
       return NextResponse.json({ data: null, error: "Coach requires Starter plan or above" }, { status: 403 });
+    }
+
+    // Check monthly message limit
+    const access = getFeatureAccess(dbUser.plan as PlanType);
+    if (access.coach_messages_per_month !== -1) {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const { data: userConversations } = await serviceClient
+        .from("coach_conversations")
+        .select("id")
+        .eq("user_id", dbUser.id);
+
+      const conversationIds = userConversations?.map((c: { id: string }) => c.id) ?? [];
+
+      if (conversationIds.length > 0) {
+        const { count } = await serviceClient
+          .from("coach_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "user")
+          .in("conversation_id", conversationIds)
+          .gte("created_at", startOfMonth.toISOString());
+
+        if ((count ?? 0) >= access.coach_messages_per_month) {
+          return NextResponse.json(
+            { data: null, error: `Monthly coach message limit reached (${access.coach_messages_per_month}). Upgrade your plan for more.` },
+            { status: 402 }
+          );
+        }
+      }
     }
 
     // Verify conversation belongs to user

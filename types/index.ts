@@ -87,8 +87,12 @@ export interface FixListItem {
 
 export interface AnalysisJob {
   id: string;
-  user_id: string;
-  account_id: string;
+  user_id: string | null;
+  account_id: string | null;
+  anonymous_id: string | null;
+  email: string | null;
+  tiktok_username: string | null;
+  is_anonymous: boolean;
   status: JobStatus;
   progress: number;
   current_step: string | null;
@@ -99,6 +103,25 @@ export interface AnalysisJob {
   completed_at: string | null;
   created_at: string;
 }
+
+export interface AnonymousAnalysisRequest {
+  username: string;
+  platform: Platform;
+}
+
+export interface PartialAnalysisResult {
+  growth_score: number;
+  hook_strength_score: number;
+  engagement_score: number;
+  detected_niche: string;
+  avg_engagement_rate: number;
+  content_quality_score: number;
+  consistency_score: number;
+  executive_summary: string;
+  is_partial: true;
+}
+
+export type AnalysisAccessLevel = "anonymous" | "free" | "paid";
 
 export interface Insight {
   title: string;

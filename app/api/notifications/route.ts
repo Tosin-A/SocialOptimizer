@@ -11,27 +11,46 @@ interface Notification {
   created_at: string;
 }
 
-function formatEvent(event: { id: string; event_type: string; metadata: any; created_at: string }): Notification {
+interface UsageEvent {
+  id: string;
+  event_type: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+function getMetadataString(meta: Record<string, unknown>, key: string): string | null {
+  const value = meta[key];
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
+function formatEvent(event: UsageEvent): Notification {
   const meta = event.metadata ?? {};
+  const platform = getMetadataString(meta, "platform");
+  const username = getMetadataString(meta, "username");
+  const reportId = getMetadataString(meta, "report_id");
+  const contentType = getMetadataString(meta, "content_type");
+  const plan = getMetadataString(meta, "plan");
+
   switch (event.event_type) {
     case "analysis_run":
       return {
         id: event.id,
         type: "analysis",
         title: "Analysis started",
-        body: meta.platform ? `${meta.platform} analysis in progress.` : "Analysis in progress.",
+        body: platform ? `${platform} analysis in progress.` : "Analysis in progress.",
         link: "/dashboard/analyze",
         created_at: event.created_at,
       };
     case "analysis_completed":
+    case "analysis_ready":
       return {
         id: event.id,
         type: "analysis",
         title: "Analysis complete",
-        body: meta.platform && meta.username
-          ? `${meta.platform} @${meta.username} — score: ${meta.growth_score ?? "–"}`
+        body: platform && username
+          ? `${platform} @${username} — score: ${meta.growth_score ?? "–"}`
           : "Your account analysis finished.",
-        link: meta.report_id ? `/dashboard/reports/${meta.report_id}` : "/dashboard/reports",
+        link: reportId ? `/dashboard/reports/${reportId}` : "/dashboard/reports",
         created_at: event.created_at,
       };
     case "content_generated":
@@ -39,10 +58,19 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         id: event.id,
         type: "generate",
         title: "Content generated",
-        body: meta.platform && meta.content_type
-          ? `${meta.content_type.replace("_", " ")} for ${meta.platform}`
+        body: platform && contentType
+          ? `${contentType.replace("_", " ")} for ${platform}`
           : "New content created.",
         link: "/dashboard/generate",
+        created_at: event.created_at,
+      };
+    case "competitor_added":
+      return {
+        id: event.id,
+        type: "competitor",
+        title: "Competitor added",
+        body: username ? `Now tracking @${username}.` : "New competitor added.",
+        link: "/dashboard/competitors",
         created_at: event.created_at,
       };
     case "plan_upgraded":
@@ -50,7 +78,27 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         id: event.id,
         type: "billing",
         title: "Plan upgraded",
-        body: meta.plan ? `You're now on the ${meta.plan} plan.` : "Your plan was updated.",
+        body: plan
+          ? `You're now on the ${plan} plan.`
+          : "Your plan was updated.",
+        link: "/dashboard/settings",
+        created_at: event.created_at,
+      };
+    case "plan_cancelled":
+      return {
+        id: event.id,
+        type: "billing",
+        title: "Plan cancelled",
+        body: "Your account moved to the free plan.",
+        link: "/dashboard/settings",
+        created_at: event.created_at,
+      };
+    case "payment_failed":
+      return {
+        id: event.id,
+        type: "billing",
+        title: "Payment failed",
+        body: "Billing failed. Update your payment method to keep plan access.",
         link: "/dashboard/settings",
         created_at: event.created_at,
       };
@@ -68,7 +116,7 @@ function formatEvent(event: { id: string; event_type: string; metadata: any; cre
         id: event.id,
         type: "competitor",
         title: "Competitor compared",
-        body: meta.username ? `Gap analysis for @${meta.username} complete.` : "Competitor comparison done.",
+        body: username ? `Gap analysis for @${username} complete.` : "Competitor comparison done.",
         link: "/dashboard/competitors",
         created_at: event.created_at,
       };

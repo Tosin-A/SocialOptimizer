@@ -5,7 +5,7 @@ import { generateIdeas } from "@/lib/ai/openai";
 import { buildAnalysisContext } from "@/lib/ai/analysisContext";
 import { z } from "zod";
 import type { AnalysisReport, PlanType } from "@/types";
-import { canAccess } from "@/lib/plans/feature-gate";
+import { canAccess, getFeatureAccess } from "@/lib/plans/feature-gate";
 
 const CoachSchema = z.object({
   messages: z.array(
@@ -48,6 +48,35 @@ export async function POST(req: NextRequest) {
         { data: null, error: "Content Coach requires Starter plan or above" },
         { status: 403 }
       );
+    }
+
+    // Check monthly message limit
+    const access = getFeatureAccess(dbUser.plan as PlanType);
+    if (access.coach_messages_per_month !== -1) {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const { count } = await serviceClient
+        .from("coach_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "user")
+        .in(
+          "conversation_id",
+          (await serviceClient
+            .from("coach_conversations")
+            .select("id")
+            .eq("user_id", dbUser.id)
+          ).data?.map((c: { id: string }) => c.id) ?? []
+        )
+        .gte("created_at", startOfMonth.toISOString());
+
+      if ((count ?? 0) >= access.coach_messages_per_month) {
+        return NextResponse.json(
+          { data: null, error: `Monthly coach message limit reached (${access.coach_messages_per_month}). Upgrade your plan for more.` },
+          { status: 402 }
+        );
+      }
     }
 
     const { messages, account_id, provider } = parsed.data;

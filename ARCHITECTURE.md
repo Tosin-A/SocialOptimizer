@@ -13,7 +13,8 @@
 │  │  Landing     │  │  Dashboard   │  │  API Routes            │  │
 │  │  Auth pages  │  │  Analyze     │  │  /api/analyze          │  │
 │  │  Terms       │  │  Generate    │  │  /api/generate         │  │
-│  │  Pricing     │  │  Competitors │  │  /api/connect/[plat]   │  │
+│  │  Pricing     │  │  Coach       │  │  /api/coach            │  │
+│  │              │  │  Competitors │  │  /api/connect/[plat]   │  │
 │  │              │  │  Discover    │  │  /api/competitors      │  │
 │  │              │  │  Track       │  │  /api/competitors/[id]/│  │
 │  │              │  │  Settings    │  │    ├── compare         │  │
@@ -74,6 +75,7 @@ SocialOptimizer/
 │   │   ├── dashboard/page.tsx    # Main dashboard
 │   │   ├── analyze/page.tsx      # Analysis runner + report viewer
 │   │   ├── competitors/page.tsx  # Competitor benchmarking + refresh
+│   │   ├── coach/page.tsx        # AI content coaching (chat-based)
 │   │   ├── discover/page.tsx     # Outliers, trends, saturation
 │   │   ├── generate/page.tsx     # AI content generator
 │   │   ├── track/page.tsx        # Experiments, win library
@@ -93,6 +95,9 @@ SocialOptimizer/
 │   │   │   └── [id]/
 │   │   │       ├── compare/      # Gap analysis (GET, POST)
 │   │   │       └── refresh/      # Re-scrape profile data (POST)
+│   │   ├── coach/                # Content coaching conversations
+│   │   │   ├── conversations/    # CRUD for coach conversations
+│   │   │   └── messages/         # Send/receive coach messages
 │   │   ├── generate/route.ts     # Content generation
 │   │   ├── reports/route.ts      # Analysis reports
 │   │   └── webhooks/
@@ -111,7 +116,8 @@ SocialOptimizer/
 │   │   ├── PlatformConnect.tsx   # OAuth connect cards
 │   │   ├── QuickActions.tsx
 │   │   ├── RecentReports.tsx
-│   │   └── UpgradeGate.tsx       # Feature lock for plan-gated features
+│   │   ├── UpgradeGate.tsx       # Feature lock with optional blurred teaser previews
+│   │   └── UpgradeCard.tsx      # Free-to-paid nudge card for dashboard home
 │   ├── landing/                  # Marketing page components
 │   │   └── GradualBlur.tsx
 │   ├── layout/                   # Sidebar, Header
@@ -242,6 +248,10 @@ Stripe webhooks are verified via `stripe.webhooks.constructEvent()` with `STRIPE
 | GET | `/api/analyze/status/[jobId]` | Poll job progress |
 | GET | `/api/reports?id=` | Get specific report |
 | POST | `/api/generate` | Generate content (hooks, captions, etc.) |
+| GET | `/api/coach/conversations` | List coaching conversations |
+| POST | `/api/coach/conversations` | Create new coaching conversation |
+| DELETE | `/api/coach/conversations/[id]` | Delete a coaching conversation |
+| POST | `/api/coach/messages` | Send message and get coaching response |
 | POST | `/api/competitors` | Add competitor (scrapes profile) |
 | GET | `/api/competitors` | List competitors |
 | POST | `/api/competitors/[id]/refresh` | Re-scrape competitor profile data |
@@ -322,12 +332,12 @@ supabase db push
 
 ## Monetization Architecture
 
-| Plan | Analyses/mo | Platforms | Competitors | Content Gens |
-|------|------------|-----------|-------------|-------------|
-| Free | 1 | 1 | 0 | 5 |
-| Starter ($19) | 10 | 2 | 0 | 50 |
-| Pro ($49) | 20 | 4 | 3 | unlimited |
-| Agency ($199) | 50 | 10 | 50 | unlimited |
+| Plan | Analyses/mo | Platforms | Competitors | Content Gens | Coach Msgs/mo |
+|------|------------|-----------|-------------|-------------|---------------|
+| Free | 1 | 1 | 0 | 3 | 0 (locked) |
+| Starter ($19) | 10 | 2 | 0 | 50 | 50 |
+| Pro ($49) | 20 | 4 | 3 | unlimited | 200 |
+| Agency ($199) | 50 | 10 | 50 | unlimited | unlimited |
 
 Stripe webhooks handle plan changes:
 - `checkout.session.completed` — updates `users.plan` and `users.analyses_limit` (preserves `analyses_used`)
@@ -338,3 +348,18 @@ Stripe webhooks handle plan changes:
 Feature access is enforced at two levels:
 - **Server-side**: `lib/plans/feature-gate.ts` defines the per-plan feature matrix
 - **Client-side**: `hooks/use-feature-access.ts` + `UpgradeGate.tsx` component locks gated features with upgrade prompts
+
+### Free-to-Paid Conversion
+
+Gated features use blurred teaser previews instead of blank lock walls. `UpgradeGate` accepts an optional `teaser` prop — when provided, it renders mock preview content blurred (`blur-[6px]`) with a `bg-gradient-to-t` overlay and an upgrade CTA on top. Each gated page provides feature-specific teasers:
+
+| Page | Teaser content |
+|------|---------------|
+| Discover | Mock outlier cards, trending hashtags, tab bar |
+| Coach | Sample 3-message coaching conversation |
+| Track | Mock experiment cards, score history bar chart |
+| Competitors | Mock competitor profiles with metrics and hashtags |
+
+Additional conversion touchpoints:
+- **`UpgradeCard`** — shown on dashboard home for free users after first report. "You're leaving data on the table" with specific feature list.
+- **`AnalysisUsageBadge`** — switches to amber upgrade prompt when 0 analyses remain (links to billing settings instead of analyze page).

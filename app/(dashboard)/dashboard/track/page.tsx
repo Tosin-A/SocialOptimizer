@@ -11,6 +11,66 @@ import WinLibrary from "@/components/dashboard/WinLibrary";
 import ScoreHistoryChart from "@/components/dashboard/ScoreHistoryChart";
 import type { Experiment, WinLibraryEntry, Platform } from "@/types";
 import UpgradeGate from "@/components/dashboard/UpgradeGate";
+import { FlaskConical, TrendingUp as TrendUp, CheckCircle2 } from "lucide-react";
+
+function TrackTeaser() {
+  return (
+    <div className="space-y-4">
+      {/* Mock tab bar */}
+      <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+        {["Experiments", "Score History", "Win Library"].map((label, i) => (
+          <div
+            key={label}
+            className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium text-center ${
+              i === 0 ? "bg-brand-600 text-white" : "text-muted-foreground"
+            }`}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* Mock experiment cards */}
+      <div className="space-y-3">
+        {[
+          { name: "Question-based hooks", hypothesis: "Opening with a direct question will increase hook score by 20+ pts", status: "active" },
+          { name: "3x weekly posting", hypothesis: "Posting Tue/Thu/Sat instead of random days will improve avg views by 30%", status: "completed" },
+        ].map((exp) => (
+          <div key={exp.name} className="glass rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-brand-400" />
+              <span className="text-sm font-semibold">{exp.name}</span>
+              <span className={`text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                exp.status === "active" ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-muted-foreground"
+              }`}>
+                {exp.status}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">{exp.hypothesis}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Mock score chart placeholder */}
+      <div className="glass rounded-2xl p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold mb-3">
+          <TrendUp className="w-4 h-4 text-brand-400" /> Score History
+        </div>
+        <div className="h-32 flex items-end gap-2 px-2">
+          {[42, 48, 45, 53, 61, 58, 67, 72].map((score, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className="w-full rounded-t bg-brand-600/40"
+                style={{ height: `${score * 1.2}px` }}
+              />
+              <span className="text-[10px] text-muted-foreground">{score}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface Account { id: string; platform: string; username: string; }
 
@@ -171,7 +231,7 @@ export default function TrackPage() {
         </p>
       </div>
 
-      <UpgradeGate feature="track">
+      <UpgradeGate feature="track" teaser={<TrackTeaser />}>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white/5 rounded-xl p-1">

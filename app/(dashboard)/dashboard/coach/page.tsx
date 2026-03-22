@@ -1,12 +1,48 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MessageSquare, Loader2, PanelLeftOpen } from "lucide-react";
+import { MessageSquare, Loader2, PanelLeftOpen, Bot, User } from "lucide-react";
 import CoachChat from "@/components/dashboard/CoachChat";
 import CoachConversationList from "@/components/dashboard/CoachConversationList";
+import UpgradeGate from "@/components/dashboard/UpgradeGate";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
-import { requiredPlanFor } from "@/lib/plans/feature-gate";
 import type { CoachConversation } from "@/types";
+
+function CoachTeaser() {
+  const messages = [
+    { role: "user" as const, text: "My last 5 videos averaged 2.1% engagement but my hook scores are low. What should I change?" },
+    { role: "assistant" as const, text: "Your hook scores average 34/100 — that's 2.8x below the fitness niche median. The main issue: your first 2 seconds are visual (b-roll), not verbal. Top performers in your niche open with a direct statement or question. Try: \"Here's why your bench isn't growing\" instead of showing the gym. Expect hook-through rate to improve 40-60% within 3 videos." },
+    { role: "user" as const, text: "What about my posting schedule? I post whenever I feel like it." },
+  ];
+
+  return (
+    <div className="glass rounded-2xl p-4 space-y-3">
+      {messages.map((msg, i) => (
+        <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
+          {msg.role === "assistant" && (
+            <div className="w-7 h-7 rounded-full bg-brand-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-3.5 h-3.5 text-brand-300" />
+            </div>
+          )}
+          <div
+            className={`rounded-xl px-3.5 py-2.5 text-sm leading-relaxed max-w-[80%] ${
+              msg.role === "user"
+                ? "bg-brand-600/20 text-brand-100"
+                : "bg-white/5 text-slate-300"
+            }`}
+          >
+            {msg.text}
+          </div>
+          {msg.role === "user" && (
+            <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <User className="w-3.5 h-3.5 text-slate-300" />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function CoachPage() {
   const { access, loading: accessLoading } = useFeatureAccess();
@@ -91,17 +127,19 @@ export default function CoachPage() {
   }
 
   if (!access.coach) {
-    const requiredPlan = requiredPlanFor("coach");
     return (
-      <div className="max-w-lg mx-auto text-center py-20">
-        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-4">
-          <MessageSquare className="w-6 h-6 text-muted-foreground" />
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <MessageSquare className="w-6 h-6 text-brand-400" /> Content Coach
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Get personalized, data-backed coaching for your content strategy
+          </p>
         </div>
-        <h2 className="text-xl font-bold mb-2">Content Coach</h2>
-        <p className="text-muted-foreground text-sm mb-6">
-          Get personalized, data-backed coaching for your content strategy.
-          Available on the <span className="capitalize font-medium text-foreground">{requiredPlan}</span> plan and above.
-        </p>
+        <UpgradeGate feature="coach" teaser={<CoachTeaser />}>
+          <div />
+        </UpgradeGate>
       </div>
     );
   }

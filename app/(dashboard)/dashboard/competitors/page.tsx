@@ -13,6 +13,53 @@ import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/utils";
 import UpgradeGate from "@/components/dashboard/UpgradeGate";
 
+function CompetitorsTeaser() {
+  const mockCompetitors = [
+    { username: "fitnesswithkai", platform: "TikTok", followers: "842K", engagement: "4.7%", postsWeek: "5.2", hashtags: ["#fitcheck", "#gymmotivation", "#bulking"] },
+    { username: "sarahlifts", platform: "TikTok", followers: "1.2M", engagement: "3.9%", postsWeek: "4.8", hashtags: ["#strengthtraining", "#fitnessgirl", "#prday"] },
+    { username: "cleaneatsdaily", platform: "Instagram", followers: "320K", engagement: "5.1%", postsWeek: "6.0", hashtags: ["#mealprep", "#healthyfood", "#macros"] },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {mockCompetitors.map((c) => (
+        <div key={c.username} className="glass rounded-2xl p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center font-bold text-brand-300 text-sm">
+              {c.username.slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <div className="font-semibold">@{c.username}</div>
+              <div className="text-xs text-muted-foreground">{c.platform}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3 mb-3">
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">Followers</div>
+              <div className="font-semibold">{c.followers}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">Engagement</div>
+              <div className="font-semibold">{c.engagement}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground mb-1">Posts/week</div>
+              <div className="font-semibold">{c.postsWeek}</div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {c.hashtags.map((tag) => (
+              <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 type Platform = "tiktok" | "instagram" | "youtube" | "facebook";
 type ImpactLevel = "high" | "medium" | "low";
 
@@ -327,7 +374,7 @@ export default function CompetitorsPage() {
         </Button>
       </div>
 
-      <UpgradeGate feature="competitors">
+      <UpgradeGate feature="competitors" teaser={<CompetitorsTeaser />}>
 
       {/* Add form */}
       {showForm && (
