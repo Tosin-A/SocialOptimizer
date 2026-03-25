@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
   const serviceClient = getSupabaseServiceClient();
   const { data: dbUser } = await serviceClient
     .from("users")
-    .select("id, plan, analyses_used, analyses_limit, stripe_customer_id")
+    .select("id, plan, analyses_used, analyses_limit, bonus_analyses, stripe_customer_id")
     .eq("auth_id", user.id)
     .single();
 
@@ -72,6 +72,7 @@ export async function GET(req: NextRequest) {
         plan: dbUser.plan,
         analyses_used: dbUser.analyses_used,
         analyses_limit: dbUser.analyses_limit,
+        bonus_analyses: dbUser.bonus_analyses ?? 0,
         has_billing: !!dbUser.stripe_customer_id,
       },
     },

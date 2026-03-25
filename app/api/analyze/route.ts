@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     // Verify the user owns this account
     const { data: dbUser } = await serviceClient
       .from("users")
-      .select("id, plan, analyses_used, analyses_limit")
+      .select("id, plan, analyses_used, analyses_limit, bonus_analyses")
       .eq("auth_id", user.id)
       .single();
 
@@ -52,13 +52,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Enforce usage limits (all plans have limits)
-    if (dbUser.analyses_used >= dbUser.analyses_limit) {
+    // Enforce usage limits (all plans have limits, bonus_analyses adds to the cap)
+    const effectiveLimit = dbUser.analyses_limit + (dbUser.bonus_analyses ?? 0);
+    if (dbUser.analyses_used >= effectiveLimit) {
       return NextResponse.json(
         {
           error:
             dbUser.plan === "free"
-              ? "Analysis limit reached. Upgrade to run more analyses."
+              ? "Analysis limit reached. Share a report to earn 3 bonus scans, or upgrade for more."
               : `You've used all ${dbUser.analyses_limit} analyses this month. Upgrade for more or wait until next billing cycle.`,
         },
         { status: 402 }

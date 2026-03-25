@@ -3,8 +3,9 @@ import { useState, useEffect, useMemo } from "react";
 import {
   CheckCircle2, XCircle, Lightbulb, Map, Hash,
   ThumbsUp, AlertTriangle, BarChart2, TrendingUp, TrendingDown,
-  Minus, ExternalLink, Loader2, Download, RefreshCw, Mic
+  Minus, ExternalLink, Loader2, Download, RefreshCw, Mic, Share2
 } from "lucide-react";
+import ShareReportModal from "./ShareReportModal";
 import type { AnalysisReport as AnalysisReportType, Insight, RoadmapAction } from "@/types";
 import { cn } from "@/lib/utils";
 import RankedFixList from "./RankedFixList";
@@ -123,6 +124,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsFetched, setPostsFetched] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [postSortField, setPostSortField] = useState<
     "posted_at" | "engagement_rate" | "views" | "likes" | "comments" | "shares" | "saves"
   >("engagement_rate");
@@ -205,6 +207,13 @@ export default function AnalysisReport({ report, accountId }: Props) {
                 Re-analyze
               </a>
             )}
+            <button
+              onClick={() => setShareModalOpen(true)}
+              className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Share
+            </button>
             <a
               href={`/reports/${report.id}/print`}
               target="_blank"
@@ -507,6 +516,12 @@ export default function AnalysisReport({ report, accountId }: Props) {
           </div>
         </div>
       )}
+
+      <ShareReportModal
+        reportId={report.id}
+        open={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+      />
     </div>
   );
 }

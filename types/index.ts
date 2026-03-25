@@ -22,6 +22,8 @@ export interface User {
   stripe_customer_id: string | null;
   analyses_used: number;
   analyses_limit: number;
+  bonus_analyses: number;
+  total_shares: number;
   brand_pillars: string[];
   created_at: string;
   updated_at: string;
@@ -220,7 +222,24 @@ export interface AnalysisReport {
   // Transcription metadata
   posts_transcribed: number;
 
+  // Share
+  share_token: string | null;
+
   created_at: string;
+}
+
+// ─── Report Shares ───────────────────────────────────────────────────────────
+
+export interface ReportShare {
+  id: string;
+  report_id: string;
+  user_id: string;
+  share_token: string;
+  platform?: string;
+  created_at: string;
+  image_url: string;
+  public_url: string;
+  caption: string;
 }
 
 // ─── Competitors ──────────────────────────────────────────────────────────────

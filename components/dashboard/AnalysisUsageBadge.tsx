@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { BarChart3, ArrowUpRight } from "lucide-react";
+import { BarChart3, ArrowUpRight, Gift } from "lucide-react";
 
 export default function AnalysisUsageBadge() {
-  const [usage, setUsage] = useState<{ used: number; limit: number; plan: string } | null>(null);
+  const [usage, setUsage] = useState<{
+    used: number;
+    limit: number;
+    bonus: number;
+    plan: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch("/api/accounts", { cache: "no-store" })
@@ -16,6 +21,7 @@ export default function AnalysisUsageBadge() {
           setUsage({
             used: plan.analyses_used,
             limit: plan.analyses_limit,
+            bonus: plan.bonus_analyses ?? 0,
             plan: plan.plan ?? "free",
           });
         }
@@ -24,7 +30,8 @@ export default function AnalysisUsageBadge() {
 
   if (!usage) return null;
 
-  const left = Math.max(0, usage.limit - usage.used);
+  const effectiveLimit = usage.limit + usage.bonus;
+  const left = Math.max(0, effectiveLimit - usage.used);
   const exhausted = left === 0;
   const isFree = usage.plan === "free";
 
@@ -39,7 +46,7 @@ export default function AnalysisUsageBadge() {
           0 analyses left
         </span>
         <span className="text-amber-400/70 text-xs flex items-center gap-0.5">
-          Upgrade <ArrowUpRight className="w-3 h-3" />
+          Share to earn 3 <Gift className="w-3 h-3 ml-0.5" />
         </span>
       </Link>
     );
@@ -53,7 +60,7 @@ export default function AnalysisUsageBadge() {
       >
         <BarChart3 className="w-3.5 h-3.5 text-amber-400" />
         <span className="text-amber-300">
-          <span className="font-mono">{usage.used}</span>/{usage.limit} used
+          <span className="font-mono">{usage.used}</span>/{effectiveLimit} used
         </span>
       </Link>
     );
@@ -68,6 +75,11 @@ export default function AnalysisUsageBadge() {
       <span className="text-muted-foreground">
         <span className="font-mono text-foreground">{usage.used}</span> used ·{" "}
         <span className="font-mono text-brand-400">{left}</span> left
+        {usage.bonus > 0 && (
+          <span className="text-emerald-400 ml-1">
+            (+{usage.bonus} bonus)
+          </span>
+        )}
       </span>
     </Link>
   );
