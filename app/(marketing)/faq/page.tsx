@@ -1,13 +1,36 @@
 import type { Metadata } from "next";
+import { FAQ } from "@/lib/data/landing";
 import FAQAccordion from "@/components/landing/FAQAccordion";
 import LimitationsSection from "@/components/landing/LimitationsSection";
 import SectionReveal from "@/components/landing/SectionReveal";
 
-export const metadata: Metadata = { title: "FAQ" };
+export const metadata: Metadata = {
+  title: "FAQ",
+  description:
+    "Answers to common questions about CLOUT — account access, analysis limits, competitor tracking, and pricing.",
+  alternates: { canonical: "/faq" },
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.a,
+    },
+  })),
+};
 
 export default function FAQPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Header */}
       <section className="pt-28 pb-4 px-6">
         <div className="max-w-6xl mx-auto">

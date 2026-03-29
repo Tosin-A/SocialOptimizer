@@ -5,7 +5,12 @@ import { Button } from "@/components/ui/button";
 import { PLATFORMS } from "@/lib/data/landing";
 import SectionReveal from "@/components/landing/SectionReveal";
 
-export const metadata: Metadata = { title: "Platforms" };
+export const metadata: Metadata = {
+  title: "Platforms",
+  description:
+    "CLOUT analyzes TikTok, Instagram, YouTube, and Facebook separately — each with platform-specific signal scoring.",
+  alternates: { canonical: "/platforms" },
+};
 
 export default function PlatformsPage() {
   return (

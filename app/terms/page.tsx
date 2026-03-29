@@ -2,7 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Terms of Service | CLOUT" };
+export const metadata = {
+  title: "Terms of Service",
+  robots: { index: true, follow: true },
+};
 
 export default function TermsPage() {
   return (

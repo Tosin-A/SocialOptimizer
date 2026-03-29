@@ -12,7 +12,7 @@ import StarBorder from "@/components/ui/StarBorder";
 
 export default function HeroSection() {
   return (
-    <section className="pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-20 px-6 relative overflow-hidden">
+    <section className="pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-20 px-4 sm:px-6 relative overflow-hidden">
       {/* Dot-grid background with bottom blur fade */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
         <div className="dot-grid absolute inset-0" />
@@ -41,6 +41,7 @@ export default function HeroSection() {
         <div className="hidden md:block mb-6 max-w-4xl">
           <BlurText
             text="The creators outgrowing you aren't luckier. They're more informed."
+            as="h1"
             delay={150}
             animateBy="words"
             direction="top"
@@ -104,7 +105,7 @@ export default function HeroSection() {
           </div>
 
           {/* Three-column body */}
-          <div className="grid md:grid-cols-[200px_1fr_200px] divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
+          <div className="grid md:grid-cols-[180px_1fr_180px] lg:grid-cols-[200px_1fr_200px] divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
 
             {/* Score panel */}
             <div className="p-4 sm:p-6">

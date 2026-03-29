@@ -2,7 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 
-export const metadata = { title: "Privacy Policy | CLOUT" };
+export const metadata = {
+  title: "Privacy Policy",
+  robots: { index: true, follow: true },
+};
 
 export default function PrivacyPage() {
   return (

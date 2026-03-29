@@ -4,7 +4,12 @@ import FindingsSection from "@/components/landing/FindingsSection";
 import CaseStudy from "@/components/landing/CaseStudy";
 import SectionReveal from "@/components/landing/SectionReveal";
 
-export const metadata: Metadata = { title: "How It Works" };
+export const metadata: Metadata = {
+  title: "How It Works",
+  description:
+    "Connect your account, we scan 90 days of posts, and you get a ranked fix list in under 3 minutes. No password required.",
+  alternates: { canonical: "/how-it-works" },
+};
 
 export default function HowItWorksPage() {
   return (

@@ -3,7 +3,12 @@ import PricingTable from "@/components/landing/PricingTable";
 import BottomCTA from "@/components/landing/BottomCTA";
 import SectionReveal from "@/components/landing/SectionReveal";
 
-export const metadata: Metadata = { title: "Pricing" };
+export const metadata: Metadata = {
+  title: "Pricing",
+  description:
+    "Free to start. Upgrade for more analyses, competitor tracking, and AI coaching. Plans from $19/mo.",
+  alternates: { canonical: "/pricing" },
+};
 
 export default function PricingPage() {
   return (
