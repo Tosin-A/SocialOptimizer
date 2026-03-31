@@ -11,7 +11,7 @@ const FINDING_COUNTS: { to: number; suffix: string }[] = [
 
 export default function FindingsSection() {
   return (
-    <section className="py-20 px-6">
+    <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-12">
           <div className="label-mono mb-4">What the data shows</div>
@@ -27,12 +27,12 @@ export default function FindingsSection() {
         {FINDINGS.map((f, i) => (
           <div
             key={i}
-            className={`flex flex-col md:flex-row gap-8 md:gap-16 py-10 border-t border-white/[0.05] ${
+            className={`flex flex-col md:flex-row gap-6 sm:gap-8 md:gap-16 py-10 border-t border-white/[0.05] ${
               i === FINDINGS.length - 1 ? "border-b" : ""
             }`}
           >
             <div className="md:w-52 flex-shrink-0">
-              <div className="font-mono font-semibold text-5xl text-brand-400 leading-none mb-1 tabular-nums">
+              <div className="font-mono font-semibold text-3xl sm:text-4xl md:text-5xl text-brand-400 leading-none mb-1 tabular-nums">
                 <CountUp
                   to={FINDING_COUNTS[i].to}
                   suffix={FINDING_COUNTS[i].suffix}

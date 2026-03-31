@@ -6,7 +6,7 @@ import StarBorder from "@/components/ui/StarBorder";
 
 export default function PricingTable() {
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 border-y border-white/[0.05] bg-white/[0.015]">
       <div className="max-w-6xl mx-auto">
         <div className="label-mono mb-4">Pricing</div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-2">
@@ -16,7 +16,7 @@ export default function PricingTable() {
           Start free. Upgrade when it&apos;s actually worth it to you.
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {TIERS.map((tier) => (
             <div
               key={tier.name}
@@ -41,7 +41,7 @@ export default function PricingTable() {
                   )}
                 </div>
                 <div className="flex items-baseline gap-1 mb-2">
-                  <span className="font-mono font-semibold text-3xl tabular-nums">{tier.price}</span>
+                  <span className="font-mono font-semibold text-2xl sm:text-3xl tabular-nums">{tier.price}</span>
                   <span className="text-muted-foreground text-sm">{tier.cadence}</span>
                 </div>
                 <p className="text-xs text-muted-foreground leading-snug">{tier.note}</p>

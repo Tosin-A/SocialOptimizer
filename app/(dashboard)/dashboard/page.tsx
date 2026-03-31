@@ -121,16 +121,15 @@ export default async function DashboardPage() {
       {hasAccounts && hasReports && (
         <>
           {/* Top row: Growth score + metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-3 sm:gap-4 lg:gap-6">
             <GrowthScoreCard
               score={stats.growth_score}
               delta={stats.growth_score_delta}
               niche={stats.niche}
               lastAnalyzedAt={stats.last_analysis_at}
               accountId={accounts[0]?.id}
-              className="lg:col-span-1"
             />
-            <MetricsGrid stats={stats} accounts={accounts as any[]} className="lg:col-span-3" />
+            <MetricsGrid stats={stats} accounts={accounts as any[]} />
           </div>
 
           {/* Score history chart — only shown when there are 2+ reports */}

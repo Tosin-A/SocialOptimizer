@@ -197,11 +197,11 @@ export default function AnalysisReport({ report, accountId }: Props) {
               <p className="text-sm text-muted-foreground leading-relaxed">{report.executive_summary}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-shrink-0">
             {accountId && (
               <a
                 href={`/dashboard/analyze?account=${accountId}`}
-                className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+                className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Re-analyze
@@ -209,7 +209,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             )}
             <button
               onClick={() => setShareModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+              className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
             >
               <Share2 className="w-3.5 h-3.5" />
               Share
@@ -218,7 +218,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
               href={`/reports/${report.id}/print`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
+              className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
             >
               <Download className="w-3.5 h-3.5" />
               Export PDF
@@ -256,7 +256,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
-              "flex-1 py-2 px-2 sm:px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-0",
+              "py-2 px-2 sm:px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-fit sm:flex-1",
               tab === t.id ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -435,7 +435,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex-shrink-0 flex items-center gap-4 text-right">
+                    <div className="flex-shrink-0 flex items-center gap-2 sm:gap-4 text-right">
                       <div>
                         <p className={cn("font-mono font-semibold",
                           post.performance === "top" ? "text-neon-green" :

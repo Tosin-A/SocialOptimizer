@@ -42,7 +42,7 @@ export default function PostingTimeGrid({ recommendations, loading }: Props) {
   }
 
   return (
-    <div className="glass rounded-2xl p-6 space-y-4">
+    <div className="glass rounded-2xl p-3 sm:p-4 md:p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
         <Clock className="w-4 h-4 text-brand-400" />
         Best posting times
@@ -58,7 +58,7 @@ export default function PostingTimeGrid({ recommendations, loading }: Props) {
 
           return (
             <div key={day} className="flex items-center gap-3">
-              <span className="text-xs font-medium w-20 text-muted-foreground">{day.slice(0, 3)}</span>
+              <span className="text-xs font-medium w-12 sm:w-20 text-muted-foreground"><span className="sm:hidden">{day.slice(0, 2)}</span><span className="hidden sm:inline">{day.slice(0, 3)}</span></span>
               <div className="flex gap-2 flex-wrap">
                 {slots.map((slot) => (
                   <span

@@ -12,7 +12,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
   if (!signals?.length) return null;
 
   return (
-    <div className="glass rounded-2xl p-6 space-y-4">
+    <div className="glass rounded-2xl p-3 sm:p-5 md:p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
         <Activity className="w-4 h-4 text-brand-400" />
         Platform signals — <span className="capitalize">{platform}</span>
@@ -48,7 +48,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
                     )}
                   >
                     {gap >= 0 ? "+" : ""}
-                    {gap} vs median
+                    {gap}<span className="hidden sm:inline"> vs median</span>
                   </span>
                 </span>
               </div>

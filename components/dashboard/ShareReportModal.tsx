@@ -85,7 +85,7 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-5 space-y-4 shadow-2xl">
+      <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <Share2 className="w-4 h-4 text-brand-400" />

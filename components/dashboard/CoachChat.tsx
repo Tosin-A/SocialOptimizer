@@ -331,7 +331,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         transition={{ duration: 0.3 }}
         className="flex-1 min-h-0 glass rounded-2xl flex flex-col overflow-hidden"
       >
-        <div className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-7 space-y-6">
+        <div className="flex-1 overflow-y-auto px-3 sm:px-5 md:px-8 py-4 sm:py-6 md:py-7 space-y-6">
           {loadingHistory ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -467,7 +467,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         </div>
 
         {/* Input area */}
-        <div className="border-t border-white/5 px-4 py-4 md:px-6 md:py-5">
+        <div className="border-t border-white/5 px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
           <div className="relative mx-auto w-full max-w-4xl">
             {/* Command palette */}
             <AnimatePresence>

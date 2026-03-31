@@ -49,13 +49,13 @@ export default function RankedFixList({ fixes }: Props) {
                 </p>
               </div>
             </div>
-            <div className="ml-10 flex items-start gap-2">
+            <div className="ml-8 sm:ml-10 flex items-start gap-2">
               <ArrowRight className="w-3 h-3 text-brand-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-brand-300 leading-relaxed">
                 {fix.action}
               </p>
             </div>
-            <p className="ml-10 text-xs font-mono text-muted-foreground">
+            <p className="ml-8 sm:ml-10 text-xs font-mono text-muted-foreground">
               {fix.metric_reference}
             </p>
           </div>
