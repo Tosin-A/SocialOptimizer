@@ -18,7 +18,7 @@ export default function DashboardShell({
   const canCollapseSidebar = pathname.startsWith("/dashboard/coach");
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background/80 overflow-hidden relative z-10">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

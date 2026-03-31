@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "@/components/providers/QueryProvider";
+import DarkVeil from "@/components/landing/DarkVeil";
 
 const sans = localFont({
   src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
@@ -111,6 +112,18 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        {/* Animated WebGL background — fixed behind all content */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <DarkVeil
+            hueShift={0}
+            noiseIntensity={0}
+            scanlineIntensity={0}
+            speed={2}
+            scanlineFrequency={0}
+            warpAmount={0}
+          />
+          <div className="absolute inset-0 bg-background/60" />
+        </div>
         <QueryProvider>
           {children}
           <Toaster />

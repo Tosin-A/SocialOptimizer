@@ -131,7 +131,7 @@ export default function Sidebar({ open, onClose, collapsed = false }: SidebarPro
   return (
     <>
       {/* Desktop sidebar — always visible on lg+ */}
-      <aside className={cn("hidden lg:flex flex-shrink-0 border-r border-border flex-col h-full bg-background transition-[width] duration-200", collapsed ? "w-[78px]" : "w-64")}>
+      <aside className={cn("hidden lg:flex flex-shrink-0 border-r border-border flex-col h-full bg-background/80 transition-[width] duration-200", collapsed ? "w-[78px]" : "w-64")}>
         {navContent}
       </aside>
 
@@ -145,7 +145,7 @@ export default function Sidebar({ open, onClose, collapsed = false }: SidebarPro
             aria-hidden="true"
           />
           {/* Drawer */}
-          <aside className="relative z-10 w-72 flex flex-col h-full bg-background border-r border-border shadow-2xl">
+          <aside className="relative z-10 w-72 flex flex-col h-full bg-background/90 border-r border-border shadow-2xl">
             {navContent}
           </aside>
         </div>
