@@ -5,8 +5,7 @@
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
 import {
-  analyzeNicheAndThemes,
-  analyzeHashtags,
+  analyzeNicheAndHashtags,
   generateInsightsAndRoadmap,
   generateFixList,
 } from "@/lib/ai/claude";
@@ -486,39 +485,36 @@ export async function runAnalysisEngine(options: EngineOptions): Promise<string>
       .update({ status: "processing", started_at: new Date().toISOString(), progress: 5 })
       .eq("id", jobId);
 
-    // ── Step 2: Niche & theme detection ──────────────────────────────────────
-    await updateJobProgress(jobId, 15, "Detecting niche and content themes...");
+    // ── Step 2: Niche, theme & hashtag detection (single combined call) ─────
+    await updateJobProgress(jobId, 15, "Detecting niche, themes, and hashtag effectiveness...");
 
-    const nicheResult = await retryClaudeCall(
+    const allHashtags = posts.flatMap((p) => ensureArray<string>(p.hashtags));
+    const combinedResult = await retryClaudeCall(
       () =>
-        analyzeNicheAndThemes(
+        analyzeNicheAndHashtags(
           posts.map((p) => ({
             caption: p.caption,
             hashtags: ensureArray<string>(p.hashtags),
             engagement_rate: p.engagement_rate,
             content_type: p.content_type,
-          }))
+          })),
+          allHashtags,
+          account.platform
         ),
-      "analyzeNicheAndThemes"
+      "analyzeNicheAndHashtags"
     );
+    const nicheResult = {
+      niche: combinedResult.niche,
+      confidence: combinedResult.confidence,
+      keywords: combinedResult.keywords,
+      themes: combinedResult.themes,
+    };
     const nicheThemes = ensureArray<{ theme: string; frequency: number; avg_engagement_rate: number; is_dominant: boolean }>(
       nicheResult.themes
     );
+    const hashtagAnalysis = ensureArray<HashtagAnalysis>(combinedResult.hashtag_analysis);
 
-    // ── Step 3: Hashtag analysis ──────────────────────────────────────────────
-    await updateJobProgress(jobId, 30, "Analyzing hashtag effectiveness...");
-
-    const allHashtags = posts.flatMap((p) => ensureArray<string>(p.hashtags));
-    const hashtagAnalysisRaw = await retryClaudeCall(
-      () =>
-        analyzeHashtags(
-          allHashtags,
-          nicheResult.niche,
-          account.platform
-        ),
-      "analyzeHashtags"
-    );
-    const hashtagAnalysis = ensureArray<HashtagAnalysis>(hashtagAnalysisRaw);
+    await updateJobProgress(jobId, 30, "Analyzing content hooks and CTAs...");
 
     // ── Step 4: Hook + CTA analysis (via Python service) ─────────────────────
     await updateJobProgress(jobId, 45, "Analyzing content hooks and CTAs...");

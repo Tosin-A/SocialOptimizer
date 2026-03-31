@@ -19,15 +19,17 @@ import type {
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── Model tiers ───────────────────────────────────────────────────────────────
-// ANALYSIS_MODEL  — core product output (strengths/weaknesses/roadmap). Keep Opus.
-// STRATEGY_MODEL  — creative generation + complex structured tasks. Sonnet is sufficient.
+// STRATEGY_MODEL  — insights, generation, complex structured tasks. Sonnet handles these well.
 // CLASSIFY_MODEL  — classification, scoring, lookup tasks. Haiku handles these well.
 
-const ANALYSIS_MODEL = "claude-opus-4-6";
 const STRATEGY_MODEL = "claude-sonnet-4-6";
 const CLASSIFY_MODEL = "claude-haiku-4-5-20251001";
 
-const MAX_TOKENS = 8096;
+// ─── Prompt caching helper ─────────────────────────────────────────────────────
+
+function cachedSystem(text: string): Array<{ type: "text"; text: string; cache_control: { type: "ephemeral" } }> {
+  return [{ type: "text" as const, text, cache_control: { type: "ephemeral" as const } }];
+}
 
 // ─── System prompts ────────────────────────────────────────────────────────────
 
@@ -72,8 +74,8 @@ export async function analyzeNicheAndThemes(posts: {
 
   const response = await client.messages.create({
     model: CLASSIFY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    max_tokens: 2048,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -122,8 +124,8 @@ export async function analyzeHashtags(
 
   const response = await client.messages.create({
     model: CLASSIFY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    max_tokens: 3072,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -157,6 +159,94 @@ Consider:
   return parseJSONResponse(text, "analyzeHashtags");
 }
 
+// ─── Combined niche + hashtag analysis (saves one Claude call) ────────────────
+
+export async function analyzeNicheAndHashtags(
+  posts: {
+    caption: string | null;
+    hashtags: string[];
+    engagement_rate: number | null;
+    content_type: string;
+  }[],
+  allHashtags: string[],
+  platform: Platform
+): Promise<{
+  niche: string;
+  confidence: number;
+  keywords: string[];
+  themes: ContentTheme[];
+  hashtag_analysis: HashtagAnalysis[];
+}> {
+  const postSummary = posts.slice(0, 20).map((p) => ({
+    caption: p.caption?.slice(0, 300) ?? "",
+    hashtags: p.hashtags.slice(0, 10),
+    engagement_rate: p.engagement_rate ?? 0,
+    type: p.content_type,
+  }));
+
+  const tagFrequency = allHashtags.reduce((acc, tag) => {
+    acc[tag] = (acc[tag] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const topTags = Object.entries(tagFrequency)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 20)
+    .map(([tag, freq]) => ({ tag, frequency: freq }));
+
+  const response = await client.messages.create({
+    model: CLASSIFY_MODEL,
+    max_tokens: 4096,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
+    messages: [
+      {
+        role: "user",
+        content: `Analyze these ${postSummary.length} posts to identify the creator's niche, content themes, AND evaluate their hashtag strategy on ${platform}.
+
+Posts data:
+${JSON.stringify(postSummary, null, 2)}
+
+Hashtag usage frequency:
+${JSON.stringify(topTags, null, 2)}
+
+Return a JSON object with this exact structure:
+{
+  "niche": "specific niche name (e.g. 'fitness for beginners', 'personal finance tips')",
+  "confidence": 0.0-1.0,
+  "keywords": ["keyword1", "keyword2", ...up to 15 keywords],
+  "themes": [
+    {
+      "theme": "theme name",
+      "frequency": number_of_posts,
+      "avg_engagement_rate": 0.0,
+      "is_dominant": true/false
+    }
+  ],
+  "hashtag_analysis": [
+    {
+      "tag": "#hashtag",
+      "reach_score": 0-100,
+      "competition": "low" | "medium" | "high",
+      "relevance": 0.0-1.0,
+      "recommendation": "keep" | "replace" | "add",
+      "suggested_alternative": "alternative hashtag if replacing, or null"
+    }
+  ]
+}
+
+For hashtags consider:
+- Are they too broad (millions of posts = hard to get discovered)?
+- Are they too niche (too small to drive meaningful reach)?
+- Are they relevant to the detected niche?
+- Do they follow the 30/30/30/10 rule (large/medium/small/brand)?`,
+      },
+    ],
+  });
+
+  const text = response.content[0].type === "text" ? response.content[0].text : "";
+  return parseJSONResponse(text, "analyzeNicheAndHashtags");
+}
+
 export async function generateInsightsAndRoadmap(analysisData: {
   platform: Platform;
   niche: string;
@@ -179,9 +269,9 @@ export async function generateInsightsAndRoadmap(analysisData: {
   executive_summary: string;
 }> {
   const response = await client.messages.create({
-    model: ANALYSIS_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    model: STRATEGY_MODEL,
+    max_tokens: 4096,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -260,7 +350,7 @@ export async function analyzeHookStrength(transcript: string, caption: string): 
   const response = await client.messages.create({
     model: CLASSIFY_MODEL,
     max_tokens: 512,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -300,8 +390,8 @@ export async function detectOutlierPatterns(
 ): Promise<Array<{ pattern_tags: string[]; what_worked: string }>> {
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    max_tokens: 3072,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -481,8 +571,8 @@ export async function extractFormatPatterns(
 
   const response = await client.messages.create({
     model: CLASSIFY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    max_tokens: 2048,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -527,8 +617,8 @@ export async function generateFixList(analysisData: {
 
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: ANALYSIS_SYSTEM_PROMPT,
+    max_tokens: 2048,
+    system: cachedSystem(ANALYSIS_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -590,8 +680,8 @@ export async function generatePersonalizedIdeas(
 ): Promise<PersonalizedIdea[]> {
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: GENERATION_SYSTEM_PROMPT,
+    max_tokens: 4096,
+    system: cachedSystem(GENERATION_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -631,8 +721,8 @@ export async function generateScoredHooks(
 ): Promise<ScoredHook[]> {
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: GENERATION_SYSTEM_PROMPT,
+    max_tokens: 4096,
+    system: cachedSystem(GENERATION_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -672,8 +762,8 @@ export async function generateStructuredCaption(
 ): Promise<StructuredCaption> {
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: GENERATION_SYSTEM_PROMPT,
+    max_tokens: 2048,
+    system: cachedSystem(GENERATION_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -725,8 +815,8 @@ export async function generateContent(
 
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: GENERATION_SYSTEM_PROMPT,
+    max_tokens: 4096,
+    system: cachedSystem(GENERATION_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -789,8 +879,8 @@ export async function generateReplicateWinners(
 
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: GENERATION_SYSTEM_PROMPT,
+    max_tokens: 4096,
+    system: cachedSystem(GENERATION_SYSTEM_PROMPT),
     messages: [
       {
         role: "user",
@@ -883,8 +973,8 @@ export async function coachChat(
 
   const response = await client.messages.create({
     model: STRATEGY_MODEL,
-    max_tokens: MAX_TOKENS,
-    system: COACH_SYSTEM_PROMPT,
+    max_tokens: 2048,
+    system: cachedSystem(COACH_SYSTEM_PROMPT),
     messages: apiMessages,
     tools: coachTools,
   });
