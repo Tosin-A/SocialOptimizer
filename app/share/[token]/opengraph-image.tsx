@@ -42,7 +42,7 @@ export default async function OGImage({
   if (!report) {
     return new ImageResponse(
       (
-        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#0f172a", color: "white", fontSize: 32 }}>
+        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#080a0f", color: "white", fontSize: 32, fontFamily: "'Inter', system-ui, sans-serif" }}>
           Report not found
         </div>
       ),
@@ -52,6 +52,7 @@ export default async function OGImage({
 
   const score = report.growth_score as number;
   const scoreColor = getScoreColor(score);
+  const scoreLabel = getScoreLabel(score);
   const accountArr = report.connected_accounts as unknown as Array<{ username: string }>;
   const account = accountArr?.[0] ?? null;
 
@@ -62,105 +63,291 @@ export default async function OGImage({
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 80,
-          padding: "60px 80px",
-          background: "linear-gradient(145deg, #0a0c12 0%, #0d1420 40%, #111827 100%)",
+          background: "#080a0f",
           fontFamily: "'Inter', system-ui, sans-serif",
           position: "relative",
+          overflow: "hidden",
         }}
       >
-        {/* Grid dots */}
+        {/* Ambient glow behind score */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            backgroundImage: "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+            top: "10%",
+            left: "5%",
+            width: 500,
+            height: 500,
+            background: `radial-gradient(circle, ${scoreColor}15 0%, ${scoreColor}05 40%, transparent 65%)`,
+            borderRadius: "50%",
           }}
         />
 
-        {/* Score circle */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+        {/* Blue glow — right side */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: -100,
+            right: -50,
+            width: 400,
+            height: 400,
+            background:
+              "radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 60%)",
+            borderRadius: "50%",
+          }}
+        />
+
+        {/* Dot grid */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage:
+              "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: "100%",
+            padding: "50px 70px",
+            position: "relative",
+          }}
+        >
+          {/* Left — score visualization */}
           <div
             style={{
-              width: 180,
-              height: 180,
-              borderRadius: "50%",
-              border: `6px solid ${scoreColor}`,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              background: "rgba(0,0,0,0.3)",
+              width: "40%",
+              gap: 16,
             }}
           >
-            <span style={{ fontSize: 72, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{score}</span>
-            <span style={{ fontSize: 16, color: "rgba(255,255,255,0.4)" }}>/100</span>
-          </div>
-          <span style={{ fontSize: 20, fontWeight: 700, color: scoreColor }}>{getScoreLabel(score)}</span>
-        </div>
-
-        {/* Right side info */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          {account && (
-            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 24 }}>@{account.username}</span>
-          )}
-          <span style={{ color: "#60a5fa", fontSize: 18, fontWeight: 600 }}>{report.detected_niche}</span>
-
-          {/* Mini scores */}
-          <div style={{ display: "flex", gap: 16 }}>
-            {[
-              { label: "Hook", value: report.hook_strength_score },
-              { label: "Engagement", value: report.engagement_score },
-              { label: "Content", value: report.content_quality_score },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 12,
-                  padding: "12px 16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 4,
-                  minWidth: 90,
-                }}
-              >
-                <span style={{ color: getScoreColor(item.value as number), fontSize: 24, fontWeight: 800 }}>
-                  {item.value}
-                </span>
-                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  {item.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Branding */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            {/* Score ring */}
             <div
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+                width: 200,
+                height: 200,
+                borderRadius: "50%",
+                border: `6px solid ${scoreColor}`,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
+                background: "rgba(0,0,0,0.35)",
+                boxShadow: `0 0 60px ${scoreColor}18`,
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <polyline points="16 7 22 7 22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <span
+                style={{
+                  fontSize: 76,
+                  fontWeight: 800,
+                  color: "white",
+                  lineHeight: 1,
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {score}
+              </span>
+              <span
+                style={{
+                  fontSize: 16,
+                  color: "rgba(255,255,255,0.3)",
+                  fontWeight: 500,
+                }}
+              >
+                /100
+              </span>
             </div>
-            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 14, fontWeight: 600 }}>Analyzed by CLOUT</span>
+            <span
+              style={{
+                color: scoreColor,
+                fontSize: 16,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.15em",
+              }}
+            >
+              {scoreLabel}
+            </span>
+          </div>
+
+          {/* Right — details */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              width: "60%",
+              paddingLeft: 40,
+              gap: 24,
+            }}
+          >
+            {/* Username + niche */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {account && (
+                <span
+                  style={{
+                    color: "white",
+                    fontSize: 36,
+                    fontWeight: 800,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  @{account.username}
+                </span>
+              )}
+              {report.detected_niche && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      background: "#3b82f6",
+                    }}
+                  />
+                  <span
+                    style={{
+                      color: "#93c5fd",
+                      fontSize: 18,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {report.detected_niche as string}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Mini score cards */}
+            <div style={{ display: "flex", gap: 12 }}>
+              {[
+                { label: "Hook", value: report.hook_strength_score },
+                { label: "Engagement", value: report.engagement_score },
+                { label: "Content", value: report.content_quality_score },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 5,
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 14,
+                    padding: "14px 20px",
+                    minWidth: 100,
+                  }}
+                >
+                  <span
+                    style={{
+                      color: getScoreColor(item.value as number),
+                      fontSize: 28,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {item.value}
+                  </span>
+                  <span
+                    style={{
+                      color: "rgba(255,255,255,0.35)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Branding */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: 12,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <span
+                  style={{
+                    color: "white",
+                    fontSize: 20,
+                    fontWeight: 900,
+                    letterSpacing: "0.12em",
+                  }}
+                >
+                  CLOUT
+                </span>
+                <div
+                  style={{
+                    width: 1,
+                    height: 16,
+                    background: "rgba(255,255,255,0.15)",
+                  }}
+                />
+                <span
+                  style={{
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: 14,
+                    fontWeight: 500,
+                  }}
+                >
+                  Content Analysis Report
+                </span>
+              </div>
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.2)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  letterSpacing: "0.03em",
+                }}
+              >
+                cloutai.co.uk
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Bottom accent line */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            background: `linear-gradient(90deg, transparent, ${scoreColor} 30%, #2563eb 60%, #3b82f6 80%, transparent)`,
+          }}
+        />
       </div>
     ),
     { ...size }
