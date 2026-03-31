@@ -17,101 +17,149 @@ export default function OGImage() {
           alignItems: "flex-start",
           justifyContent: "flex-end",
           padding: "72px 80px",
-          background: "linear-gradient(135deg, #080f1e 0%, #0f1a35 50%, #1e1b4b 100%)",
+          background: "linear-gradient(145deg, #0a0c12 0%, #0d1420 40%, #111827 100%)",
           fontFamily: "'Inter', system-ui, sans-serif",
           position: "relative",
         }}
       >
-        {/* Grid dot pattern */}
+        {/* Subtle grid */}
         <div
           style={{
             position: "absolute",
             inset: 0,
             backgroundImage:
-              "radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
+              "radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
           }}
         />
 
-        {/* Glow */}
+        {/* Blue glow — top right */}
         <div
           style={{
             position: "absolute",
-            top: "20%",
-            right: "10%",
-            width: 500,
-            height: 300,
-            background: "rgba(99,102,241,0.15)",
+            top: "10%",
+            right: "5%",
+            width: 480,
+            height: 320,
+            background: "rgba(37,99,235,0.12)",
+            borderRadius: "50%",
+            filter: "blur(100px)",
+          }}
+        />
+
+        {/* Secondary glow — bottom left */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            left: "0%",
+            width: 400,
+            height: 250,
+            background: "rgba(59,130,246,0.06)",
             borderRadius: "50%",
             filter: "blur(80px)",
           }}
         />
 
-        {/* Score cards decorative row */}
+        {/* Score cards */}
         <div
           style={{
             position: "absolute",
             top: 56,
             right: 80,
             display: "flex",
-            gap: 12,
+            gap: 14,
           }}
         >
           {[
             { label: "Growth Score", value: "84", color: "#22c55e" },
-            { label: "Engagement",   value: "3.8%", color: "#818cf8" },
-            { label: "Hook Strength", value: "71", color: "#f59e0b" },
+            { label: "Engagement", value: "3.8%", color: "#60a5fa" },
+            { label: "Hook Strength", value: "71", color: "#eab308" },
           ].map((card) => (
             <div
               key={card.label}
               style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: 12,
-                padding: "16px 20px",
+                padding: "18px 22px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: 4,
-                minWidth: 120,
+                gap: 6,
+                minWidth: 125,
               }}
             >
-              <span style={{ color: card.color, fontSize: 28, fontWeight: 800, lineHeight: 1 }}>
+              <span
+                style={{
+                  color: card.color,
+                  fontSize: 30,
+                  fontWeight: 800,
+                  lineHeight: 1,
+                }}
+              >
                 {card.value}
               </span>
-              <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+              <span
+                style={{
+                  color: "rgba(255,255,255,0.35)",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                }}
+              >
                 {card.label}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Logo mark */}
+        {/* Logo */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 12,
-            marginBottom: 32,
+            marginBottom: 36,
           }}
         >
           <div
             style={{
-              width: 48,
-              height: 48,
-              borderRadius: 12,
-              background: "linear-gradient(135deg, #6366f1, #a855f7)",
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #2563eb, #3b82f6)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              <polyline points="16 7 22 7 22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <polyline
+                points="22 7 13.5 15.5 8.5 10.5 2 17"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <polyline
+                points="16 7 22 7 22 13"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </div>
-          <span style={{ color: "#818cf8", fontSize: 22, fontWeight: 800, letterSpacing: "0.02em" }}>
+          <span
+            style={{
+              color: "#60a5fa",
+              fontSize: 22,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+            }}
+          >
             CLOUT
           </span>
         </div>
@@ -119,31 +167,44 @@ export default function OGImage() {
         {/* Headline */}
         <h1
           style={{
-            color: "#f1f5f9",
-            fontSize: 56,
+            color: "#ffffff",
+            fontSize: 58,
             fontWeight: 800,
-            lineHeight: 1.1,
+            lineHeight: 1.08,
             letterSpacing: "-0.03em",
             margin: 0,
             marginBottom: 20,
-            maxWidth: 720,
+            maxWidth: 700,
           }}
         >
-          Stop guessing.<br />Start growing.
+          Content analytics for serious creators.
         </h1>
 
         {/* Sub */}
         <p
           style={{
-            color: "rgba(255,255,255,0.5)",
+            color: "rgba(255,255,255,0.45)",
             fontSize: 22,
             margin: 0,
-            maxWidth: 600,
+            maxWidth: 580,
             lineHeight: 1.5,
           }}
         >
-          AI-powered analysis of your TikTok, Instagram, YouTube, and Facebook content. Get a ranked fix list, not a generic report.
+          Analyze 90 days of TikTok, Instagram, YouTube, and Facebook posts.
+          Get a ranked fix list, not a generic report.
         </p>
+
+        {/* Bottom edge accent line */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            background: "linear-gradient(90deg, transparent, #2563eb 30%, #3b82f6 70%, transparent)",
+          }}
+        />
       </div>
     ),
     { ...size }

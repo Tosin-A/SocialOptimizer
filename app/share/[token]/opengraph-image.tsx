@@ -66,7 +66,7 @@ export default async function OGImage({
           justifyContent: "center",
           gap: 80,
           padding: "60px 80px",
-          background: "linear-gradient(135deg, #080f1e 0%, #0f172a 50%, #1e1b4b 100%)",
+          background: "linear-gradient(145deg, #0a0c12 0%, #0d1420 40%, #111827 100%)",
           fontFamily: "'Inter', system-ui, sans-serif",
           position: "relative",
         }}
@@ -107,7 +107,7 @@ export default async function OGImage({
           {account && (
             <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 24 }}>@{account.username}</span>
           )}
-          <span style={{ color: "#818cf8", fontSize: 18, fontWeight: 600 }}>{report.detected_niche}</span>
+          <span style={{ color: "#60a5fa", fontSize: 18, fontWeight: 600 }}>{report.detected_niche}</span>
 
           {/* Mini scores */}
           <div style={{ display: "flex", gap: 16 }}>
@@ -147,7 +147,7 @@ export default async function OGImage({
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
