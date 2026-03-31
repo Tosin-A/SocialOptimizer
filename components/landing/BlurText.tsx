@@ -100,7 +100,7 @@ export default function BlurText({
   );
 
   return (
-    <Tag ref={ref} className={`blur-text ${className} flex flex-wrap`}>
+    <Tag ref={ref as React.RefObject<never>} className={`blur-text ${className} flex flex-wrap`}>
       {elements.map((segment, index) => {
         const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
 
