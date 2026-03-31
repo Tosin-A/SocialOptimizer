@@ -72,9 +72,9 @@ export default function CompetitorsPage() {
               </div>
 
               {/* Right: mock competitor card */}
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+              <div className="rounded-xl border border-white/[0.06] bg-card p-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center font-bold text-brand-300 text-sm">
+                  <div className="w-10 h-10 rounded-full bg-blue-600/30 flex items-center justify-center font-bold text-blue-300 text-sm">
                     JF
                   </div>
                   <div>
@@ -98,7 +98,7 @@ export default function CompetitorsPage() {
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {["#fitness", "#gym", "#workout", "#gains", "#fitfam"].map((tag) => (
-                    <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded font-mono">
+                    <span key={tag} className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded font-mono">
                       {tag}
                     </span>
                   ))}
@@ -111,10 +111,10 @@ export default function CompetitorsPage() {
 
       {/* Gap analysis */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-2 mb-3">
-              <GitCompareArrows className="w-5 h-5 text-brand-400" />
+              <GitCompareArrows className="w-5 h-5 text-blue-400" />
               <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
                 Gap analysis
               </h2>
@@ -129,8 +129,8 @@ export default function CompetitorsPage() {
               {COMPARISON_METRICS.map((metric, i) => (
                 <SectionReveal key={metric.label} delay={i * 0.08}>
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">
-                      <metric.icon className="w-4 h-4 text-brand-400" />
+                    <div className="w-9 h-9 rounded-lg bg-card flex items-center justify-center flex-shrink-0">
+                      <metric.icon className="w-4 h-4 text-blue-400" />
                     </div>
                     <div>
                       <h3 className="font-medium mb-1">{metric.label}</h3>
@@ -146,7 +146,7 @@ export default function CompetitorsPage() {
 
       {/* Sample action */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl font-semibold tracking-tight mb-6">
               The kind of actions you get
@@ -175,7 +175,7 @@ export default function CompetitorsPage() {
       </SectionReveal>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             Stop guessing what competitors are doing right
@@ -185,7 +185,7 @@ export default function CompetitorsPage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

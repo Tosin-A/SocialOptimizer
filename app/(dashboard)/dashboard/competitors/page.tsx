@@ -25,7 +25,7 @@ function CompetitorsTeaser() {
       {mockCompetitors.map((c) => (
         <div key={c.username} className="glass rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center font-bold text-brand-300 text-sm">
+            <div className="w-10 h-10 rounded-full bg-blue-600/30 flex items-center justify-center font-bold text-blue-300 text-sm">
               {c.username.slice(0, 2).toUpperCase()}
             </div>
             <div>
@@ -49,7 +49,7 @@ function CompetitorsTeaser() {
           </div>
           <div className="flex flex-wrap gap-1.5">
             {c.hashtags.map((tag) => (
-              <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono">
+              <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-border font-mono">
                 {tag}
               </span>
             ))}
@@ -111,7 +111,7 @@ const PLATFORM_LABELS: Record<Platform, string> = {
 const PRIORITY_STYLES: Record<ImpactLevel, string> = {
   high:   "bg-red-500/10 text-red-400 border-red-500/20",
   medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  low:    "bg-white/5 text-muted-foreground border-white/10",
+  low:    "bg-white/5 text-muted-foreground border-border",
 };
 
 function DeltaBadge({ value, unit = "" }: { value: number; unit?: string }) {
@@ -132,10 +132,10 @@ function ComparisonPanel({ comparison, onClose }: { comparison: ComparisonResult
     .slice(0, 8);
 
   return (
-    <div className="mt-4 pt-4 border-t border-white/10 space-y-4">
+    <div className="mt-4 pt-4 border-t border-border space-y-4">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold flex items-center gap-2">
-          <GitCompareArrows className="w-4 h-4 text-brand-400" /> Gap analysis
+          <GitCompareArrows className="w-4 h-4 text-blue-400" /> Gap analysis
         </h4>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
           <X className="w-4 h-4" />
@@ -166,7 +166,7 @@ function ComparisonPanel({ comparison, onClose }: { comparison: ComparisonResult
           </p>
           <div className="flex flex-wrap gap-1.5">
             {compUniqueHashtags.map((h) => (
-              <span key={h.hashtag} className="text-xs px-2 py-0.5 rounded-full bg-brand-600/20 text-brand-300 border border-brand-600/30 font-mono">
+              <span key={h.hashtag} className="text-xs px-2 py-0.5 rounded-full bg-blue-600/20 text-blue-300 border border-blue-600/30 font-mono">
                 #{h.hashtag}
               </span>
             ))}
@@ -362,7 +362,7 @@ export default function CompetitorsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-6 h-6 text-brand-400" /> Competitors
+            <Users className="w-6 h-6 text-blue-400" /> Competitors
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             Track what's working for other accounts in your niche
@@ -416,7 +416,7 @@ export default function CompetitorsPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="gap-2 w-full sm:w-auto border-white/10 hover:border-brand-500/50"
+                className="gap-2 w-full sm:w-auto border-border hover:border-blue-500/50"
                 disabled={autoPicking}
                 onClick={autoPickCompetitor}
               >
@@ -434,7 +434,7 @@ export default function CompetitorsPage() {
       {/* Loading */}
       {loading && (
         <div className="glass rounded-2xl p-12 text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-brand-400 mx-auto mb-3" />
+          <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto mb-3" />
           <p className="text-muted-foreground text-sm">Loading competitors...</p>
         </div>
       )}
@@ -452,7 +452,7 @@ export default function CompetitorsPage() {
           </Button>
           <Button
             variant="outline"
-            className="gap-2 ml-2 border-white/10 hover:border-brand-500/50"
+            className="gap-2 ml-2 border-border hover:border-blue-500/50"
             onClick={autoPickCompetitor}
             disabled={autoPicking}
           >
@@ -475,7 +475,7 @@ export default function CompetitorsPage() {
                 {/* Profile row */}
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-brand-600/30 flex items-center justify-center font-bold text-brand-300 text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-600/30 flex items-center justify-center font-bold text-blue-300 text-sm flex-shrink-0">
                       {c.username.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
@@ -520,7 +520,7 @@ export default function CompetitorsPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="gap-1.5 text-xs border-white/10 hover:border-brand-500/50"
+                        className="gap-1.5 text-xs border-border hover:border-blue-500/50"
                         onClick={() => runComparison(c.id)}
                         disabled={isComparing}
                       >
@@ -567,7 +567,7 @@ export default function CompetitorsPage() {
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {c.top_hashtags.slice(0, 10).map((tag) => (
-                        <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 font-mono">
+                        <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-border font-mono">
                           #{tag}
                         </span>
                       ))}
@@ -588,7 +588,7 @@ export default function CompetitorsPage() {
                     <button
                       onClick={() => refreshCompetitor(c.id)}
                       disabled={refreshing === c.id}
-                      className="text-brand-400 hover:text-brand-300 font-medium flex items-center gap-1 ml-3 flex-shrink-0"
+                      className="text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 ml-3 flex-shrink-0"
                     >
                       <RefreshCw className={`w-3 h-3 ${refreshing === c.id ? "animate-spin" : ""}`} />
                       {refreshing === c.id ? "Refreshing..." : "Refresh now"}

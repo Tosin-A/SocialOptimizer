@@ -31,7 +31,7 @@ export default function ReportViewPage() {
   if (loading) {
     return (
       <div className="max-w-5xl mx-auto p-12 flex flex-col items-center justify-center gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-brand-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-blue-400" />
         <p className="text-sm text-muted-foreground">Loading report...</p>
       </div>
     );
@@ -43,7 +43,7 @@ export default function ReportViewPage() {
         <p className="text-destructive mb-4">{error ?? "Report not found"}</p>
         <Link
           href="/dashboard/reports"
-          className="inline-flex items-center gap-2 text-brand-400 hover:text-brand-300"
+          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300"
         >
           <ArrowLeft className="w-4 h-4" /> Back to reports
         </Link>

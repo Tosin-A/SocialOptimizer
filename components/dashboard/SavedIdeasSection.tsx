@@ -34,12 +34,12 @@ function formatContent(text: string): string {
       "<div class='flex gap-2 items-baseline'><span class='text-[11px] uppercase tracking-wider text-muted-foreground font-medium shrink-0'>$1</span><span>$2</span></div>")
     // Timestamps like [0-3s]
     .replace(/^\[(\d+[\-–]\d+s?)\]\s*(.+)$/gm,
-      "<div class='flex gap-2 items-baseline ml-2 border-l-2 border-white/10 pl-2'><span class='text-[11px] font-mono text-muted-foreground shrink-0'>$1</span><span>$2</span></div>")
+      "<div class='flex gap-2 items-baseline ml-2 border-l-2 border-border pl-2'><span class='text-[11px] font-mono text-muted-foreground shrink-0'>$1</span><span>$2</span></div>")
     // Hashtags line (multiple #tags)
     .replace(/^((?:#\S+\s*){3,})$/gm, (match) => {
       const tags = match.trim().split(/\s+/);
       return "<div class='flex flex-wrap gap-1 mt-1'>" +
-        tags.map((t) => `<span class='text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded'>${t}</span>`).join("") +
+        tags.map((t) => `<span class='text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded'>${t}</span>`).join("") +
         "</div>";
     })
     // List items
@@ -81,8 +81,8 @@ export default function SavedIdeasSection() {
       <div className="glass rounded-2xl p-6 animate-pulse">
         <div className="h-5 w-32 bg-white/10 rounded mb-4" />
         <div className="space-y-3">
-          <div className="h-16 bg-white/5 rounded-lg" />
-          <div className="h-16 bg-white/5 rounded-lg" />
+          <div className="h-16 bg-muted rounded-lg" />
+          <div className="h-16 bg-muted rounded-lg" />
         </div>
       </div>
     );
@@ -90,8 +90,8 @@ export default function SavedIdeasSection() {
 
   return (
     <div className="glass rounded-2xl overflow-hidden">
-      <div className="p-5 border-b border-white/5 flex items-center gap-2">
-        <Bookmark className="w-4 h-4 text-brand-400" />
+      <div className="p-5 border-b border-border flex items-center gap-2">
+        <Bookmark className="w-4 h-4 text-blue-400" />
         <h2 className="font-semibold text-sm">Saved Ideas</h2>
         {ideas.length > 0 && (
           <span className="text-xs text-muted-foreground ml-auto">{ideas.length} saved</span>
@@ -106,7 +106,7 @@ export default function SavedIdeasSection() {
           </p>
           <Link
             href="/dashboard/coach"
-            className="inline-flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
           >
             <MessageSquare className="w-3.5 h-3.5" /> Open Coach
           </Link>
@@ -120,7 +120,7 @@ export default function SavedIdeasSection() {
               ? idea.content.slice(0, 300) + "…"
               : idea.content;
             return (
-              <div key={idea.id} className="p-4 hover:bg-white/[0.02] transition-colors">
+              <div key={idea.id} className="p-4 hover:bg-card transition-colors">
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -128,13 +128,13 @@ export default function SavedIdeasSection() {
                         className={`text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded ${
                           idea.provider === "openai"
                             ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-brand-500/15 text-brand-400"
+                            : "bg-blue-500/15 text-blue-400"
                         }`}
                       >
                         {idea.provider === "openai" ? "GPT-4o" : "Claude"}
                       </span>
                       {idea.platform && (
-                        <span className="text-[10px] font-mono uppercase tracking-wider bg-white/5 px-1.5 py-0.5 rounded text-muted-foreground">
+                        <span className="text-[10px] font-mono uppercase tracking-wider bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
                           {idea.platform}
                         </span>
                       )}
@@ -149,7 +149,7 @@ export default function SavedIdeasSection() {
                     {isLong && (
                       <button
                         onClick={() => toggleExpand(idea.id)}
-                        className="mt-1.5 flex items-center gap-1 text-[11px] text-brand-400 hover:text-brand-300 transition-colors"
+                        className="mt-1.5 flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         {expanded ? (
                           <>
@@ -171,7 +171,7 @@ export default function SavedIdeasSection() {
                   <div className="flex flex-col gap-1 flex-shrink-0">
                     <button
                       onClick={() => navigator.clipboard.writeText(idea.content)}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+                      className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       title="Copy to clipboard"
                     >
                       <Copy className="w-3.5 h-3.5" />

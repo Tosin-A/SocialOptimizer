@@ -1,15 +1,16 @@
-import * as Sentry from "@sentry/nextjs";
-
 export async function register() {
+  if (process.env.NODE_ENV !== "production") return;
+
   const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
   if (!dsn || dsn.includes("...")) return;
 
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    Sentry.init({
+    const mod = await import(/* webpackIgnore: true */ "@sentry/nextjs");
+    mod.init({
       dsn,
       environment: process.env.NODE_ENV,
-      tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-      beforeSend(event) {
+      tracesSampleRate: 0.1,
+      beforeSend(event: { request?: { headers?: Record<string, string> } }) {
         if (event.request?.headers) {
           delete event.request.headers["authorization"];
           delete event.request.headers["x-service-secret"];
@@ -21,10 +22,11 @@ export async function register() {
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {
-    Sentry.init({
+    const mod = await import(/* webpackIgnore: true */ "@sentry/nextjs");
+    mod.init({
       dsn,
       environment: process.env.NODE_ENV,
-      tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+      tracesSampleRate: 0.1,
     });
   }
 }

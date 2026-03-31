@@ -8,14 +8,14 @@ interface Props {
 }
 
 const typeColors: Record<string, string> = {
-  sound: "bg-neon-purple/20 text-neon-purple",
-  hashtag: "bg-brand-600/20 text-brand-300",
-  format: "bg-neon-cyan/20 text-neon-cyan",
-  topic: "bg-neon-pink/20 text-neon-pink",
+  sound: "bg-blue-400/20 text-blue-400",
+  hashtag: "bg-blue-600/20 text-blue-300",
+  format: "bg-blue-400/20 text-blue-400",
+  topic: "bg-rose-400/20 text-rose-400",
 };
 
 const saturationColors: Record<string, string> = {
-  low: "text-neon-green",
+  low: "text-emerald-500",
   medium: "text-yellow-400",
   high: "text-red-400",
 };
@@ -37,7 +37,7 @@ export default function TrendVelocityFeed({ trends }: Props) {
       {trends.map((trend) => (
         <div key={trend.id} className="glass rounded-xl p-4 flex items-center gap-4">
           <div className="flex-shrink-0">
-            <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
               <Flame className={cn("w-5 h-5", trend.velocity_score >= 70 ? "text-red-400" : trend.velocity_score >= 40 ? "text-yellow-400" : "text-muted-foreground")} />
             </div>
           </div>
@@ -55,9 +55,9 @@ export default function TrendVelocityFeed({ trends }: Props) {
           </div>
           {/* Velocity bar */}
           <div className="w-16 flex-shrink-0">
-            <div className="w-full bg-white/5 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div
-                className={cn("h-full rounded-full", trend.velocity_score >= 70 ? "bg-red-400" : trend.velocity_score >= 40 ? "bg-yellow-400" : "bg-brand-500")}
+                className={cn("h-full rounded-full", trend.velocity_score >= 70 ? "bg-red-400" : trend.velocity_score >= 40 ? "bg-yellow-400" : "bg-blue-500")}
                 style={{ width: `${trend.velocity_score}%` }}
               />
             </div>

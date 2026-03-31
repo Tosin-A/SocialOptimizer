@@ -22,7 +22,7 @@ export default function Header({
   const initials = user.email?.slice(0, 2).toUpperCase() ?? "??";
 
   return (
-    <header className="h-14 border-b border-white/5 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 bg-background/80 backdrop-blur-sm">
+    <header className="h-14 border-b border-border flex items-center justify-between px-4 sm:px-6 flex-shrink-0 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         {/* Hamburger — mobile only */}
         <Button
@@ -55,7 +55,7 @@ export default function Header({
 
       <div className="flex items-center gap-3">
         <NotificationsPopover />
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-neon-purple flex items-center justify-center text-xs font-bold select-none">
+        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold select-none">
           {initials}
         </div>
       </div>

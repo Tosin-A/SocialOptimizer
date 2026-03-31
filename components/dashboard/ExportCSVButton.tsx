@@ -71,7 +71,7 @@ export default function ExportCSVButton({ reports }: { reports: ReportRow[] }) {
   return (
     <button
       onClick={handleExport}
-      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 text-sm text-muted-foreground hover:text-foreground hover:border-white/20 transition-all"
+      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:border-white/20 transition-all"
     >
       <Download className="w-4 h-4" />
       Export CSV

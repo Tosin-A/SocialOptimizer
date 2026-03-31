@@ -223,7 +223,7 @@ export default function GeneratePage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Wand2 className="w-6 h-6 text-neon-purple" /> Content Generator
+            <Wand2 className="w-6 h-6 text-blue-400" /> Content Generator
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             AI-generated hooks, captions, scripts, and hashtags personalized to your niche
@@ -290,8 +290,8 @@ export default function GeneratePage() {
                   onClick={() => setNiche(pillar)}
                   className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
                     niche === pillar
-                      ? "bg-brand-500/20 border-brand-500/40 text-brand-300"
-                      : "bg-white/5 border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20"
+                      ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                      : "bg-white/5 border-border text-muted-foreground hover:text-foreground hover:border-white/20"
                   }`}
                 >
                   {pillar}
@@ -426,7 +426,7 @@ export default function GeneratePage() {
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-mono capitalize bg-white/5 px-2 py-0.5 rounded">{item.platform}</span>
-                        <span className="text-xs font-mono capitalize bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{item.content_type.replace("_", " ")}</span>
+                        <span className="text-xs font-mono capitalize bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded">{item.content_type.replace("_", " ")}</span>
                       </div>
                       <p className="text-sm font-medium truncate">
                         {item.prompt_context.niche}
@@ -447,7 +447,7 @@ export default function GeneratePage() {
                 </button>
 
                 {isExpanded && (
-                  <div className="px-5 pb-5 border-t border-white/5 pt-4">
+                  <div className="px-5 pb-5 border-t border-border pt-4">
                     <OutputDisplay output={item.output} copyToClipboard={copyToClipboard} onSave={saveToIdeas} savedKeys={savedKeys} savingKey={savingKey} />
                   </div>
                 )}
@@ -546,11 +546,11 @@ function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }
                     </Button>
                   </div>
                 </div>
-                {cap.cta && <p className="text-xs text-brand-400">CTA: {cap.cta}</p>}
+                {cap.cta && <p className="text-xs text-blue-400">CTA: {cap.cta}</p>}
                 {cap.hashtags?.length > 0 && (
                   <div className="flex flex-wrap gap-1">
                     {cap.hashtags.slice(0, 15).map((tag) => (
-                      <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+                      <span key={tag} className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded">{tag}</span>
                     ))}
                     {cap.hashtags.length > 15 && <span className="text-xs text-muted-foreground">+{cap.hashtags.length - 15} more</span>}
                   </div>
@@ -593,7 +593,7 @@ function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }
                   </div>
                 </div>
                 {script.body_points?.length > 0 && (
-                  <div className="space-y-1.5 border-l-2 border-white/10 pl-3 ml-1">
+                  <div className="space-y-1.5 border-l-2 border-border pl-3 ml-1">
                     {script.body_points.map((point, j) => (
                       <div key={j} className="text-sm">
                         <span className="text-xs text-muted-foreground font-mono mr-2">{point.timestamp}</span>
@@ -603,7 +603,7 @@ function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }
                   </div>
                 )}
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <p className="text-brand-400">CTA: {script.cta}</p>
+                  <p className="text-blue-400">CTA: {script.cta}</p>
                   <span className="bg-white/5 px-2 py-0.5 rounded">Total: {script.total_duration}</span>
                 </div>
               </div>
@@ -626,7 +626,7 @@ function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">Angle: {idea.angle}</p>
-                <p className="text-xs text-brand-300 italic">{idea.why_it_works}</p>
+                <p className="text-xs text-blue-300 italic">{idea.why_it_works}</p>
               </div>
             ))}
           </div>
@@ -651,7 +651,7 @@ function OutputDisplay({ output, copyToClipboard, onSave, savedKeys, savingKey }
                 {set.tags?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {set.tags.map((tag) => (
-                      <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+                      <span key={tag} className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded">{tag}</span>
                     ))}
                   </div>
                 )}
@@ -683,7 +683,7 @@ function SaveButton({ contentKey, onSave, savedKeys, savingKey, content }: {
       className="flex-shrink-0"
       title={isSaved ? "Saved" : "Save idea"}
     >
-      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" /> : <Bookmark className="w-3.5 h-3.5" />}
+      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-blue-400" /> : <Bookmark className="w-3.5 h-3.5" />}
     </Button>
   );
 }

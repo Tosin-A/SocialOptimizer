@@ -16,7 +16,7 @@ interface Job { job_id: string; status: string; progress: number; current_step: 
 
 export default function AnalyzePage() {
   return (
-    <Suspense fallback={<div className="max-w-5xl mx-auto p-6"><Loader2 className="w-6 h-6 animate-spin text-brand-400" /></div>}>
+    <Suspense fallback={<div className="max-w-5xl mx-auto p-6"><Loader2 className="w-6 h-6 animate-spin text-blue-400" /></div>}>
       <AnalyzePageInner />
     </Suspense>
   );
@@ -148,14 +148,14 @@ function AnalyzePageInner() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-brand-400" /> Content Analysis
+            <BarChart3 className="w-6 h-6 text-blue-400" /> Content Analysis
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Deep AI analysis of your posts, hashtags, and engagement patterns</p>
         </div>
         {userPlan && (
           <div className="text-sm text-muted-foreground">
             <span className="font-mono text-foreground">{userPlan.analyses_used}</span> used ·{" "}
-            <span className="font-mono text-brand-400">{Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span> left
+            <span className="font-mono text-blue-400">{Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span> left
           </div>
         )}
       </div>
@@ -192,10 +192,10 @@ function AnalyzePageInner() {
         </div>
 
         {/* Posts depth slider */}
-        <div className="mt-5 pt-5 border-t border-white/5">
+        <div className="mt-5 pt-5 border-t border-border">
           <div className="flex items-center justify-between mb-2">
             <label className="text-sm font-medium">Posts to analyze</label>
-            <span className="font-mono text-sm text-brand-400">{maxPosts} posts</span>
+            <span className="font-mono text-sm text-blue-400">{maxPosts} posts</span>
           </div>
           <input
             type="range"
@@ -205,16 +205,16 @@ function AnalyzePageInner() {
             value={maxPosts}
             onChange={(e) => setMaxPosts(parseInt(e.target.value))}
             disabled={!!isRunning}
-            className="w-full accent-brand-500 disabled:opacity-50"
+            className="w-full accent-blue-500 disabled:opacity-50"
           />
           <div className="flex justify-between text-xs text-muted-foreground mt-1">
             <span>10 (faster)</span>
             <span>{maxPostsAllowed} {isFreePlan ? "(free plan cap)" : "(thorough)"}</span>
           </div>
           {isFreePlan && (
-            <div className="mt-3 rounded-lg border border-brand-500/20 bg-brand-500/5 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between gap-3">
+            <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2 text-xs text-muted-foreground flex items-center justify-between gap-3">
               <span>Free plan analyzes up to the last 10 posts. Upgrade to unlock deeper analysis depth.</span>
-              <Button asChild size="sm" variant="outline" className="h-7 px-2 text-xs border-brand-500/40">
+              <Button asChild size="sm" variant="outline" className="h-7 px-2 text-xs border-blue-500/40">
                 <Link href="/dashboard/settings">Upgrade</Link>
               </Button>
             </div>
@@ -226,9 +226,9 @@ function AnalyzePageInner() {
           <div className="mt-6 space-y-3">
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
-                {job.status === "completed" && <CheckCircle2 className="w-4 h-4 text-neon-green" />}
+                {job.status === "completed" && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
                 {job.status === "failed" && <XCircle className="w-4 h-4 text-destructive" />}
-                {isRunning && <Loader2 className="w-4 h-4 animate-spin text-brand-400" />}
+                {isRunning && <Loader2 className="w-4 h-4 animate-spin text-blue-400" />}
                 {job.status === "processing" && <AlertCircle className="w-4 h-4 text-yellow-400" />}
                 <span className="capitalize">
                   {job.status === "completed" ? "Complete" : job.status}
@@ -237,11 +237,11 @@ function AnalyzePageInner() {
                   <span className="text-muted-foreground">&middot; {job.current_step}</span>
                 )}
               </div>
-              <span className="font-mono text-brand-400">{job.progress ?? 0}%</span>
+              <span className="font-mono text-blue-400">{job.progress ?? 0}%</span>
             </div>
             <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-brand-500 to-neon-purple rounded-full transition-all duration-500 ease-out"
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${Math.min(100, job.progress ?? 0)}%` }}
               />
             </div>
@@ -252,7 +252,7 @@ function AnalyzePageInner() {
             )}
             <p className="text-xs text-muted-foreground">
               You can also view all generated reports anytime in{" "}
-              <Link href="/dashboard/reports" className="text-brand-400 hover:text-brand-300 underline-offset-2 hover:underline">
+              <Link href="/dashboard/reports" className="text-blue-400 hover:text-blue-300 underline-offset-2 hover:underline">
                 Reports
               </Link>.
             </p>
@@ -268,7 +268,7 @@ function AnalyzePageInner() {
         <>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center">
               <span className="bg-background px-3 text-xs text-muted-foreground">Or import from CSV</span>
@@ -289,7 +289,7 @@ function AnalyzePageInner() {
           />
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center">
               <span className="bg-background px-3 text-xs text-muted-foreground">Or connect with OAuth</span>

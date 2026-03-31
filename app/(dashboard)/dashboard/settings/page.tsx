@@ -48,7 +48,7 @@ const ALL_PLANS = [
     badge: "Most Popular",
     price: "$19",
     cadence: "/month",
-    color: "text-brand-400",
+    color: "text-blue-400",
     features: [
       "10 analyses / month",
       "2 connected platforms",
@@ -83,7 +83,7 @@ const ALL_PLANS = [
     label: "Agency",
     price: "$199",
     cadence: "/month",
-    color: "text-neon-purple",
+    color: "text-blue-400",
     features: [
       "Unlimited analyses",
       "Up to 10 accounts",
@@ -99,7 +99,7 @@ const ALL_PLANS = [
 
 export default function SettingsPage() {
   return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto p-6"><Loader2 className="w-6 h-6 animate-spin text-brand-400" /></div>}>
+    <Suspense fallback={<div className="max-w-4xl mx-auto p-6"><Loader2 className="w-6 h-6 animate-spin text-blue-400" /></div>}>
       <SettingsContent />
     </Suspense>
   );
@@ -293,7 +293,7 @@ function SettingsContent() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Settings className="w-6 h-6 text-brand-400" /> Settings
+          <Settings className="w-6 h-6 text-blue-400" /> Settings
         </h1>
         <p className="text-muted-foreground text-sm mt-0.5">Manage your account, plan, and connected platforms</p>
       </div>
@@ -347,7 +347,7 @@ function SettingsContent() {
           {brandPillars.map((pillar, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1.5 bg-brand-600/20 text-brand-300 px-3 py-1.5 rounded-full text-sm"
+              className="inline-flex items-center gap-1.5 bg-blue-600/20 text-blue-300 px-3 py-1.5 rounded-full text-sm"
             >
               {pillar}
               <button
@@ -478,14 +478,14 @@ function SettingsContent() {
               <span>
                 <span className="font-mono text-foreground">{userPlan.analyses_used}</span>
                 <span className="text-muted-foreground"> used · </span>
-                <span className="font-mono text-brand-400">{isUnlimited ? "∞" : Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span>
+                <span className="font-mono text-blue-400">{isUnlimited ? "∞" : Math.max(0, userPlan.analyses_limit - userPlan.analyses_used)}</span>
                 <span className="text-muted-foreground"> left</span>
               </span>
             </div>
             {!isUnlimited && (
               <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all ${usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-brand-500"}`}
+                  className={`h-full rounded-full transition-all ${usagePercent >= 90 ? "bg-red-500" : usagePercent >= 70 ? "bg-yellow-500" : "bg-blue-500"}`}
                   style={{ width: `${usagePercent}%` }}
                 />
               </div>
@@ -505,15 +505,15 @@ function SettingsContent() {
                 key={tier.key}
                 className={`rounded-lg p-4 flex flex-col border relative ${
                   isCurrent
-                    ? "border-brand-500/40 bg-brand-950/20"
+                    ? "border-blue-500/40 bg-blue-950/20"
                     : tier.accent
-                    ? "border-brand-500/30 bg-brand-950/10 ring-1 ring-brand-500/20"
-                    : "border-white/[0.07] bg-white/[0.02]"
+                    ? "border-blue-500/30 bg-blue-950/10 ring-1 ring-blue-500/20"
+                    : "border-border bg-card"
                 }`}
               >
                 {"badge" in tier && tier.badge && !isCurrent && (
                   <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                    <span className="text-[10px] font-semibold text-white bg-brand-500 rounded-full px-2.5 py-0.5 whitespace-nowrap">
+                    <span className="text-[10px] font-semibold text-white bg-blue-500 rounded-full px-2.5 py-0.5 whitespace-nowrap">
                       {tier.badge}
                     </span>
                   </div>
@@ -522,7 +522,7 @@ function SettingsContent() {
                   <div className="flex items-center justify-between mb-1">
                     <span className={`font-semibold text-sm ${tier.color}`}>{tier.label}</span>
                     {isCurrent && (
-                      <span className="text-[10px] font-mono text-brand-400 bg-brand-500/10 border border-brand-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
+                      <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
                         current
                       </span>
                     )}
@@ -536,7 +536,7 @@ function SettingsContent() {
                 <div className="flex-1 space-y-1.5 mb-4">
                   {tier.features.map((f) => (
                     <div key={f} className="flex items-start gap-2 text-xs">
-                      <Check className="w-3 h-3 text-brand-400 flex-shrink-0 mt-0.5" />
+                      <Check className="w-3 h-3 text-blue-400 flex-shrink-0 mt-0.5" />
                       <span>{f}</span>
                     </div>
                   ))}
@@ -549,7 +549,7 @@ function SettingsContent() {
                 </div>
 
                 {isCurrent ? (
-                  <Button size="sm" variant="outline" disabled className="w-full border-brand-500/20 text-brand-400 text-xs">
+                  <Button size="sm" variant="outline" disabled className="w-full border-blue-500/20 text-blue-400 text-xs">
                     Current plan
                   </Button>
                 ) : isUpgrade ? (
@@ -557,7 +557,7 @@ function SettingsContent() {
                     size="sm"
                     className={`w-full gap-1.5 text-xs ${
                       tier.accent
-                        ? "bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                        ? "bg-blue-500 hover:bg-blue-600 text-white font-semibold"
                         : "bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1]"
                     }`}
                     disabled={checkoutLoading === tier.key}
@@ -572,7 +572,7 @@ function SettingsContent() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="w-full border-white/[0.07] text-muted-foreground text-xs"
+                    className="w-full border-border text-muted-foreground text-xs"
                     onClick={openBillingPortal}
                     disabled={portalLoading || !userPlan?.has_billing}
                   >
@@ -637,7 +637,7 @@ function SettingsContent() {
                 }
               }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                emailAnalysis ? "bg-brand-500" : "bg-white/10"
+                emailAnalysis ? "bg-blue-500" : "bg-white/10"
               }`}
             >
               <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
@@ -675,7 +675,7 @@ function SettingsContent() {
                 }
               }}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                emailDigest ? "bg-brand-500" : "bg-white/10"
+                emailDigest ? "bg-blue-500" : "bg-white/10"
               }`}
             >
               <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${

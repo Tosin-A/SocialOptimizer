@@ -66,7 +66,7 @@ function LoginContent() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-brand-500/6 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-blue-500/6 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative">
@@ -80,11 +80,11 @@ function LoginContent() {
         </div>
 
         {/* Card */}
-        <div className="rounded-xl border border-white/[0.08] bg-[#0d1526] p-8">
+        <div className="rounded-xl border border-border bg-[#0d1526] p-8">
           {/* Google */}
           <Button
             variant="outline"
-            className="w-full mb-6 gap-2 h-11 border-white/[0.1] hover:bg-white/[0.04]"
+            className="w-full mb-6 gap-2 h-11 border-white/[0.1] hover:bg-card"
             onClick={handleGoogleLogin}
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -98,7 +98,7 @@ function LoginContent() {
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.07]" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-[#0d1526] px-2 text-muted-foreground tracking-wider">
@@ -116,7 +116,7 @@ function LoginContent() {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className="pl-10 bg-white/[0.03] border-white/[0.09] focus:border-brand-500/60"
+                  className="pl-10 bg-card border-white/[0.09] focus:border-blue-500/60"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -129,7 +129,7 @@ function LoginContent() {
                 <Label htmlFor="password" className="text-xs text-muted-foreground">Password</Label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                  className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -140,7 +140,7 @@ function LoginContent() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="pl-10 bg-white/[0.03] border-white/[0.09] focus:border-brand-500/60"
+                  className="pl-10 bg-card border-white/[0.09] focus:border-blue-500/60"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -150,7 +150,7 @@ function LoginContent() {
 
             <Button
               type="submit"
-              className="w-full h-11 gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold mt-2"
+              className="w-full h-11 gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold mt-2"
               disabled={loading}
             >
               {loading
@@ -163,7 +163,7 @@ function LoginContent() {
 
         <p className="text-center text-sm text-muted-foreground mt-5">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
+          <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
             Sign up free
           </Link>
         </p>

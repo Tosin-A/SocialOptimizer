@@ -27,12 +27,12 @@ export default function FindingsSection() {
         {FINDINGS.map((f, i) => (
           <div
             key={i}
-            className={`flex flex-col md:flex-row gap-6 sm:gap-8 md:gap-16 py-10 border-t border-white/[0.05] ${
+            className={`flex flex-col md:flex-row gap-6 sm:gap-8 md:gap-16 py-10 border-t border-border ${
               i === FINDINGS.length - 1 ? "border-b" : ""
             }`}
           >
             <div className="md:w-52 flex-shrink-0">
-              <div className="font-mono font-semibold text-3xl sm:text-4xl md:text-5xl text-brand-400 leading-none mb-1 tabular-nums">
+              <div className="font-mono font-semibold text-3xl sm:text-4xl md:text-5xl text-blue-400 leading-none mb-1 tabular-nums">
                 <CountUp
                   to={FINDING_COUNTS[i].to}
                   suffix={FINDING_COUNTS[i].suffix}

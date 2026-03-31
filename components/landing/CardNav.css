@@ -20,7 +20,7 @@
   display: block;
   height: 56px;
   padding: 0;
-  background-color: rgba(13, 7, 22, 0.85);
+  background-color: rgba(10, 12, 18, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
@@ -126,7 +126,7 @@
 }
 
 .card-nav-cta-button {
-  background-color: rgba(99, 102, 241, 1);
+  background-color: #2563eb;
   color: white;
   border: none;
   border-radius: calc(0.75rem - 0.25rem);
@@ -147,7 +147,7 @@
 }
 
 .card-nav-cta-button:hover {
-  background-color: rgba(79, 82, 221, 1);
+  background-color: #3b82f6;
 }
 
 .card-nav-content {

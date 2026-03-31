@@ -1,22 +1,26 @@
 "use client";
 
-import { motion, Transition, Easing } from "framer-motion";
+import { motion } from "framer-motion";
+import type { Transition } from "framer-motion";
 import { useEffect, useRef, useState, useMemo } from "react";
+
+type EasingFn = (t: number) => number;
+type EasingValue = EasingFn | EasingFn[];
 
 interface BlurTextProps {
   text?: string;
   delay?: number;
   className?: string;
-  as?: "p" | "h1" | "h2" | "h3" | "span";
   animateBy?: "words" | "letters";
   direction?: "top" | "bottom";
   threshold?: number;
   rootMargin?: string;
   animationFrom?: Record<string, string | number>;
   animationTo?: Array<Record<string, string | number>>;
-  easing?: Easing | Easing[];
+  easing?: EasingValue;
   onAnimationComplete?: () => void;
   stepDuration?: number;
+  as?: React.ElementType;
 }
 
 function buildKeyframes(
@@ -39,7 +43,6 @@ export default function BlurText({
   text = "",
   delay = 200,
   className = "",
-  as: Tag = "p",
   animateBy = "words",
   direction = "top",
   threshold = 0.1,
@@ -49,6 +52,7 @@ export default function BlurText({
   easing = (t: number) => t,
   onAnimationComplete,
   stepDuration = 0.35,
+  as: Tag = "p",
 }: BlurTextProps) {
   const elements = animateBy === "words" ? text.split(" ") : text.split("");
   const [inView, setInView] = useState(false);
@@ -100,7 +104,7 @@ export default function BlurText({
   );
 
   return (
-    <Tag ref={ref as React.RefObject<never>} className={`blur-text ${className} flex flex-wrap`}>
+    <Tag ref={ref} className={`${className} flex flex-wrap`}>
       {elements.map((segment, index) => {
         const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
 
@@ -117,6 +121,9 @@ export default function BlurText({
             initial={fromSnapshot}
             animate={inView ? animateKeyframes : fromSnapshot}
             transition={spanTransition}
+            onAnimationComplete={
+              index === elements.length - 1 ? onAnimationComplete : undefined
+            }
             style={{
               display: "inline-block",
               willChange: "transform, filter, opacity",

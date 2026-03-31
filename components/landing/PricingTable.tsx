@@ -2,11 +2,10 @@ import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TIERS } from "@/lib/data/landing";
-import StarBorder from "@/components/ui/StarBorder";
 
 export default function PricingTable() {
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 border-y border-border bg-muted/30">
       <div className="max-w-6xl mx-auto">
         <div className="label-mono mb-4">Pricing</div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-2">
@@ -22,20 +21,15 @@ export default function PricingTable() {
               key={tier.name}
               className={`rounded-lg p-4 sm:p-6 flex flex-col border ${
                 tier.accent
-                  ? "border-brand-500/40 bg-brand-950/20"
-                  : "border-white/[0.07] bg-white/[0.02]"
+                  ? "border-blue-500/40 bg-blue-950/20"
+                  : "border-border bg-card"
               }`}
-              style={
-                tier.accent
-                  ? { boxShadow: "0 0 48px rgba(99,102,241,0.08)" }
-                  : {}
-              }
             >
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-semibold">{tier.name}</span>
                   {tier.accent && (
-                    <span className="text-[10px] font-mono text-brand-400 bg-brand-500/10 border border-brand-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">
                       popular
                     </span>
                   )}
@@ -50,7 +44,7 @@ export default function PricingTable() {
               <div className="flex-1 space-y-2.5 mb-6">
                 {tier.features.map((f) => (
                   <div key={f} className="flex items-start gap-2.5 text-sm">
-                    <Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0 mt-0.5" />
+                    <Check className="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </div>
                 ))}
@@ -63,19 +57,17 @@ export default function PricingTable() {
               </div>
 
               {tier.accent ? (
-                <StarBorder as="div" speed="6s" className="w-full">
-                  <Button
-                    asChild
-                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold w-full"
-                  >
-                    <Link href={tier.href}>{tier.cta}</Link>
-                  </Button>
-                </StarBorder>
+                <Button
+                  asChild
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-semibold w-full"
+                >
+                  <Link href={tier.href}>{tier.cta}</Link>
+                </Button>
               ) : (
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full border-white/[0.1] hover:bg-white/[0.04]"
+                  className="w-full border-border hover:bg-muted"
                 >
                   <Link href={tier.href}>{tier.cta}</Link>
                 </Button>

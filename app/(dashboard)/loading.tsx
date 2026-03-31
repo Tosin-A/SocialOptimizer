@@ -51,7 +51,7 @@ export default function DashboardLoading() {
           <div className="glass rounded-2xl p-6 space-y-4">
             <Skeleton className="h-4 w-40" />
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex gap-4 py-3 border-t border-white/5">
+              <div key={i} className="flex gap-4 py-3 border-t border-border">
                 <Skeleton className="w-8 h-8 rounded-lg flex-shrink-0" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-3 w-48" />

@@ -49,14 +49,14 @@ const PLANS = [
     name: "Pro",
     price: "$79",
     features: ["4 platforms", "Unlimited analyses", "20 competitors", "Gap analysis"],
-    color: "text-brand-400",
+    color: "text-blue-400",
     highlighted: true,
   },
   {
     name: "Agency",
     price: "$199",
     features: ["10 accounts", "Unlimited everything", "White-label reports", "API access"],
-    color: "text-neon-purple",
+    color: "text-blue-400",
   },
 ];
 
@@ -82,9 +82,9 @@ export default function SettingsPage() {
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 gap-6">
           {SETTINGS_SECTIONS.map((section, i) => (
             <SectionReveal key={section.title} delay={i * 0.1}>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 h-full">
-                <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
-                  <section.icon className="w-5 h-5 text-brand-400" />
+              <div className="rounded-xl border border-white/[0.06] bg-card p-6 h-full">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                  <section.icon className="w-5 h-5 text-blue-400" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{section.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{section.description}</p>
@@ -96,7 +96,7 @@ export default function SettingsPage() {
 
       {/* Plans overview */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
               Plans at a glance
@@ -110,8 +110,8 @@ export default function SettingsPage() {
                   key={plan.name}
                   className={`rounded-xl p-5 border ${
                     plan.highlighted
-                      ? "border-brand-500/30 bg-brand-500/5"
-                      : "border-white/[0.06] bg-white/[0.02]"
+                      ? "border-blue-500/30 bg-blue-500/5"
+                      : "border-white/[0.06] bg-card"
                   }`}
                 >
                   <div className={`font-semibold text-lg ${plan.color}`}>{plan.name}</div>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
                   <ul className="space-y-1.5">
                     {plan.features.map((f) => (
                       <li key={f} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="text-brand-400 flex-shrink-0">&rsaquo;</span>
+                        <span className="text-blue-400 flex-shrink-0">&rsaquo;</span>
                         {f}
                       </li>
                     ))}
@@ -130,7 +130,7 @@ export default function SettingsPage() {
               ))}
             </div>
             <p className="text-center mt-6">
-              <Link href="/pricing" className="text-sm text-brand-400 hover:text-brand-300 inline-flex items-center gap-1">
+              <Link href="/pricing" className="text-sm text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
                 Full pricing details <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </p>
@@ -140,10 +140,10 @@ export default function SettingsPage() {
 
       {/* Security */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="w-5 h-5 text-brand-400" />
+              <Shield className="w-5 h-5 text-blue-400" />
               <h2 className="text-2xl font-semibold tracking-tight">Your data is yours</h2>
             </div>
             <div className="space-y-3 text-muted-foreground leading-relaxed">
@@ -167,7 +167,7 @@ export default function SettingsPage() {
       </SectionReveal>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             Ready to get started?
@@ -177,7 +177,7 @@ export default function SettingsPage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

@@ -14,7 +14,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
   return (
     <div className="glass rounded-2xl p-3 sm:p-5 md:p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
-        <Activity className="w-4 h-4 text-brand-400" />
+        <Activity className="w-4 h-4 text-blue-400" />
         Platform signals — <span className="capitalize">{platform}</span>
       </h3>
       <p className="text-xs text-muted-foreground">
@@ -26,7 +26,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
           const gap = sw.current_score - sw.benchmark;
           const color =
             gap >= 10
-              ? "bg-neon-green"
+              ? "bg-emerald-500"
               : gap >= -5
               ? "bg-yellow-400"
               : "bg-red-400";
@@ -44,7 +44,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
                   <span
                     className={cn(
                       "ml-1.5",
-                      gap >= 0 ? "text-neon-green" : "text-red-400"
+                      gap >= 0 ? "text-emerald-500" : "text-red-400"
                     )}
                   >
                     {gap >= 0 ? "+" : ""}
@@ -52,7 +52,7 @@ export default function PlatformSignals({ signals, platform }: Props) {
                   </span>
                 </span>
               </div>
-              <div className="relative w-full bg-white/5 rounded-full h-1.5">
+              <div className="relative w-full bg-muted rounded-full h-1.5">
                 <div
                   className={cn("h-full rounded-full transition-all duration-700", color)}
                   style={{ width: `${Math.min(100, sw.current_score)}%` }}

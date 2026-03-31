@@ -31,7 +31,7 @@ export default function PlatformCards() {
               <ul className="space-y-2">
                 {p.metrics.map((m) => (
                   <li key={m} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <span className="text-brand-400 flex-shrink-0 mt-0.5">&rsaquo;</span>
+                    <span className="text-blue-400 flex-shrink-0 mt-0.5">&rsaquo;</span>
                     {m}
                   </li>
                 ))}

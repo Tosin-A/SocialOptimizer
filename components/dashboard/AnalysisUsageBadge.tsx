@@ -69,12 +69,12 @@ export default function AnalysisUsageBadge() {
   return (
     <Link
       href="/dashboard/analyze"
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/[0.08] hover:border-white/15 transition-colors text-sm"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border hover:bg-muted/80 hover:border-border transition-colors text-sm"
     >
-      <BarChart3 className="w-3.5 h-3.5 text-brand-400" />
+      <BarChart3 className="w-3.5 h-3.5 text-blue-400" />
       <span className="text-muted-foreground">
         <span className="font-mono text-foreground">{usage.used}</span> used ·{" "}
-        <span className="font-mono text-brand-400">{left}</span> left
+        <span className="font-mono text-blue-400">{left}</span> left
         {usage.bonus > 0 && (
           <span className="text-emerald-400 ml-1">
             (+{usage.bonus} bonus)

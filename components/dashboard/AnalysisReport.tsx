@@ -23,14 +23,14 @@ const SCORE_ITEMS = [
 ];
 
 function ScoreBar({ label, score }: { label: string; score: number }) {
-  const color = score >= 70 ? "bg-neon-green" : score >= 45 ? "bg-yellow-400" : "bg-red-400";
+  const color = score >= 70 ? "bg-emerald-500" : score >= 45 ? "bg-yellow-400" : "bg-red-400";
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-xs">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-mono font-medium">{score}/100</span>
       </div>
-      <div className="w-full bg-white/5 rounded-full h-1.5">
+      <div className="w-full bg-muted rounded-full h-1.5">
         <div className={cn("h-full rounded-full transition-all duration-700", color)} style={{ width: `${score}%` }} />
       </div>
     </div>
@@ -39,7 +39,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 
 function InsightCard({ insight, type }: { insight: Insight; type: "strength" | "weakness" | "opportunity" }) {
   const configs = {
-    strength: { icon: CheckCircle2, color: "text-neon-green", bg: "bg-neon-green/5 border-neon-green/20" },
+    strength: { icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/5 border-emerald-500/20" },
     weakness: { icon: XCircle, color: "text-red-400", bg: "bg-red-400/5 border-red-400/20" },
     opportunity: { icon: Lightbulb, color: "text-yellow-400", bg: "bg-yellow-400/5 border-yellow-400/20" },
   };
@@ -58,7 +58,7 @@ function InsightCard({ insight, type }: { insight: Insight; type: "strength" | "
       </div>
       <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
       {insight.recommendation && (
-        <p className="text-xs text-brand-300 leading-relaxed">
+        <p className="text-xs text-blue-300 leading-relaxed">
           <span className="font-medium">Fix:</span> {insight.recommendation}
         </p>
       )}
@@ -68,20 +68,20 @@ function InsightCard({ insight, type }: { insight: Insight; type: "strength" | "
 
 function RoadmapItem({ action, index }: { action: RoadmapAction; index: number }) {
   const categoryColors: Record<string, string> = {
-    content: "bg-brand-600/20 text-brand-300",
-    hashtags: "bg-neon-purple/20 text-neon-purple",
-    posting: "bg-neon-cyan/20 text-neon-cyan",
-    engagement: "bg-neon-green/20 text-neon-green",
-    branding: "bg-neon-pink/20 text-neon-pink",
+    content: "bg-blue-600/20 text-blue-300",
+    hashtags: "bg-blue-400/20 text-blue-400",
+    posting: "bg-blue-400/20 text-blue-400",
+    engagement: "bg-emerald-500/20 text-emerald-500",
+    branding: "bg-rose-400/20 text-rose-400",
   };
 
   return (
     <div className="flex gap-4 group">
       <div className="flex flex-col items-center">
-        <div className="w-7 h-7 rounded-full bg-brand-600/20 border border-brand-600/30 flex items-center justify-center text-xs font-bold text-brand-400 flex-shrink-0">
+        <div className="w-7 h-7 rounded-full bg-blue-600/20 border border-blue-600/30 flex items-center justify-center text-xs font-bold text-blue-400 flex-shrink-0">
           {index + 1}
         </div>
-        <div className="w-px flex-1 bg-white/5 mt-1" />
+        <div className="w-px flex-1 bg-muted mt-1" />
       </div>
       <div className="pb-6 flex-1">
         <div className="flex items-start gap-2 mb-1.5 flex-wrap">
@@ -91,7 +91,7 @@ function RoadmapItem({ action, index }: { action: RoadmapAction; index: number }
           <span className="text-xs text-muted-foreground">{action.timeframe}</span>
         </div>
         <p className="text-sm font-medium mb-1">{action.action}</p>
-        <p className="text-xs text-neon-green">{action.expected_impact}</p>
+        <p className="text-xs text-emerald-500">{action.expected_impact}</p>
       </div>
     </div>
   );
@@ -191,7 +191,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       <div className="glass rounded-2xl p-3 sm:p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-start gap-3 flex-1">
-            <BarChart2 className="w-5 h-5 text-brand-400 flex-shrink-0 mt-0.5" />
+            <BarChart2 className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="font-semibold text-sm mb-1.5">Executive Summary</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{report.executive_summary}</p>
@@ -201,7 +201,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             {accountId && (
               <a
                 href={`/dashboard/analyze?account=${accountId}`}
-                className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+                className="flex items-center justify-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-600/30 hover:border-blue-500/50 rounded-lg px-3 py-2 transition-all"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Re-analyze
@@ -209,7 +209,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
             )}
             <button
               onClick={() => setShareModalOpen(true)}
-              className="flex items-center justify-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 border border-brand-600/30 hover:border-brand-500/50 rounded-lg px-3 py-2 transition-all"
+              className="flex items-center justify-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-600/30 hover:border-blue-500/50 rounded-lg px-3 py-2 transition-all"
             >
               <Share2 className="w-3.5 h-3.5" />
               Share
@@ -218,7 +218,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
               href={`/reports/${report.id}/print`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-white/10 hover:border-white/20 rounded-lg px-3 py-2 transition-all"
+              className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground border border-border hover:border-white/20 rounded-lg px-3 py-2 transition-all"
             >
               <Download className="w-3.5 h-3.5" />
               Export PDF
@@ -232,32 +232,32 @@ export default function AnalysisReport({ report, accountId }: Props) {
             { label: "Posts/Week", value: report.avg_posts_per_week.toFixed(1) },
             { label: "Best Days", value: (report.best_days ?? []).slice(0, 2).join(", ") || "—" },
           ].map((m) => (
-            <div key={m.label} className="text-center bg-white/5 rounded-lg p-3">
+            <div key={m.label} className="text-center bg-muted rounded-lg p-3">
               <p className="text-xs text-muted-foreground mb-1">{m.label}</p>
               <p className="font-semibold text-sm">{m.value}</p>
             </div>
           ))}
         </div>
         {(report.posts_transcribed ?? 0) > 0 && (
-          <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-brand-600/10 border border-brand-600/20">
-            <Mic className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
-            <p className="text-xs text-brand-300">
+          <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-lg bg-blue-600/10 border border-blue-600/20">
+            <Mic className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+            <p className="text-xs text-blue-300">
               <span className="font-medium">{report.posts_transcribed} video{report.posts_transcribed === 1 ? "" : "s"} transcribed</span>
-              <span className="text-brand-400/60"> — audio analyzed via Whisper for hook detection, CTA scoring, and sentiment analysis</span>
+              <span className="text-blue-400/60"> — audio analyzed via Whisper for hook detection, CTA scoring, and sentiment analysis</span>
             </p>
           </div>
         )}
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-white/5 rounded-xl p-1 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 bg-muted rounded-xl p-1 overflow-x-auto scrollbar-hide">
         {tabs.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
               "py-2 px-2 sm:px-3 rounded-lg text-xs font-medium transition-all whitespace-nowrap min-w-fit sm:flex-1",
-              tab === t.id ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
+              tab === t.id ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
             )}
           >
             {t.label}
@@ -274,11 +274,11 @@ export default function AnalysisReport({ report, accountId }: Props) {
               <ScoreBar key={key} label={label} score={(report as any)[key] ?? 0} />
             ))}
           </div>
-          <div className="pt-4 border-t border-white/10">
+          <div className="pt-4 border-t border-border">
             <h4 className="text-sm font-medium mb-3">Top performing formats</h4>
             <div className="flex flex-wrap gap-2">
               {report.top_performing_formats?.map((f) => (
-                <span key={f} className="bg-brand-600/20 text-brand-300 px-3 py-1 rounded-full text-xs capitalize">{f}</span>
+                <span key={f} className="bg-blue-600/20 text-blue-300 px-3 py-1 rounded-full text-xs capitalize">{f}</span>
               ))}
             </div>
           </div>
@@ -300,7 +300,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
         <div className="space-y-4">
           <div className="glass rounded-2xl p-3 sm:p-5 space-y-3">
             <h3 className="font-semibold text-sm flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-neon-green" /> What you're doing well
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" /> What you're doing well
             </h3>
             {report.strengths?.map((s, i) => <InsightCard key={i} insight={s} type="strength" />)}
           </div>
@@ -324,7 +324,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
       {tab === "roadmap" && (
         <div className="glass rounded-2xl p-3 sm:p-5">
           <h3 className="font-semibold text-sm flex items-center gap-2 mb-6">
-            <Map className="w-4 h-4 text-brand-400" /> Your prioritized growth roadmap
+            <Map className="w-4 h-4 text-blue-400" /> Your prioritized growth roadmap
           </h3>
           <div>
             {report.improvement_roadmap?.map((action, i) => (
@@ -385,7 +385,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
 
           {postsLoading && (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
             </div>
           )}
 
@@ -406,15 +406,15 @@ export default function AnalysisReport({ report, accountId }: Props) {
                     className={cn(
                       "flex items-center gap-2 sm:gap-3 rounded-xl p-2.5 sm:p-3 border text-xs transition-all",
                       post.performance === "top"
-                        ? "border-neon-green/20 bg-neon-green/5"
+                        ? "border-emerald-500/20 bg-emerald-500/5"
                         : post.performance === "worst"
                         ? "border-red-400/20 bg-red-400/5"
-                        : "border-white/5 bg-white/[0.02]"
+                        : "border-border bg-card"
                     )}
                   >
                     {/* Performance icon */}
                     <div className="flex-shrink-0 w-5">
-                      {post.performance === "top" && <TrendingUp className="w-4 h-4 text-neon-green" />}
+                      {post.performance === "top" && <TrendingUp className="w-4 h-4 text-emerald-500" />}
                       {post.performance === "worst" && <TrendingDown className="w-4 h-4 text-red-400" />}
                       {post.performance === "average" && <Minus className="w-4 h-4 text-white/20" />}
                     </div>
@@ -425,7 +425,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                       <div className="flex items-center gap-2 mt-0.5 text-white/30">
                         <span className="capitalize">{post.content_type}</span>
                         {post.has_transcript && (
-                          <span className="inline-flex items-center gap-1 text-brand-400" title="Audio transcribed via Whisper">
+                          <span className="inline-flex items-center gap-1 text-blue-400" title="Audio transcribed via Whisper">
                             <Mic className="w-3 h-3" />
                           </span>
                         )}
@@ -438,7 +438,7 @@ export default function AnalysisReport({ report, accountId }: Props) {
                     <div className="flex-shrink-0 flex items-center gap-2 sm:gap-4 text-right">
                       <div>
                         <p className={cn("font-mono font-semibold",
-                          post.performance === "top" ? "text-neon-green" :
+                          post.performance === "top" ? "text-emerald-500" :
                           post.performance === "worst" ? "text-red-400" : "text-foreground"
                         )}>
                           {engPct}%
@@ -476,11 +476,11 @@ export default function AnalysisReport({ report, accountId }: Props) {
         <div className="glass rounded-2xl p-3 sm:p-5 space-y-5">
           <div>
             <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              <Hash className="w-4 h-4 text-brand-400" /> Recommended hashtags to add
+              <Hash className="w-4 h-4 text-blue-400" /> Recommended hashtags to add
             </h3>
             <div className="flex flex-wrap gap-2">
               {report.recommended_hashtags?.map((h) => (
-                <span key={h} className="bg-neon-green/10 border border-neon-green/20 text-neon-green px-3 py-1 rounded-full text-xs">{h}</span>
+                <span key={h} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-3 py-1 rounded-full text-xs">{h}</span>
               ))}
             </div>
           </div>
@@ -498,15 +498,15 @@ export default function AnalysisReport({ report, accountId }: Props) {
               {report.hashtag_effectiveness?.slice(0, 10).map((h) => (
                 <div key={h.tag} className="flex items-center gap-3 text-xs">
                   <span className="w-28 text-muted-foreground truncate">{h.tag}</span>
-                  <div className="flex-1 bg-white/5 rounded-full h-1.5">
+                  <div className="flex-1 bg-muted rounded-full h-1.5">
                     <div
-                      className="h-full rounded-full bg-brand-500"
+                      className="h-full rounded-full bg-blue-500"
                       style={{ width: `${h.reach_score}%` }}
                     />
                   </div>
                   <span className={cn("w-16 text-right",
-                    h.recommendation === "keep" ? "text-neon-green" :
-                    h.recommendation === "add" ? "text-brand-400" : "text-red-400"
+                    h.recommendation === "keep" ? "text-emerald-500" :
+                    h.recommendation === "add" ? "text-blue-400" : "text-red-400"
                   )}>
                     {h.recommendation}
                   </span>

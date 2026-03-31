@@ -11,10 +11,10 @@ export default function UpgradeCard({ analysesLimit }: Props) {
   const extraAnalyses = 10 - analysesLimit;
 
   return (
-    <div className="rounded-xl border border-brand-600/30 bg-brand-600/5 p-5">
+    <div className="rounded-xl border border-blue-600/30 bg-blue-600/5 p-5">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-brand-600/20 p-2 flex-shrink-0">
-          <Sparkles className="w-4 h-4 text-brand-400" />
+        <div className="rounded-lg bg-blue-600/20 p-2 flex-shrink-0">
+          <Sparkles className="w-4 h-4 text-blue-400" />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-slate-200 mb-1">
@@ -25,7 +25,7 @@ export default function UpgradeCard({ analysesLimit }: Props) {
           </p>
           <Link
             href="/dashboard/settings"
-            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white hover:bg-brand-500 transition-colors"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-500 transition-colors"
           >
             See plans
           </Link>

@@ -1,21 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "@/components/providers/QueryProvider";
 
-const sans = Inter({
-  subsets: ["latin"],
+const sans = localFont({
+  src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
   variable: "--font-sans",
   display: "swap",
+  weight: "100 900",
 });
 
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const display = localFont({
+  src: "../node_modules/@fontsource-variable/sora/files/sora-latin-wght-normal.woff2",
+  variable: "--font-display",
+  display: "swap",
+  weight: "100 800",
+});
+
+const mono = localFont({
+  src: "../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2",
   variable: "--font-mono",
   display: "swap",
+  weight: "100 800",
 });
 
 const SITE_URL =
@@ -97,7 +105,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${sans.variable} ${mono.variable} font-sans antialiased min-h-screen`}
+        className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased min-h-screen`}
       >
         <script
           type="application/ld+json"

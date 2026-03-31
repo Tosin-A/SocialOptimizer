@@ -61,14 +61,14 @@ export default function GeneratePage() {
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 gap-6">
           {CONTENT_TYPES.map((type, i) => (
             <SectionReveal key={type.title} delay={i * 0.1}>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 h-full">
-                <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
-                  <type.icon className="w-5 h-5 text-brand-400" />
+              <div className="rounded-xl border border-white/[0.06] bg-card p-6 h-full">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                  <type.icon className="w-5 h-5 text-blue-400" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{type.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{type.description}</p>
                 {type.example && (
-                  <div className="mt-4 bg-white/[0.03] rounded-lg p-3 border border-white/[0.04]">
+                  <div className="mt-4 bg-card rounded-lg p-3 border border-white/[0.04]">
                     <p className="text-sm italic text-muted-foreground">{type.example}</p>
                   </div>
                 )}
@@ -80,7 +80,7 @@ export default function GeneratePage() {
 
       {/* How it works */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-10">
             <div className="flex-1">
               <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4">
@@ -101,7 +101,7 @@ export default function GeneratePage() {
                 <div className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Available tones</div>
                 <div className="flex flex-wrap gap-2">
                   {TONES.map((tone) => (
-                    <span key={tone} className="text-xs px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
+                    <span key={tone} className="text-xs px-3 py-1 rounded-full bg-card border border-white/[0.06]">
                       {tone}
                     </span>
                   ))}
@@ -110,9 +110,9 @@ export default function GeneratePage() {
             </div>
 
             {/* Mock output */}
-            <div className="flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+            <div className="flex-1 rounded-xl border border-white/[0.06] bg-card p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-brand-400" />
+                <Sparkles className="w-4 h-4 text-blue-400" />
                 <span className="font-semibold text-sm">Generated hooks — fitness / educational</span>
               </div>
               <div className="space-y-3">
@@ -121,7 +121,7 @@ export default function GeneratePage() {
                   { text: "I tracked my protein intake for 90 days. Here's what actually happened.", retention: "high", type: "story" },
                   { text: "Why do most people plateau at 3 months? It's not what you think.", retention: "medium", type: "question" },
                 ].map((hook, i) => (
-                  <div key={i} className="bg-white/[0.03] rounded-lg p-3 border border-white/[0.04] space-y-1.5">
+                  <div key={i} className="bg-card rounded-lg p-3 border border-white/[0.04] space-y-1.5">
                     <p className="text-sm font-medium">&ldquo;{hook.text}&rdquo;</p>
                     <div className="flex gap-2 text-xs">
                       <span className="bg-white/[0.05] px-2 py-0.5 rounded text-muted-foreground">{hook.type}</span>
@@ -139,10 +139,10 @@ export default function GeneratePage() {
 
       {/* Full plan */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-3xl mx-auto">
             <div className="flex items-center gap-2 mb-3">
-              <Wand2 className="w-5 h-5 text-neon-purple" />
+              <Wand2 className="w-5 h-5 text-blue-400" />
               <h2 className="text-2xl font-semibold tracking-tight">Full content plan mode</h2>
             </div>
             <p className="text-muted-foreground leading-relaxed mb-4">
@@ -159,7 +159,7 @@ export default function GeneratePage() {
       </SectionReveal>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             Generate your first batch
@@ -169,7 +169,7 @@ export default function GeneratePage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

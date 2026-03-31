@@ -7,70 +7,43 @@ import { SIGNALS, FIXES } from "@/lib/data/landing";
 import MetricBar from "./MetricBar";
 import ScoreRing from "./ScoreRing";
 import BlurText from "./BlurText";
-import GradualBlur from "./GradualBlur";
-import StarBorder from "@/components/ui/StarBorder";
 
 export default function HeroSection() {
   return (
     <section className="pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-20 px-4 sm:px-6 relative overflow-hidden">
-      {/* Dot-grid background with bottom blur fade */}
-      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <div className="dot-grid absolute inset-0" />
-        <GradualBlur
-          target="parent"
-          position="bottom"
-          height="7rem"
-          strength={2}
-          divCount={5}
-          curve="bezier"
-          exponential
-          opacity={1}
-        />
-      </div>
-      {/* Subtle indigo glow behind dashboard */}
-      <div className="hidden sm:block absolute top-40 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative max-w-6xl mx-auto" style={{ zIndex: 1 }}>
+      <div className="relative max-w-6xl mx-auto text-center">
         {/* Platform pill */}
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-brand-400 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-1 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-full px-3 py-1 mb-8">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
           Content analytics &middot; TikTok &middot; Instagram &middot; YouTube &middot; Facebook
         </div>
 
-        {/* Headline — BlurText animation on desktop, plain on mobile */}
-        <div className="hidden md:block mb-6 max-w-4xl">
-          <BlurText
-            text="The creators outgrowing you aren't luckier. They're more informed."
-            as="h1"
-            delay={150}
-            animateBy="words"
-            direction="top"
-            className="text-4xl lg:text-5xl xl:text-6xl font-semibold leading-[1.08] tracking-tight text-slate-100"
-          />
-        </div>
-        <h1 className="md:hidden text-2xl sm:text-3xl font-semibold leading-[1.06] tracking-tight mb-6 max-w-3xl">
-          The creators outgrowing you<br />
-          aren&apos;t luckier. They&apos;re more informed.
-        </h1>
+        {/* Headline */}
+        <BlurText
+          as="h1"
+          text="The creators outgrowing you aren't luckier. They're more informed."
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.05] tracking-tight mb-6 mx-auto max-w-5xl text-white font-display justify-center"
+          animateBy="words"
+          delay={80}
+          direction="bottom"
+        />
 
-        <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-10 max-w-2xl">
+        <p className="text-base sm:text-lg text-slate-400 leading-relaxed mb-10 mx-auto max-w-2xl">
           We analyze 90 days of your posts across 4 platforms, scoring hooks, hashtags,
           engagement patterns, CTA placement, and posting cadence. You get a ranked fix
           list, not a generic report.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-16">
-          <StarBorder as="div" speed="6s">
-            <Button
-              size="lg"
-              className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
-              asChild
-            >
-              <Link href="/signup">
-                Analyze my account <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
-          </StarBorder>
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-16">
+          <Button
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold h-11 px-7 gap-2"
+            asChild
+          >
+            <Link href="/signup">
+              Analyze my account <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Button>
           <Button
             size="lg"
             variant="ghost"
@@ -84,12 +57,10 @@ export default function HeroSection() {
         </div>
 
         {/* ── Dashboard mock ──────────────────────────────────── */}
-        <div className="rounded-xl border border-white/[0.08] overflow-hidden"
-             style={{ background: "#0a1120" }}>
+        <div className="rounded-xl border border-border overflow-hidden bg-card">
 
           {/* Window chrome */}
-          <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.05]"
-               style={{ background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-border bg-muted/50">
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
               <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
@@ -105,7 +76,7 @@ export default function HeroSection() {
           </div>
 
           {/* Three-column body */}
-          <div className="grid md:grid-cols-[180px_1fr_180px] lg:grid-cols-[200px_1fr_200px] divide-y md:divide-y-0 md:divide-x divide-white/[0.05]">
+          <div className="grid md:grid-cols-[180px_1fr_180px] lg:grid-cols-[200px_1fr_200px] divide-y md:divide-y-0 md:divide-x divide-border">
 
             {/* Score panel */}
             <div className="p-4 sm:p-6">
@@ -153,8 +124,8 @@ export default function HeroSection() {
                       <span
                         className={`inline-block text-[10px] font-mono px-1.5 py-0.5 rounded ${
                           f.impact === "high"
-                            ? "bg-brand-500/15 text-brand-400"
-                            : "bg-white/[0.05] text-muted-foreground"
+                            ? "bg-blue-500/15 text-blue-400"
+                            : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {f.impact} impact

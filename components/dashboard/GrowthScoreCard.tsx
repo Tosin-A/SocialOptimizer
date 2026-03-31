@@ -14,7 +14,7 @@ interface Props {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 75) return { text: "text-neon-green", bg: "from-neon-green", ring: "#10b981" };
+  if (score >= 75) return { text: "text-emerald-500", bg: "from-emerald-500", ring: "#10b981" };
   if (score >= 50) return { text: "text-yellow-400", bg: "from-yellow-400", ring: "#facc15" };
   if (score >= 25) return { text: "text-orange-400", bg: "from-orange-400", ring: "#fb923c" };
   return { text: "text-red-400", bg: "from-red-400", ring: "#f87171" };
@@ -52,7 +52,6 @@ export default function GrowthScoreCard({ score, delta, niche, lastAnalyzedAt, a
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             className="transition-all duration-1000 ease-out"
-            style={{ filter: `drop-shadow(0 0 6px ${colors.ring}60)` }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -64,7 +63,7 @@ export default function GrowthScoreCard({ score, delta, niche, lastAnalyzedAt, a
       {/* Delta */}
       <div className="flex items-center gap-1.5 text-sm">
         {delta > 0 ? (
-          <><TrendingUp className="w-4 h-4 text-neon-green" /><span className="text-neon-green">+{delta} pts</span></>
+          <><TrendingUp className="w-4 h-4 text-emerald-500" /><span className="text-emerald-500">+{delta} pts</span></>
         ) : delta < 0 ? (
           <><TrendingDown className="w-4 h-4 text-red-400" /><span className="text-red-400">{delta} pts</span></>
         ) : (
@@ -75,7 +74,7 @@ export default function GrowthScoreCard({ score, delta, niche, lastAnalyzedAt, a
 
       {/* Niche */}
       {niche && (
-        <div className="bg-brand-600/15 border border-brand-600/20 rounded-full px-3 py-1 text-xs text-brand-300">
+        <div className="bg-blue-600/15 border border-blue-600/20 rounded-full px-3 py-1 text-xs text-blue-300">
           {niche}
         </div>
       )}

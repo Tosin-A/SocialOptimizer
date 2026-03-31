@@ -35,7 +35,7 @@ function CustomTooltip({
     <div className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs shadow-xl">
       <p className="text-muted-foreground mb-0.5">{d.date}</p>
       {d.label && <p className="text-muted-foreground mb-0.5">{d.label}</p>}
-      <p className="font-semibold text-brand-300 text-base">{d.score}</p>
+      <p className="font-semibold text-blue-300 text-base">{d.score}</p>
       <p className="text-muted-foreground">Growth score</p>
     </div>
   );
@@ -66,7 +66,7 @@ export default function ScoreHistoryChart({ reports, className = "" }: Props) {
     <div className={`glass rounded-2xl p-5 ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-brand-400" />
+          <TrendingUp className="w-4 h-4 text-blue-400" />
           <h3 className="font-semibold text-sm">Score history</h3>
           <span className="text-xs text-muted-foreground">{reports.length} analyses</span>
         </div>

@@ -63,9 +63,9 @@ export default function AnalyzePage() {
           <div className="grid md:grid-cols-3 gap-6">
             {ANALYSIS_STEPS.map((step, i) => (
               <SectionReveal key={step.title} delay={i * 0.1}>
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 h-full">
-                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
-                    <step.icon className="w-5 h-5 text-brand-400" />
+                <div className="rounded-xl border border-white/[0.06] bg-card p-6 h-full">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                    <step.icon className="w-5 h-5 text-blue-400" />
                   </div>
                   <div className="text-xs font-mono text-muted-foreground mb-2">Step {i + 1}</div>
                   <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
@@ -79,7 +79,7 @@ export default function AnalyzePage() {
 
       {/* What we analyze */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
               What the analysis covers
@@ -91,7 +91,7 @@ export default function AnalyzePage() {
             <div className="grid sm:grid-cols-2 gap-3">
               {METRICS_ANALYZED.map((metric) => (
                 <div key={metric} className="flex items-center gap-3 text-sm py-2">
-                  <CheckCircle2 className="w-4 h-4 text-brand-400 flex-shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0" />
                   <span>{metric}</span>
                 </div>
               ))}
@@ -102,11 +102,11 @@ export default function AnalyzePage() {
 
       {/* Speed callout */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8 items-start">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-5 h-5 text-brand-400" />
+                <Clock className="w-5 h-5 text-blue-400" />
                 <h2 className="text-2xl font-semibold tracking-tight">3 minutes, not 3 hours</h2>
               </div>
               <p className="text-muted-foreground leading-relaxed mb-4">
@@ -118,7 +118,7 @@ export default function AnalyzePage() {
                 No waiting around.
               </p>
             </div>
-            <div className="flex-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
+            <div className="flex-1 rounded-xl border border-white/[0.06] bg-card p-6">
               <div className="flex items-center gap-3 mb-4">
                 <TrendingUp className="w-5 h-5 text-emerald-400" />
                 <span className="font-semibold">Sample output</span>
@@ -135,7 +135,7 @@ export default function AnalyzePage() {
       </SectionReveal>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             See what your posts are actually doing
@@ -145,7 +145,7 @@ export default function AnalyzePage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

@@ -22,14 +22,14 @@ export default function CompetitorOutlierList({ outliers, competitorUsername }: 
               <span className="text-xs font-mono font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded">
                 {o.multiplier}x avg
               </span>
-              <span className="text-xs font-mono text-neon-green">
+              <span className="text-xs font-mono text-emerald-500">
                 {(o.engagement_rate * 100).toFixed(2)}% eng
               </span>
             </div>
             {o.caption && (
               <p className="text-xs text-muted-foreground line-clamp-2">{o.caption}</p>
             )}
-            <p className="text-xs text-brand-300">{o.what_worked}</p>
+            <p className="text-xs text-blue-300">{o.what_worked}</p>
           </div>
         ))}
       </div>

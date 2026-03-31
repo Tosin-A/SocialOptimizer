@@ -18,11 +18,11 @@ export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys
       {winners.map((w, i) => (
         <div key={i} className="glass rounded-2xl overflow-hidden">
           {/* Original post reference */}
-          <div className="p-4 bg-white/[0.02] border-b border-white/5">
+          <div className="p-4 bg-card border-b border-border">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-neon-green flex-shrink-0" />
-              <span className="text-xs font-medium text-neon-green">Original winner</span>
-              <span className="ml-auto text-xs font-mono text-neon-green">{w.original_post.engagement_rate} eng.</span>
+              <TrendingUp className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+              <span className="text-xs font-medium text-emerald-500">Original winner</span>
+              <span className="ml-auto text-xs font-mono text-emerald-500">{w.original_post.engagement_rate} eng.</span>
             </div>
             <p className="text-xs text-muted-foreground line-clamp-2">{w.original_post.caption_preview}</p>
             <p className="text-xs text-muted-foreground mt-1.5 italic">{w.original_post.why_it_worked}</p>
@@ -31,11 +31,11 @@ export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys
           {/* Replicated content */}
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-neon-purple flex-shrink-0" />
-              <span className="text-xs font-medium text-neon-purple">Replicated concept</span>
+              <Sparkles className="w-4 h-4 text-blue-400 flex-shrink-0" />
+              <span className="text-xs font-medium text-blue-400">Replicated concept</span>
               <span className={cn(
                 "ml-auto text-xs px-2 py-0.5 rounded-full",
-                w.replicated_content.expected_engagement === "high" ? "bg-neon-green/15 text-neon-green" :
+                w.replicated_content.expected_engagement === "high" ? "bg-emerald-500/15 text-emerald-500" :
                 w.replicated_content.expected_engagement === "medium" ? "bg-yellow-400/15 text-yellow-400" :
                 "bg-red-400/15 text-red-400"
               )}>
@@ -74,12 +74,12 @@ export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys
             {/* Hashtags */}
             <div className="flex flex-wrap gap-1.5">
               {w.replicated_content.hashtags.map((tag) => (
-                <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+                <span key={tag} className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded">{tag}</span>
               ))}
             </div>
 
             {/* Format + copy all */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/5">
+            <div className="flex items-center justify-between pt-2 border-t border-border">
               <span className="text-xs text-muted-foreground capitalize">Format: {w.replicated_content.format}</span>
               <div className="flex items-center gap-1">
                 {onSave && (() => {
@@ -94,7 +94,7 @@ export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys
                       onClick={() => onSave(fullContent, key)}
                       disabled={isSaved || savingKey === key}
                     >
-                      {isSaved ? <BookmarkCheck className="w-3 h-3 text-brand-400" /> : <Bookmark className="w-3 h-3" />}
+                      {isSaved ? <BookmarkCheck className="w-3 h-3 text-blue-400" /> : <Bookmark className="w-3 h-3" />}
                       {isSaved ? "Saved" : "Save"}
                     </Button>
                   );
@@ -111,7 +111,7 @@ export default function ReplicateWinnerCard({ winners, onCopy, onSave, savedKeys
             </div>
 
             {/* Adaptation notes */}
-            <p className="text-xs text-brand-300 italic">{w.adaptation_notes}</p>
+            <p className="text-xs text-blue-300 italic">{w.adaptation_notes}</p>
           </div>
         </div>
       ))}

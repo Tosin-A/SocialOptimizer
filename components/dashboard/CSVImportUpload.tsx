@@ -108,7 +108,7 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
   return (
     <div className="glass rounded-2xl p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
-        <Upload className="w-4 h-4 text-brand-400" />
+        <Upload className="w-4 h-4 text-blue-400" />
         Import your data
       </h3>
       <p className="text-xs text-muted-foreground">
@@ -149,12 +149,12 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
 
       {/* Export instructions */}
       {steps && (
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 space-y-2">
+        <div className="bg-card border border-white/[0.06] rounded-xl p-4 space-y-2">
           <p className="text-xs font-medium text-slate-300">{steps.title}</p>
           <ol className="space-y-1">
             {steps.steps.map((step, i) => (
               <li key={i} className="text-xs text-muted-foreground flex gap-2">
-                <span className="text-brand-400 font-mono flex-shrink-0">{i + 1}.</span>
+                <span className="text-blue-400 font-mono flex-shrink-0">{i + 1}.</span>
                 {step}
               </li>
             ))}
@@ -170,10 +170,10 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
         onClick={() => fileRef.current?.click()}
         className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
           dragOver
-            ? "border-brand-500 bg-brand-500/5"
+            ? "border-blue-500 bg-blue-500/5"
             : file
-            ? "border-neon-green/30 bg-neon-green/5"
-            : "border-white/10 hover:border-white/20"
+            ? "border-emerald-500/30 bg-emerald-500/5"
+            : "border-border hover:border-white/20"
         }`}
       >
         <input
@@ -188,7 +188,7 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
         />
         {file ? (
           <div className="flex items-center justify-center gap-2">
-            <FileText className="w-5 h-5 text-neon-green" />
+            <FileText className="w-5 h-5 text-emerald-500" />
             <span className="text-sm">{file.name}</span>
             <span className="text-xs text-muted-foreground">({(file.size / 1024).toFixed(0)} KB)</span>
             <button
@@ -225,13 +225,13 @@ export default function CSVImportUpload({ onImportComplete }: Props) {
 
       {/* Result */}
       {result && (
-        <div className="border border-neon-green/20 rounded-xl p-4 space-y-2">
+        <div className="border border-emerald-500/20 rounded-xl p-4 space-y-2">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-neon-green" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <span className="text-sm font-medium">Import complete</span>
           </div>
           <div className="flex gap-4 text-xs text-muted-foreground">
-            <span className="text-neon-green">{result.posts_imported} imported</span>
+            <span className="text-emerald-500">{result.posts_imported} imported</span>
             {result.posts_skipped > 0 && <span className="text-yellow-400">{result.posts_skipped} skipped</span>}
           </div>
           {result.errors.length > 0 && (

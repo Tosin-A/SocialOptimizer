@@ -58,7 +58,7 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
               key={i}
               className={cn(
                 "h-1.5 w-10 rounded-full transition-all",
-                s.done ? "bg-brand-500" : i === currentStep ? "bg-brand-500/40" : "bg-white/10"
+                s.done ? "bg-blue-500" : i === currentStep ? "bg-blue-500/40" : "bg-white/10"
               )}
             />
           ))}
@@ -74,15 +74,15 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
               step.done
                 ? "opacity-50"
                 : i === currentStep
-                ? "bg-brand-600/10 border border-brand-600/20"
+                ? "bg-blue-600/10 border border-blue-600/20"
                 : "opacity-40"
             )}
           >
             <div className="flex-shrink-0">
               {step.done ? (
-                <CheckCircle2 className="w-5 h-5 text-brand-400" />
+                <CheckCircle2 className="w-5 h-5 text-blue-400" />
               ) : (
-                <Circle className={cn("w-5 h-5", i === currentStep ? "text-brand-400" : "text-white/20")} />
+                <Circle className={cn("w-5 h-5", i === currentStep ? "text-blue-400" : "text-white/20")} />
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -96,7 +96,7 @@ export default function OnboardingSteps({ hasAccounts, hasReports }: Props) {
             {step.href && step.cta && (
               <Link
                 href={step.href}
-                className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-brand-400 hover:text-brand-300 transition-colors"
+                className="flex-shrink-0 flex items-center gap-1 text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors"
               >
                 {step.cta}
                 <ArrowRight className="w-3 h-3" />

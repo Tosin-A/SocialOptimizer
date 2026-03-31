@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+const sentryConfig = {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   silent: true,
@@ -42,4 +42,8 @@ export default withSentryConfig(nextConfig, {
     autoInstrumentAppDirectory: true,
     treeshake: { removeDebugLogging: true },
   },
-});
+};
+
+export default process.env.NODE_ENV === "production"
+  ? withSentryConfig(nextConfig, sentryConfig)
+  : nextConfig;

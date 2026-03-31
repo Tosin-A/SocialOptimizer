@@ -25,7 +25,7 @@ interface NavCardItem {
 const NAV_ITEMS: NavCardItem[] = [
   {
     label: "Product",
-    bgColor: "rgba(99, 102, 241, 0.08)",
+    bgColor: "rgba(59, 130, 246, 0.08)",
     textColor: "#fff",
     links: [
       { label: "Analyze", href: "/analyze", ariaLabel: "Content analysis" },
@@ -36,7 +36,7 @@ const NAV_ITEMS: NavCardItem[] = [
   },
   {
     label: "Resources",
-    bgColor: "rgba(99, 102, 241, 0.05)",
+    bgColor: "rgba(59, 130, 246, 0.05)",
     textColor: "#fff",
     links: [
       { label: "How it works", href: "/how-it-works", ariaLabel: "Learn how it works" },
@@ -47,7 +47,7 @@ const NAV_ITEMS: NavCardItem[] = [
   },
   {
     label: "Legal",
-    bgColor: "rgba(99, 102, 241, 0.03)",
+    bgColor: "rgba(59, 130, 246, 0.03)",
     textColor: "#fff",
     links: [
       { label: "Privacy policy", href: "/privacy", ariaLabel: "Privacy policy" },
@@ -152,7 +152,7 @@ export default function CardNav() {
 
           {/* Logo */}
           <Link href="/" className="card-nav-logo" onClick={() => setIsOpen(false)}>
-            <Image src="/logo.png" alt="CLOUT" width={72} height={22} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)] flex-shrink-0" />
+            <Image src="/logo.png" alt="CLOUT" width={72} height={22} className="rounded-lg opacity-90 flex-shrink-0" />
           </Link>
 
           {/* Auth buttons */}

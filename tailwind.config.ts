@@ -47,33 +47,35 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
 
-        // ── Indigo — primary brand ──────────────────────────────────────
+        // ── Blue — primary brand ──────────────────────────────────────
         brand: {
-          50:  "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-          950: "#1e1b4b",
-        },
-
-        // ── Blue — secondary accent ─────────────────────────────────────
-        blue: {
+          50:  "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
           400: "#60a5fa",
           500: "#3b82f6",
           600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#172554",
         },
 
-        // ── Neon accents ────────────────────────────────────────────────
-        "neon-purple": "#a855f7",   // purple-500 — used in logo gradient, Agency badge
-        "neon-green":  "#22c55e",   // green-500  — used for connected/success states
-        "neon-cyan":   "#06b6d4",   // cyan-500   — used in MetricsGrid metric cards
-        "neon-pink":   "#ec4899",   // pink-500   — used in MetricsGrid metric cards
+        // ── Blue — alias to brand ─────────────────────────────────────
+        blue: {
+          50:  "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#172554",
+        },
 
         // ── Status colours ──────────────────────────────────────────────
         status: {
@@ -100,6 +102,7 @@ const config: Config = {
 
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        display: ["var(--font-display)", ...fontFamily.sans],
         mono: ["var(--font-mono)", ...fontFamily.mono],
       },
 
@@ -120,22 +123,12 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%":      { opacity: "0.4" },
         },
-        "star-movement-bottom": {
-          "0%":   { transform: "translate(0%, 0%)",     opacity: "1" },
-          "100%": { transform: "translate(-100%, 0%)",  opacity: "0" },
-        },
-        "star-movement-top": {
-          "0%":   { transform: "translate(0%, 0%)",     opacity: "1" },
-          "100%": { transform: "translate(100%, 0%)",   opacity: "0" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up":   "accordion-up 0.2s ease-out",
         shimmer:          "shimmer 2s linear infinite",
         pulse:            "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "star-movement-bottom": "star-movement-bottom linear infinite alternate",
-        "star-movement-top":    "star-movement-top linear infinite alternate",
       },
     },
   },

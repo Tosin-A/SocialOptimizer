@@ -13,9 +13,9 @@ interface Props {
 }
 
 const sectionColors: Record<string, string> = {
-  hook: "border-l-neon-green",
-  body: "border-l-brand-400",
-  cta: "border-l-neon-purple",
+  hook: "border-l-emerald-500",
+  body: "border-l-blue-400",
+  cta: "border-l-blue-400",
 };
 
 const sectionLabels: Record<string, string> = {
@@ -41,11 +41,11 @@ export default function StructuredCaptionCard({ caption, onSave, savedKeys, savi
     <div className="glass rounded-2xl p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-brand-400" />
+          <FileText className="w-4 h-4 text-blue-400" />
           <h3 className="font-semibold text-sm">Structured Caption</h3>
           <span className={cn(
             "text-xs font-mono px-2 py-0.5 rounded",
-            caption.overall_score >= 80 ? "bg-neon-green/10 text-neon-green" :
+            caption.overall_score >= 80 ? "bg-emerald-500/10 text-emerald-500" :
             caption.overall_score >= 60 ? "bg-yellow-400/10 text-yellow-400" :
             "bg-red-400/10 text-red-400"
           )}>
@@ -64,7 +64,7 @@ export default function StructuredCaptionCard({ caption, onSave, savedKeys, savi
                 onClick={() => onSave(fullWithHashtags, key)}
                 disabled={isSaved || savingKey === key}
               >
-                {isSaved ? <BookmarkCheck className="w-3 h-3 text-brand-400" /> : <Bookmark className="w-3 h-3" />}
+                {isSaved ? <BookmarkCheck className="w-3 h-3 text-blue-400" /> : <Bookmark className="w-3 h-3" />}
                 {isSaved ? "Saved" : "Save"}
               </Button>
             );
@@ -87,7 +87,7 @@ export default function StructuredCaptionCard({ caption, onSave, savedKeys, savi
               </span>
               <span className={cn(
                 "text-xs font-mono",
-                section.score >= 80 ? "text-neon-green" : section.score >= 60 ? "text-yellow-400" : "text-red-400"
+                section.score >= 80 ? "text-emerald-500" : section.score >= 60 ? "text-yellow-400" : "text-red-400"
               )}>
                 {section.score}/100
               </span>
@@ -101,7 +101,7 @@ export default function StructuredCaptionCard({ caption, onSave, savedKeys, savi
       {caption.hashtags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {caption.hashtags.map((tag) => (
-            <span key={tag} className="text-xs bg-brand-600/20 text-brand-300 px-2 py-0.5 rounded">{tag}</span>
+            <span key={tag} className="text-xs bg-blue-600/20 text-blue-300 px-2 py-0.5 rounded">{tag}</span>
           ))}
         </div>
       )}

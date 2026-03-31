@@ -60,9 +60,9 @@ export default function ReportsPage() {
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 gap-6">
           {REPORT_SECTIONS.map((section, i) => (
             <SectionReveal key={section.title} delay={i * 0.1}>
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 h-full">
-                <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
-                  <section.icon className="w-5 h-5 text-brand-400" />
+              <div className="rounded-xl border border-white/[0.06] bg-card p-6 h-full">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center mb-4">
+                  <section.icon className="w-5 h-5 text-blue-400" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{section.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{section.description}</p>
@@ -74,7 +74,7 @@ export default function ReportsPage() {
 
       {/* Sample report preview */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-3">
               What a report looks like
@@ -85,7 +85,7 @@ export default function ReportsPage() {
             </p>
 
             {/* Mock report card */}
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 max-w-2xl">
+            <div className="rounded-xl border border-white/[0.06] bg-card p-6 max-w-2xl">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-pink-500/20 flex items-center justify-center">
                   <span className="text-pink-400 font-bold text-sm">IG</span>
@@ -111,7 +111,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              <div className="border-t border-white/[0.05] pt-4 space-y-2">
+              <div className="border-t border-border pt-4 space-y-2">
                 <div className="text-xs font-mono text-muted-foreground uppercase tracking-wide">Top insight</div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   &ldquo;Your Reel posts average 4.1% engagement vs. 1.8% for carousel posts.
@@ -126,7 +126,7 @@ export default function ReportsPage() {
 
       {/* Export features */}
       <SectionReveal>
-        <section className="py-16 px-6 border-t border-white/[0.05]">
+        <section className="py-16 px-6 border-t border-border">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-semibold tracking-tight mb-8">
               Export and share
@@ -134,7 +134,7 @@ export default function ReportsPage() {
             <div className="grid md:grid-cols-3 gap-6">
               {REPORT_FEATURES.map((feature) => (
                 <div key={feature.label} className="flex items-start gap-3">
-                  <feature.icon className="w-5 h-5 text-brand-400 mt-0.5 flex-shrink-0" />
+                  <feature.icon className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
                   <div>
                     <h3 className="font-medium mb-1">{feature.label}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
@@ -147,7 +147,7 @@ export default function ReportsPage() {
       </SectionReveal>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             Get your first report
@@ -157,7 +157,7 @@ export default function ReportsPage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

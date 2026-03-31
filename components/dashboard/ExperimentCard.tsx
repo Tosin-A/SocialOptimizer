@@ -12,9 +12,9 @@ interface Props {
 }
 
 const statusConfig = {
-  draft: { icon: Pause, color: "text-muted-foreground", bg: "bg-white/5" },
-  running: { icon: Play, color: "text-brand-400", bg: "bg-brand-600/10" },
-  completed: { icon: CheckCircle2, color: "text-neon-green", bg: "bg-neon-green/10" },
+  draft: { icon: Pause, color: "text-muted-foreground", bg: "bg-muted" },
+  running: { icon: Play, color: "text-blue-400", bg: "bg-blue-600/10" },
+  completed: { icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
   cancelled: { icon: XCircle, color: "text-red-400", bg: "bg-red-400/10" },
 };
 
@@ -27,7 +27,7 @@ export default function ExperimentCard({ experiment, onComplete, onCancel, onDel
   const delta = baselineScore != null && resultScore != null ? resultScore - baselineScore : null;
 
   return (
-    <div className={cn("glass rounded-xl p-4 space-y-3 border", experiment.status === "running" ? "border-brand-500/20" : "border-white/[0.05]")}>
+    <div className={cn("glass rounded-xl p-4 space-y-3 border", experiment.status === "running" ? "border-blue-500/20" : "border-border")}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", config.bg)}>
@@ -65,7 +65,7 @@ export default function ExperimentCard({ experiment, onComplete, onCancel, onDel
                 <span className="font-mono">{resultScore}</span>
               </div>
               {delta != null && (
-                <div className={cn("font-mono font-semibold", delta > 0 ? "text-neon-green" : delta < 0 ? "text-red-400" : "text-muted-foreground")}>
+                <div className={cn("font-mono font-semibold", delta > 0 ? "text-emerald-500" : delta < 0 ? "text-red-400" : "text-muted-foreground")}>
                   {delta > 0 ? "+" : ""}{delta} pts
                 </div>
               )}
@@ -75,7 +75,7 @@ export default function ExperimentCard({ experiment, onComplete, onCancel, onDel
       )}
 
       {experiment.outcome && (
-        <p className="text-xs text-brand-300 leading-relaxed">{experiment.outcome}</p>
+        <p className="text-xs text-blue-300 leading-relaxed">{experiment.outcome}</p>
       )}
 
       {/* Actions */}

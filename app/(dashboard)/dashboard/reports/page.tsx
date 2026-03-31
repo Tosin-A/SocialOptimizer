@@ -60,7 +60,7 @@ export default async function ReportsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <FileText className="w-6 h-6 text-brand-400" /> Analysis Reports
+            <FileText className="w-6 h-6 text-blue-400" /> Analysis Reports
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {list.length} report{list.length !== 1 ? "s" : ""} across all connected accounts
@@ -70,7 +70,7 @@ export default async function ReportsPage() {
           {list.length > 0 && <ExportCSVButton reports={list} />}
           <Link
             href="/dashboard/analyze"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <BarChart3 className="w-4 h-4" /> Run new analysis
           </Link>
@@ -87,7 +87,7 @@ export default async function ReportsPage() {
           </p>
           <Link
             href="/dashboard/analyze"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <BarChart3 className="w-4 h-4" /> Analyse an account
           </Link>
@@ -149,7 +149,7 @@ export default async function ReportsPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/dashboard/reports/${r.id}`}
-                        className="flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 transition-colors"
+                        className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         <ExternalLink className="w-3 h-3" /> View
                       </Link>

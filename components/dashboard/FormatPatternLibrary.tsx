@@ -40,17 +40,17 @@ export default function FormatPatternLibrary({ patterns, loading }: Props) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-sm capitalize">{pattern.format}</span>
-                <span className="text-xs bg-white/5 px-2 py-0.5 rounded">
+                <span className="text-xs bg-muted px-2 py-0.5 rounded">
                   {pattern.count} posts ({(pattern.pct_of_total * 100).toFixed(0)}%)
                 </span>
               </div>
-              <span className="font-mono text-sm text-brand-300">
+              <span className="font-mono text-sm text-blue-300">
                 {(pattern.avg_engagement_rate * 100).toFixed(2)}% avg eng
               </span>
             </div>
-            <div className="w-full bg-white/5 rounded-full h-1.5">
+            <div className="w-full bg-muted rounded-full h-1.5">
               <div
-                className="h-full rounded-full bg-brand-500 transition-all duration-500"
+                className="h-full rounded-full bg-blue-500 transition-all duration-500"
                 style={{ width: `${engPct}%` }}
               />
             </div>

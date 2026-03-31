@@ -3,7 +3,7 @@ import Sparkline from "./Sparkline";
 
 export default function CaseStudy() {
   return (
-    <section id="case" className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section id="case" className="py-12 sm:py-16 lg:py-20 px-6 border-y border-border bg-muted/30">
       <div className="max-w-6xl mx-auto">
         <div className="label-mono mb-4">Case study</div>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight mb-2">
@@ -20,7 +20,7 @@ export default function CaseStudy() {
             <div className="space-y-8 mb-10">
               {CASE_CHANGES.map((c, i) => (
                 <div key={i} className="flex gap-5">
-                  <div className="w-6 h-6 rounded-full border border-brand-500/40 text-brand-400 text-xs font-mono flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full border border-blue-500/40 text-blue-400 text-xs font-mono flex items-center justify-center flex-shrink-0 mt-0.5">
                     {i + 1}
                   </div>
                   <div>
@@ -32,8 +32,8 @@ export default function CaseStudy() {
             </div>
 
             {/* Sparkline card */}
-            <div className="rounded-lg border border-white/[0.07] p-5"
-                 style={{ background: "#0a1120" }}>
+            <div className="rounded-lg border border-border p-5"
+                 style={{ background: "hsl(var(--card))" }}>
               <div className="flex items-center justify-between mb-4">
                 <div className="label-mono">Engagement rate &middot; 12 weeks</div>
                 <span className="text-xs font-mono text-muted-foreground">
@@ -43,7 +43,7 @@ export default function CaseStudy() {
               <Sparkline
                 data={CASE_DATA}
                 height={56}
-                color="#6366f1"
+                color="#3b82f6"
                 markerAt={5}
               />
               <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground/50">
@@ -55,7 +55,7 @@ export default function CaseStudy() {
           </div>
 
           {/* Before / After */}
-          <div className="rounded-lg border border-white/[0.07] overflow-hidden">
+          <div className="rounded-lg border border-border overflow-hidden">
             <div className="grid grid-cols-2 divide-x divide-white/[0.05]">
               {(["before", "after"] as const).map((key) => {
                 const d =
@@ -87,7 +87,7 @@ export default function CaseStudy() {
                 );
               })}
             </div>
-            <div className="px-5 py-3 border-t border-white/[0.05] bg-white/[0.01]">
+            <div className="px-5 py-3 border-t border-border bg-muted/20">
               <p className="text-[11px] text-muted-foreground">
                 6 weeks between first and second analysis
               </p>

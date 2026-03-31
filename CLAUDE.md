@@ -101,7 +101,7 @@ Internal engineering reference. Read this before touching any code.
   ---
   Design Philosophy
 
-  - Dark, professional UI — slate-900/950 background, indigo accents, Inter font. Feels like a tool a
+  - Dark, professional UI — neutral dark background, deep blue accents, Inter font. Feels like a tool a
   professional paid for, not a marketing page.
   - Information-dense — No gratuitous whitespace or decorative illustrations. Scores, percentages, and
   deltas front and center.
@@ -299,18 +299,17 @@ The current model is `claude-opus-4-6`. Don't downgrade to Haiku or Sonnet for a
 
 ### Visual rules
 
-- Background: dark slate (`slate-900`, `slate-950`)
-- Accents: indigo/blue (`indigo-500`, `indigo-600`), branded as `brand-400`/`brand-500`/`brand-600`
+- Background: dark neutral (`--background: 220 14% 6%` → ~#0d0f14)
+- Primary accent: deep blue (`blue-500: #3b82f6`, `blue-600: #2563eb`), aliased as `brand-*`
 - Text: `slate-100` (primary), `slate-400` (secondary/muted)
 - Font: Inter (already set in globals)
-- Border: `slate-700` / `slate-800`
+- Cards: solid `bg-card` with `border-border` — no glassmorphism, no backdrop-blur
+- Border: `border-border` (CSS custom property, ~16% lightness)
 - Destructive: `red-500`
 - Success: `emerald-500`
 
 ### Custom UI components
 
-- `StarBorder` (`components/ui/StarBorder.tsx`) — animated glowing border effect for CTA buttons. Default color: `#a855f7` (neon-purple).
-- `GradualBlur` (`components/landing/GradualBlur.tsx`) — configurable blur overlay for hero sections.
 - `UpgradeGate` (`components/dashboard/UpgradeGate.tsx`) — plan-gated feature wrapper. Supports a `teaser` prop for blurred preview content with gradient overlay + upgrade CTA. Without `teaser`, falls back to a simple lock icon card.
 - `UpgradeCard` (`components/dashboard/UpgradeCard.tsx`) — "You're leaving data on the table" nudge card for free users on the dashboard home.
 

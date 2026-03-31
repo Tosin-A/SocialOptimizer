@@ -21,7 +21,7 @@ function DiscoverTeaser() {
           <div
             key={label}
             className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium text-center ${
-              i === 0 ? "bg-brand-600 text-white" : "text-muted-foreground"
+              i === 0 ? "bg-blue-600 text-white" : "text-muted-foreground"
             }`}
           >
             {label}
@@ -39,8 +39,8 @@ function DiscoverTeaser() {
         ].map((item) => (
           <div key={item.title} className="glass rounded-2xl p-4 space-y-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <item.icon className="w-3.5 h-3.5 text-brand-400" />
-              <span className="font-mono text-brand-400">{item.ratio}</span> avg performance
+              <item.icon className="w-3.5 h-3.5 text-blue-400" />
+              <span className="font-mono text-blue-400">{item.ratio}</span> avg performance
             </div>
             <p className="text-sm font-medium truncate">{item.title}</p>
             <p className="text-xs text-muted-foreground">{item.views} views</p>
@@ -51,10 +51,10 @@ function DiscoverTeaser() {
       {/* Mock trend items */}
       <div className="glass rounded-2xl p-4 space-y-3">
         <div className="flex items-center gap-2 text-sm font-semibold">
-          <BarChart2 className="w-4 h-4 text-brand-400" /> Trending in your niche
+          <BarChart2 className="w-4 h-4 text-blue-400" /> Trending in your niche
         </div>
         {["#delusionalmindset", "#softlife", "#morningroutine"].map((tag) => (
-          <div key={tag} className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+          <div key={tag} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
             <span className="text-sm font-mono">{tag}</span>
             <span className="text-xs text-emerald-400">+340% velocity</span>
           </div>
@@ -214,7 +214,7 @@ export default function DiscoverPage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Compass className="w-6 h-6 text-brand-400" /> Discover
+          <Compass className="w-6 h-6 text-blue-400" /> Discover
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
           Find outliers, spot trends, assess niche saturation, and understand format performance
@@ -245,7 +245,7 @@ export default function DiscoverPage() {
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all ${
-                  tab === t.id ? "bg-brand-600 text-white" : "text-muted-foreground hover:text-foreground"
+                  tab === t.id ? "bg-blue-600 text-white" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {t.label}
@@ -269,7 +269,7 @@ export default function DiscoverPage() {
               </div>
               {outlierLoading && outliers.length === 0 ? (
                 <div className="glass rounded-2xl p-12 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
                 </div>
               ) : (
                 <OutlierFeed outliers={outliers} />
@@ -280,7 +280,7 @@ export default function DiscoverPage() {
           {tab === "trends" && (
             trendLoading ? (
               <div className="glass rounded-2xl p-12 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-brand-400" />
+                <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
               </div>
             ) : (
               <TrendVelocityFeed trends={trends} />

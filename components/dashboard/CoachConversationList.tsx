@@ -34,12 +34,12 @@ export default function CoachConversationList({
 }: CoachConversationListProps) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-3 border-b border-white/5">
+      <div className="flex items-center justify-between p-3 border-b border-border">
         <h3 className="text-sm font-semibold text-slate-200">Conversations</h3>
         <div className="flex items-center gap-1">
           <button
             onClick={onNew}
-            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white transition-colors"
+            className="flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             New
@@ -47,7 +47,7 @@ export default function CoachConversationList({
           {onClose && (
             <button
               onClick={onClose}
-              className="lg:hidden p-1.5 rounded-lg hover:bg-white/5 text-muted-foreground transition-colors"
+              className="lg:hidden p-1.5 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -68,8 +68,8 @@ export default function CoachConversationList({
                 key={conv.id}
                 className={`group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
                   activeId === conv.id
-                    ? "bg-brand-600/20 text-foreground"
-                    : "hover:bg-white/5 text-slate-300"
+                    ? "bg-blue-600/20 text-foreground"
+                    : "hover:bg-muted text-slate-300"
                 }`}
                 onClick={() => onSelect(conv.id)}
               >

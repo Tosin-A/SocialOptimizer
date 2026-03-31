@@ -20,14 +20,14 @@ function CoachTeaser() {
       {messages.map((msg, i) => (
         <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}>
           {msg.role === "assistant" && (
-            <div className="w-7 h-7 rounded-full bg-brand-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Bot className="w-3.5 h-3.5 text-brand-300" />
+            <div className="w-7 h-7 rounded-full bg-blue-600/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot className="w-3.5 h-3.5 text-blue-300" />
             </div>
           )}
           <div
             className={`rounded-xl px-3.5 py-2.5 text-sm leading-relaxed max-w-[80%] ${
               msg.role === "user"
-                ? "bg-brand-600/20 text-brand-100"
+                ? "bg-blue-600/20 text-blue-100"
                 : "bg-white/5 text-slate-300"
             }`}
           >
@@ -131,7 +131,7 @@ export default function CoachPage() {
       <div className="max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-brand-400" /> Content Coach
+            <MessageSquare className="w-6 h-6 text-blue-400" /> Content Coach
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             Get personalized, data-backed coaching for your content strategy
@@ -175,7 +175,7 @@ export default function CoachPage() {
               className="lg:hidden fixed inset-0 bg-black/50 z-40"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="lg:hidden fixed inset-y-0 left-0 w-[85vw] max-w-72 z-50 bg-slate-950 border-r border-white/5">
+            <div className="lg:hidden fixed inset-y-0 left-0 w-[85vw] max-w-72 z-50 bg-slate-950 border-r border-border">
               <CoachConversationList
                 conversations={conversations}
                 activeId={activeConversationId}

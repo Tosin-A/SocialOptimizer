@@ -7,7 +7,7 @@ function ScoreBadge({ score }: { score: number }) {
   return (
     <div className={cn(
       "px-2 py-0.5 rounded-full text-xs font-bold",
-      score >= 70 ? "bg-neon-green/10 text-neon-green" :
+      score >= 70 ? "bg-emerald-500/10 text-emerald-500" :
       score >= 45 ? "bg-yellow-400/10 text-yellow-400" :
       "bg-red-400/10 text-red-400"
     )}>
@@ -29,9 +29,9 @@ interface Props { reports: Report[]; }
 export default function RecentReports({ reports }: Props) {
   return (
     <div className="glass rounded-2xl flex flex-col">
-      <div className="p-3 sm:p-5 border-b border-white/5">
+      <div className="p-3 sm:p-5 border-b border-border">
         <h3 className="font-semibold flex items-center gap-2">
-          <FileText className="w-4 h-4 text-brand-400" /> Recent Reports
+          <FileText className="w-4 h-4 text-blue-400" /> Recent Reports
         </h3>
       </div>
 
@@ -50,7 +50,7 @@ export default function RecentReports({ reports }: Props) {
             <Link
               key={r.id}
               href={`/dashboard/analyze?report=${r.id}`}
-              className="flex items-center gap-3 p-3 sm:p-4 hover:bg-white/5 transition-colors group"
+              className="flex items-center gap-3 p-3 sm:p-4 hover:bg-muted transition-colors group"
             >
               <PlatformIcon platform={acc?.platform ?? ""} size={20} />
               <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ export default function RecentReports({ reports }: Props) {
               <div className="flex items-center gap-2 flex-shrink-0">
                 {delta !== 0 && (
                   delta > 0
-                    ? <TrendingUp className="w-3.5 h-3.5 text-neon-green" />
+                    ? <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
                     : <TrendingDown className="w-3.5 h-3.5 text-red-400" />
                 )}
                 <ScoreBadge score={r.growth_score} />
@@ -75,10 +75,10 @@ export default function RecentReports({ reports }: Props) {
         })}
       </div>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t border-border">
         <Link
           href="/dashboard/reports"
-          className="text-xs text-brand-400 hover:underline flex items-center gap-1 justify-center"
+          className="text-xs text-blue-400 hover:underline flex items-center gap-1 justify-center"
         >
           View all reports <ChevronRight className="w-3 h-3" />
         </Link>

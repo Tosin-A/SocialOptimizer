@@ -26,7 +26,7 @@ export default function RankedFixList({ fixes }: Props) {
         {fixes.map((fix) => (
           <div
             key={fix.rank}
-            className="border border-white/[0.07] rounded-xl p-3 sm:p-4 space-y-2"
+            className="border border-border rounded-xl p-3 sm:p-4 space-y-2"
           >
             <div className="flex items-start gap-3">
               <div className="w-7 h-7 rounded-full bg-red-500/15 border border-red-500/25 flex items-center justify-center text-xs font-bold text-red-400 flex-shrink-0">
@@ -50,8 +50,8 @@ export default function RankedFixList({ fixes }: Props) {
               </div>
             </div>
             <div className="ml-8 sm:ml-10 flex items-start gap-2">
-              <ArrowRight className="w-3 h-3 text-brand-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-brand-300 leading-relaxed">
+              <ArrowRight className="w-3 h-3 text-blue-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-300 leading-relaxed">
                 {fix.action}
               </p>
             </div>

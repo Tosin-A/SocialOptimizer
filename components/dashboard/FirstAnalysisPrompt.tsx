@@ -18,8 +18,8 @@ export default function FirstAnalysisPrompt({ accounts }: Props) {
 
   return (
     <div className="glass rounded-2xl p-8 text-center space-y-5">
-      <div className="w-14 h-14 rounded-2xl bg-brand-600/20 border border-brand-600/30 flex items-center justify-center mx-auto">
-        <BarChart3 className="w-7 h-7 text-brand-400" />
+      <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-600/30 flex items-center justify-center mx-auto">
+        <BarChart3 className="w-7 h-7 text-blue-400" />
       </div>
 
       <div>
@@ -29,13 +29,13 @@ export default function FirstAnalysisPrompt({ accounts }: Props) {
         </p>
       </div>
 
-      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground bg-white/5 rounded-full px-4 py-2">
+      <div className="inline-flex items-center gap-2 text-xs text-muted-foreground bg-muted rounded-full px-4 py-2">
         <Clock className="w-3.5 h-3.5" />
         Takes about 30–60 seconds
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-        <Button asChild className="gap-2 bg-brand-600 hover:bg-brand-500">
+        <Button asChild className="gap-2 bg-blue-600 hover:bg-blue-500">
           <Link href={`/dashboard/analyze?account=${firstAccount?.id ?? ""}`}>
             Analyze {firstAccount ? `@${firstAccount.username}` : "my account"}
             <ArrowRight className="w-4 h-4" />

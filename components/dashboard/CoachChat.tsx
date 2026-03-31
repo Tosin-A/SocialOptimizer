@@ -54,7 +54,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="w-1.5 h-1.5 rounded-full bg-brand-400"
+          className="w-1.5 h-1.5 rounded-full bg-blue-400"
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }}
         />
@@ -310,7 +310,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         <div className="mb-3 px-1">
           <Label className="text-xs text-muted-foreground mb-1.5 block">Coaching based on data from</Label>
           <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-            <SelectTrigger className="w-full sm:w-80 bg-white/5 border-white/10">
+            <SelectTrigger className="w-full sm:w-80 bg-muted border-border">
               <SelectValue placeholder="Select account..." />
             </SelectTrigger>
             <SelectContent>
@@ -335,7 +335,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
           {loadingHistory ? (
             <div className="flex items-center justify-center h-full">
               <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <div className="w-4 h-4 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
                 Loading messages...
               </div>
             </div>
@@ -346,8 +346,8 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
               transition={{ duration: 0.4, delay: 0.1 }}
               className="flex flex-col items-center justify-center h-full text-center px-4"
             >
-              <div className="w-12 h-12 rounded-xl bg-brand-600/20 flex items-center justify-center mb-4">
-                <MessageSquare className="w-6 h-6 text-brand-400" />
+              <div className="w-12 h-12 rounded-xl bg-blue-600/20 flex items-center justify-center mb-4">
+                <MessageSquare className="w-6 h-6 text-blue-400" />
               </div>
               <h3 className="font-semibold text-lg mb-1">Content Coach</h3>
               <p className="text-muted-foreground text-sm mb-6 max-w-md">
@@ -360,10 +360,10 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                   <button
                     key={cmd.command}
                     onClick={() => selectCommand(cmd)}
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-white/5"
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground transition-colors border border-border"
                   >
                     {cmd.provider === "openai" && <Sparkles className="w-3 h-3 text-emerald-400" />}
-                    <span className="font-mono text-brand-400">{cmd.command}</span>
+                    <span className="font-mono text-blue-400">{cmd.command}</span>
                     <span>{cmd.label}</span>
                   </button>
                 ))}
@@ -374,7 +374,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                   <button
                     key={q}
                     onClick={() => sendMessage(q)}
-                    className="text-left text-xs px-3 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-white/5"
+                    className="text-left text-xs px-3 py-2.5 rounded-lg bg-muted hover:bg-muted-foreground/10 text-muted-foreground hover:text-foreground transition-colors border border-border"
                   >
                     {q}
                   </button>
@@ -394,8 +394,8 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                   <div
                     className={`max-w-[88%] md:max-w-[82%] rounded-2xl px-4 py-3.5 text-sm leading-relaxed ${
                       msg.role === "user"
-                        ? "bg-brand-600/30 text-foreground rounded-br-md"
-                        : "bg-white/5 text-foreground rounded-bl-md"
+                        ? "bg-blue-600/20 text-foreground rounded-br-md"
+                        : "bg-muted text-foreground rounded-bl-md"
                     }`}
                   >
                     {msg.role === "assistant" && msg.provider && (
@@ -403,7 +403,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                         className={`inline-block text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded mb-2 ${
                           msg.provider === "openai"
                             ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-brand-500/15 text-brand-400"
+                            : "bg-blue-500/15 text-blue-400"
                         }`}
                       >
                         {msg.provider === "openai" ? "GPT-4o" : "Claude"}
@@ -425,7 +425,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                         title={savedIndices.has(i) ? "Saved" : "Save idea"}
                       >
                         {savedIndices.has(i) ? (
-                          <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" />
+                          <BookmarkCheck className="w-3.5 h-3.5 text-blue-400" />
                         ) : (
                           <Bookmark className="w-3.5 h-3.5" />
                         )}
@@ -444,7 +444,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
               animate={{ opacity: 1, y: 0 }}
               className="flex justify-start"
             >
-              <div className="bg-white/5 rounded-2xl rounded-bl-md px-4 py-3">
+              <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
                 <TypingDots />
               </div>
             </motion.div>
@@ -467,7 +467,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
         </div>
 
         {/* Input area */}
-        <div className="border-t border-white/5 px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
+        <div className="border-t border-border px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-5">
           <div className="relative mx-auto w-full max-w-4xl">
             {/* Command palette */}
             <AnimatePresence>
@@ -477,15 +477,15 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute bottom-full left-0 right-0 mb-2 bg-slate-900 border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                  className="absolute bottom-full left-0 right-0 mb-2 bg-slate-900 border border-border rounded-xl overflow-hidden shadow-xl"
                 >
                   {filteredCommands.map((cmd) => (
                     <button
                       key={cmd.command}
                       onClick={() => selectCommand(cmd)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted transition-colors text-left"
                     >
-                      <span className="font-mono text-sm text-brand-400">{cmd.command}</span>
+                      <span className="font-mono text-sm text-blue-400">{cmd.command}</span>
                       <span className="text-sm text-foreground">{cmd.description}</span>
                       {cmd.provider === "openai" && (
                         <span className="ml-auto text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
@@ -506,14 +506,14 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your content performance... Type / for commands"
                 rows={1}
-                className="flex-1 resize-none bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-brand-500/50 focus:border-brand-500/50 transition-colors"
+                className="flex-1 resize-none bg-muted border border-border rounded-2xl px-4 py-3.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-colors"
                 disabled={loading}
               />
               <motion.button
                 onClick={() => sendMessage()}
                 disabled={!input.trim() || loading}
                 whileTap={{ scale: 0.95 }}
-                className="h-[48px] w-[48px] rounded-2xl flex-shrink-0 flex items-center justify-center bg-brand-600 hover:bg-brand-500 disabled:opacity-40 disabled:hover:bg-brand-600 transition-colors"
+                className="h-[48px] w-[48px] rounded-2xl flex-shrink-0 flex items-center justify-center bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 transition-colors"
               >
                 <AnimatePresence mode="wait">
                   {loading ? (
@@ -540,7 +540,7 @@ export default function CoachChat({ accounts, conversationId, onConversationCrea
             </div>
           </div>
           <p className="mx-auto w-full max-w-4xl text-[11px] text-muted-foreground mt-2">
-            Shift+Enter for new line. Type <kbd className="font-mono text-brand-400">/</kbd> for commands.
+            Shift+Enter for new line. Type <kbd className="font-mono text-blue-400">/</kbd> for commands.
           </p>
         </div>
       </motion.div>

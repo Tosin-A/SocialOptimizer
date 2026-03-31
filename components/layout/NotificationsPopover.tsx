@@ -114,12 +114,12 @@ export default function NotificationsPopover() {
       <button
         ref={buttonRef}
         onClick={handleOpen}
-        className="relative w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+        className="relative w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         aria-label="Notifications"
       >
         <Bell className="w-4 h-4" />
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-brand-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -127,11 +127,11 @@ export default function NotificationsPopover() {
 
       {open && createPortal(
         <div
-          className="fixed w-80 rounded-xl border border-white/10 bg-[#0d1424] shadow-2xl z-[9999] overflow-hidden"
+          className="fixed w-80 rounded-xl border border-border bg-card shadow-2xl z-[9999] overflow-hidden"
           style={{ top: dropdownPos.top, right: dropdownPos.right }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <span className="text-sm font-semibold">Recent activity</span>
             {notifications.length > 0 && (
               <span className="text-xs text-muted-foreground">{notifications.length} events</span>
@@ -158,10 +158,10 @@ export default function NotificationsPopover() {
                     setOpen(false);
                     router.push(n.link);
                   }}
-                  className="w-full flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] last:border-0 hover:bg-white/5 transition-colors text-left cursor-pointer group"
+                  className="w-full flex items-start gap-3 px-4 py-3 border-b border-border last:border-0 hover:bg-muted transition-colors text-left cursor-pointer group"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-brand-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Icon className="w-3.5 h-3.5 text-brand-400" />
+                  <div className="w-7 h-7 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="w-3.5 h-3.5 text-blue-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium leading-snug">{n.title}</p>

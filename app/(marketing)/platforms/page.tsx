@@ -47,7 +47,7 @@ export default function PlatformsPage() {
                 <ul className="space-y-3">
                   {p.metrics.map((m) => (
                     <li key={m} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <span className="text-brand-400 flex-shrink-0 mt-0.5">&rsaquo;</span>
+                      <span className="text-blue-400 flex-shrink-0 mt-0.5">&rsaquo;</span>
                       {m}
                     </li>
                   ))}
@@ -59,7 +59,7 @@ export default function PlatformsPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-6 border-t border-white/[0.05]">
+      <section className="py-16 px-6 border-t border-border">
         <div className="max-w-lg mx-auto text-center">
           <h2 className="text-2xl font-semibold tracking-tight mb-3">
             Ready to see your scores?
@@ -69,7 +69,7 @@ export default function PlatformsPage() {
           </p>
           <Button
             size="lg"
-            className="bg-brand-500 hover:bg-brand-600 text-white font-semibold h-11 px-7 gap-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold h-11 px-7 gap-2"
             asChild
           >
             <Link href="/signup">

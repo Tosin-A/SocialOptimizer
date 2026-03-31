@@ -11,7 +11,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-3xl mx-auto px-6 flex items-center justify-between h-14">
           <Link href="/" className="flex items-center">
             <Image src="/logo.png" alt="CLOUT" width={80} height={24} className="rounded-lg shadow-[0_0_24px_8px_rgba(0,0,0,0.5)]" />
@@ -102,7 +102,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="14. Contact">
-          <p>Questions about these terms: <a href="mailto:cloutai.support@gmail.com" className="text-brand-400 hover:text-brand-300 transition-colors">cloutai.support@gmail.com</a></p>
+          <p>Questions about these terms: <a href="mailto:cloutai.support@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">cloutai.support@gmail.com</a></p>
         </Section>
       </article>
 
@@ -122,7 +122,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Footer() {
   return (
-    <footer className="border-t border-white/[0.05] py-8 px-6">
+    <footer className="border-t border-border py-8 px-6">
       <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
         <span>CLOUT © 2026</span>
         <div className="flex gap-6 text-xs">

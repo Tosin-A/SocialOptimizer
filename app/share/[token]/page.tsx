@@ -85,7 +85,7 @@ export default async function SharePage({
         <div className="text-center space-y-3">
           <h1 className="text-xl font-bold text-foreground">Report not found</h1>
           <p className="text-sm text-muted-foreground">This share link may have expired or is invalid.</p>
-          <Link href="/" className="inline-block text-sm text-brand-400 hover:text-brand-300 mt-4">
+          <Link href="/" className="inline-block text-sm text-blue-400 hover:text-blue-300 mt-4">
             Get your own analysis →
           </Link>
         </div>
@@ -111,7 +111,7 @@ export default async function SharePage({
                 <polyline points="16 7 22 7 22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <span className="text-brand-400 font-bold text-sm tracking-wide">CLOUT</span>
+            <span className="text-blue-400 font-bold text-sm tracking-wide">CLOUT</span>
           </div>
           {account && (
             <p className="text-muted-foreground text-sm">
@@ -161,7 +161,7 @@ export default async function SharePage({
                   </span>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs text-brand-400 font-medium">Get your own analysis to see all fixes</span>
+                  <span className="text-xs text-blue-400 font-medium">Get your own analysis to see all fixes</span>
                 </div>
               </div>
             )}
@@ -186,7 +186,7 @@ export default async function SharePage({
         <div className="text-center space-y-3 pt-4">
           <Link
             href="/auth/signup"
-            className="inline-block w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm py-3 rounded-xl transition-colors text-center"
+            className="inline-block w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm py-3 rounded-xl transition-colors text-center"
           >
             Get your own analysis — it&apos;s free
           </Link>

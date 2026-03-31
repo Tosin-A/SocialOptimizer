@@ -56,7 +56,7 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-white/[0.05]">
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-3xl mx-auto px-6 flex items-center justify-between h-14">
           <Link href="/" className="flex items-center">
             <Image
@@ -101,7 +101,7 @@ export default function ContactPage() {
             <button
               type="button"
               onClick={() => setStatus("idle")}
-              className="mt-4 text-sm text-brand-400 hover:text-brand-300 transition-colors"
+              className="mt-4 text-sm text-blue-400 hover:text-blue-300 transition-colors"
             >
               Send another message
             </button>
@@ -124,7 +124,7 @@ export default function ContactPage() {
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-colors"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
                 />
               </div>
               <div className="space-y-2">
@@ -142,7 +142,7 @@ export default function ContactPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-colors"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function ContactPage() {
                 required
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-colors"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -185,7 +185,7 @@ export default function ContactPage() {
                 placeholder="Describe your question or issue in detail..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500 transition-colors resize-y min-h-[120px]"
+                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-foreground placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors resize-y min-h-[120px]"
               />
               <div className="text-xs text-slate-500 text-right">
                 {message.length}/5000
@@ -201,7 +201,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={status === "submitting"}
-              className="inline-flex items-center gap-2 rounded-lg bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2.5 text-sm font-semibold text-white transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2.5 text-sm font-semibold text-white transition-colors"
             >
               {status === "submitting" ? (
                 <>
@@ -226,7 +226,7 @@ export default function ContactPage() {
             Email us directly at{" "}
             <a
               href="mailto:cloutai.support@gmail.com"
-              className="text-brand-400 hover:text-brand-300 transition-colors"
+              className="text-blue-400 hover:text-blue-300 transition-colors"
             >
               cloutai.support@gmail.com
             </a>
@@ -237,7 +237,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <footer className="border-t border-white/[0.05] py-8 px-6">
+      <footer className="border-t border-border py-8 px-6">
         <div className="max-w-3xl mx-auto flex items-center justify-between text-sm text-muted-foreground">
           <span>CLOUT &copy; 2026</span>
           <div className="flex gap-6 text-xs">

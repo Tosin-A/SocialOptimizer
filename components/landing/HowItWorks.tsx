@@ -18,7 +18,7 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-12 sm:py-16 lg:py-20 px-6 border-y border-white/[0.05] bg-white/[0.015]">
+    <section className="py-12 sm:py-16 lg:py-20 px-6 border-y border-border bg-muted/30">
       <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 sm:gap-12 lg:gap-24">
         <div className="lg:w-72 flex-shrink-0">
           <div className="label-mono mb-4">How it works</div>
@@ -35,9 +35,9 @@ export default function HowItWorks() {
           {STEPS.map((step, i) => (
             <div
               key={i}
-              className={`flex gap-6 py-7 ${i < STEPS.length - 1 ? "border-b border-white/[0.05]" : ""}`}
+              className={`flex gap-6 py-7 ${i < STEPS.length - 1 ? "border-b border-border" : ""}`}
             >
-              <div className="w-7 h-7 rounded-full border border-brand-500/40 text-brand-400 font-mono text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full border border-blue-500/40 text-blue-400 font-mono text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
                 {step.n}
               </div>
               <div>

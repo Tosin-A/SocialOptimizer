@@ -54,7 +54,7 @@ export default function UpgradeGate({ feature, children, fallback, teaser }: Pro
             </p>
             <Link
               href="/dashboard/settings"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-500 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-500 transition-colors"
             >
               Upgrade to {PLAN_LABELS[required]}
             </Link>
@@ -78,7 +78,7 @@ export default function UpgradeGate({ feature, children, fallback, teaser }: Pro
         </p>
         <Link
           href="/dashboard/settings"
-          className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white hover:bg-brand-500 transition-colors"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-500 transition-colors"
         >
           Upgrade to {PLAN_LABELS[required]}
         </Link>

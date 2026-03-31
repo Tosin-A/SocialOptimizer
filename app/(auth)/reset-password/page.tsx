@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-brand-500/6 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-blue-500/6 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative">
@@ -70,7 +70,7 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/[0.08] bg-[#0d1526] p-8">
+        <div className="rounded-xl border border-border bg-[#0d1526] p-8">
           {done ? (
             <div className="text-center space-y-4">
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
@@ -79,11 +79,11 @@ export default function ResetPasswordPage() {
             </div>
           ) : !sessionReady ? (
             <div className="text-center space-y-4 py-4">
-              <Loader2 className="w-8 h-8 animate-spin text-brand-400 mx-auto" />
+              <Loader2 className="w-8 h-8 animate-spin text-blue-400 mx-auto" />
               <p className="text-sm text-muted-foreground">Verifying reset link…</p>
               <p className="text-xs text-muted-foreground">
                 Link invalid or expired?{" "}
-                <Link href="/forgot-password" className="text-brand-400 hover:text-brand-300 underline">
+                <Link href="/forgot-password" className="text-blue-400 hover:text-blue-300 underline">
                   Request a new one
                 </Link>
               </p>
@@ -98,7 +98,7 @@ export default function ResetPasswordPage() {
                     id="password"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10 bg-white/[0.03] border-white/[0.09] focus:border-brand-500/60"
+                    className="pl-10 bg-card border-white/[0.09] focus:border-blue-500/60"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     minLength={8}
@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
                     id="confirm"
                     type="password"
                     placeholder="••••••••"
-                    className="pl-10 bg-white/[0.03] border-white/[0.09] focus:border-brand-500/60"
+                    className="pl-10 bg-card border-white/[0.09] focus:border-blue-500/60"
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     required
@@ -127,7 +127,7 @@ export default function ResetPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                className="w-full h-11 gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold"
                 disabled={loading}
               >
                 {loading

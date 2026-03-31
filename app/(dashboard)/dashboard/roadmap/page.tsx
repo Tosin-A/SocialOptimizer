@@ -6,11 +6,11 @@ import type { RoadmapAction } from "@/types";
 import SavedIdeasSection from "@/components/dashboard/SavedIdeasSection";
 
 const CATEGORY_CONFIG: Record<string, { color: string; label: string }> = {
-  content: { color: "bg-brand-600/20 text-brand-300 border-brand-600/30", label: "Content" },
-  hashtags: { color: "bg-neon-purple/20 text-neon-purple border-neon-purple/30", label: "Hashtags" },
-  posting: { color: "bg-neon-cyan/20 text-neon-cyan border-neon-cyan/30", label: "Posting" },
-  engagement: { color: "bg-neon-green/20 text-neon-green border-neon-green/30", label: "Engagement" },
-  branding: { color: "bg-neon-pink/20 text-neon-pink border-neon-pink/30", label: "Branding" },
+  content: { color: "bg-blue-600/20 text-blue-300 border-blue-600/30", label: "Content" },
+  hashtags: { color: "bg-blue-400/20 text-blue-400 border-blue-400/30", label: "Hashtags" },
+  posting: { color: "bg-blue-400/20 text-blue-400 border-blue-400/30", label: "Posting" },
+  engagement: { color: "bg-emerald-500/20 text-emerald-500 border-emerald-500/30", label: "Engagement" },
+  branding: { color: "bg-rose-400/20 text-rose-400 border-rose-400/30", label: "Branding" },
 };
 
 export const metadata = { title: "Roadmap" };
@@ -54,7 +54,7 @@ export default async function RoadmapPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Map className="w-6 h-6 text-brand-400" /> Growth Roadmap
+          <Map className="w-6 h-6 text-blue-400" /> Growth Roadmap
         </h1>
         <p className="text-muted-foreground text-sm mt-0.5">
           Your prioritized actions — what to do and when
@@ -70,7 +70,7 @@ export default async function RoadmapPage() {
           </p>
           <Link
             href="/dashboard/analyze"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <BarChart3 className="w-4 h-4" /> Run analysis
           </Link>
@@ -94,7 +94,7 @@ export default async function RoadmapPage() {
             </div>
             <Link
               href={`/dashboard/reports/${latestReport?.id}`}
-              className="text-brand-400 hover:text-brand-300 text-xs flex items-center gap-1"
+              className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1"
             >
               View full report <ChevronRight className="w-3 h-3" />
             </Link>
@@ -102,7 +102,7 @@ export default async function RoadmapPage() {
 
           {/* Roadmap list */}
           <div className="glass rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-white/5">
+            <div className="p-5 border-b border-border">
               <h2 className="font-semibold text-sm text-muted-foreground">
                 {roadmap.length} actions · ordered by priority
               </h2>
@@ -114,9 +114,9 @@ export default async function RoadmapPage() {
                   label: action.category,
                 };
                 return (
-                  <div key={i} className="p-4 sm:p-5 flex gap-3 sm:gap-4 hover:bg-white/[0.02] transition-colors">
+                  <div key={i} className="p-4 sm:p-5 flex gap-3 sm:gap-4 hover:bg-card transition-colors">
                     <div className="flex flex-col items-center flex-shrink-0">
-                      <div className="w-9 h-9 rounded-full border bg-brand-600/10 flex items-center justify-center text-sm font-bold text-brand-400">
+                      <div className="w-9 h-9 rounded-full border bg-blue-600/10 flex items-center justify-center text-sm font-bold text-blue-400">
                         {i + 1}
                       </div>
                       {i < roadmap.length - 1 && (
@@ -136,7 +136,7 @@ export default async function RoadmapPage() {
                         </span>
                       </div>
                       <p className="text-sm font-medium leading-snug mb-1">{action.action}</p>
-                      <p className="text-xs text-neon-green">{action.expected_impact}</p>
+                      <p className="text-xs text-emerald-500">{action.expected_impact}</p>
                     </div>
                   </div>
                 );

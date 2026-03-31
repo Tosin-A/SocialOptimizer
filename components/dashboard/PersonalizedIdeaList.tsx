@@ -18,13 +18,13 @@ const sourceIcons = {
 };
 
 const sourceColors = {
-  outlier: "bg-neon-green/10 text-neon-green border-neon-green/20",
-  trend: "bg-neon-purple/10 text-neon-purple border-neon-purple/20",
-  niche_gap: "bg-neon-cyan/10 text-neon-cyan border-neon-cyan/20",
+  outlier: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+  trend: "bg-blue-400/10 text-blue-400 border-blue-400/20",
+  niche_gap: "bg-blue-400/10 text-blue-400 border-blue-400/20",
 };
 
 const engColors = {
-  high: "text-neon-green",
+  high: "text-emerald-500",
   medium: "text-yellow-400",
   low: "text-muted-foreground",
 };
@@ -60,7 +60,7 @@ export default function PersonalizedIdeaList({ ideas, onSave, savedKeys, savingK
                       disabled={isSaved || savingKey === key}
                       title={isSaved ? "Saved" : "Save idea"}
                     >
-                      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-brand-400" /> : <Bookmark className="w-3.5 h-3.5" />}
+                      {isSaved ? <BookmarkCheck className="w-3.5 h-3.5 text-blue-400" /> : <Bookmark className="w-3.5 h-3.5" />}
                     </Button>
                   );
                 })()}
@@ -75,10 +75,10 @@ export default function PersonalizedIdeaList({ ideas, onSave, savedKeys, savingK
                 <SourceIcon className="w-3 h-3" />
                 {idea.source.replace("_", " ")}
               </span>
-              <span className="text-xs bg-white/5 px-2 py-0.5 rounded capitalize">{idea.format}</span>
+              <span className="text-xs bg-muted px-2 py-0.5 rounded capitalize">{idea.format}</span>
             </div>
             <p className="text-xs text-muted-foreground italic">{idea.source_reference}</p>
-            <p className="text-xs text-brand-300">{idea.why_it_works}</p>
+            <p className="text-xs text-blue-300">{idea.why_it_works}</p>
           </div>
         );
       })}

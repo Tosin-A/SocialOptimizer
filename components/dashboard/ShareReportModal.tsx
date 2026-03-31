@@ -85,10 +85,10 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md bg-slate-900 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl">
+      <div className="relative w-full max-w-md bg-slate-900 border border-border rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm flex items-center gap-2">
-            <Share2 className="w-4 h-4 text-brand-400" />
+            <Share2 className="w-4 h-4 text-blue-400" />
             Share your results
           </h3>
           <button onClick={onClose} className="text-white/30 hover:text-white/60 transition-colors">
@@ -98,10 +98,10 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
 
         {!shareData && !loading && (
           <div className="space-y-4">
-            <div className="bg-brand-600/10 border border-brand-600/20 rounded-xl p-4 space-y-2">
+            <div className="bg-blue-600/10 border border-blue-600/20 rounded-xl p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <Gift className="w-4 h-4 text-brand-400" />
-                <span className="text-sm font-medium text-brand-300">Earn 3 bonus scans</span>
+                <Gift className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-medium text-blue-300">Earn 3 bonus scans</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Share your score card on TikTok or Instagram and get 3 extra analysis scans for free. One reward per report.
@@ -114,7 +114,7 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
 
             <button
               onClick={handleShare}
-              className="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm py-2.5 rounded-lg transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm py-2.5 rounded-lg transition-colors"
             >
               Generate shareable card
             </button>
@@ -123,7 +123,7 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
 
         {loading && (
           <div className="flex items-center justify-center py-8">
-            <div className="w-6 h-6 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -133,7 +133,7 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
             <div className={cn(
               "rounded-xl p-3 text-center text-sm font-medium",
               shareData.already_shared
-                ? "bg-white/5 border border-white/10 text-muted-foreground"
+                ? "bg-muted border border-border text-muted-foreground"
                 : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
             )}>
               {shareData.already_shared
@@ -143,7 +143,7 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
             </div>
 
             {/* Card preview */}
-            <div className="rounded-xl overflow-hidden border border-white/10">
+            <div className="rounded-xl overflow-hidden border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={shareData.image_url}
@@ -157,14 +157,14 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={handleDownloadImage}
-                className="flex items-center justify-center gap-1.5 text-xs font-medium bg-brand-600 hover:bg-brand-500 text-white py-2.5 rounded-lg transition-colors"
+                className="flex items-center justify-center gap-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-lg transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download Image
               </button>
               <button
                 onClick={handleCopyCaption}
-                className="flex items-center justify-center gap-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-foreground py-2.5 rounded-lg transition-colors"
+                className="flex items-center justify-center gap-1.5 text-xs font-medium bg-muted hover:bg-muted border border-border text-foreground py-2.5 rounded-lg transition-colors"
               >
                 {captionCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 {captionCopied ? "Copied!" : "Copy Caption"}
@@ -175,12 +175,12 @@ export default function ShareReportModal({ reportId, open, onClose }: Props) {
             <div className="space-y-1.5">
               <span className="text-xs text-muted-foreground">Public link</span>
               <div className="flex items-center gap-2">
-                <div className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-muted-foreground truncate font-mono">
+                <div className="flex-1 bg-muted border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground truncate font-mono">
                   {shareData.public_url}
                 </div>
                 <button
                   onClick={handleCopyLink}
-                  className="flex-shrink-0 p-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                  className="flex-shrink-0 p-2 bg-muted hover:bg-muted border border-border rounded-lg transition-colors"
                 >
                   {linkCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>

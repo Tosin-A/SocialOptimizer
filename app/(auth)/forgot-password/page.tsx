@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-brand-500/6 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[240px] bg-blue-500/6 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative">
@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-white/[0.08] bg-[#0d1526] p-8">
+        <div className="rounded-xl border border-border bg-[#0d1526] p-8">
           {sent ? (
             <div className="text-center space-y-4">
               <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
               <p className="text-xs text-muted-foreground">
                 Didn't get it? Check your spam folder or{" "}
                 <button
-                  className="text-brand-400 hover:text-brand-300 underline"
+                  className="text-blue-400 hover:text-blue-300 underline"
                   onClick={() => setSent(false)}
                 >
                   try again
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
                     id="email"
                     type="email"
                     placeholder="you@example.com"
-                    className="pl-10 bg-white/[0.03] border-white/[0.09] focus:border-brand-500/60"
+                    className="pl-10 bg-card border-white/[0.09] focus:border-blue-500/60"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 gap-2 bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                className="w-full h-11 gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold"
                 disabled={loading}
               >
                 {loading
@@ -106,7 +106,7 @@ export default function ForgotPasswordPage() {
 
         <p className="text-center text-sm text-muted-foreground mt-5">
           Remember it?{" "}
-          <Link href="/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
+          <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
             Back to sign in
           </Link>
         </p>

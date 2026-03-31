@@ -41,7 +41,7 @@ export default function MobileMenu() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 z-50 h-full w-72 bg-background border-l border-white/[0.08] p-6 flex flex-col"
+              className="fixed top-0 right-0 z-50 h-full w-72 bg-background border-l border-border p-6 flex flex-col"
             >
               <div className="flex justify-end mb-8">
                 <button
@@ -59,19 +59,19 @@ export default function MobileMenu() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
+                    className="py-3 px-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                   >
                     {link.label}
                   </Link>
                 ))}
               </nav>
 
-              <div className="space-y-3 pt-6 border-t border-white/[0.08]">
+              <div className="space-y-3 pt-6 border-t border-border">
                 <Button variant="ghost" className="w-full justify-center" asChild>
                   <Link href="/login" onClick={() => setOpen(false)}>Sign in</Link>
                 </Button>
                 <Button
-                  className="w-full bg-brand-500 hover:bg-brand-600 text-white font-medium gap-1.5"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium gap-1.5"
                   asChild
                 >
                   <Link href="/signup" onClick={() => setOpen(false)}>

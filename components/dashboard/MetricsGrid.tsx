@@ -50,7 +50,7 @@ export default function MetricsGrid({ stats, accounts, className }: Props) {
         <p className="text-xs text-muted-foreground mb-3">Connected accounts</p>
         <div className="flex flex-wrap gap-2">
           {accounts.map((a) => (
-            <div key={a.id} className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg text-sm">
+            <div key={a.id} className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg text-sm">
               <PlatformIcon platform={a.platform} size={16} />
               <span className="font-medium">@{a.username}</span>
               {a.followers && (
@@ -67,20 +67,20 @@ export default function MetricsGrid({ stats, accounts, className }: Props) {
           icon={Users}
           label="Total followers"
           value={formatCount(stats.total_followers)}
-          color="bg-brand-600/20 text-brand-400"
+          color="bg-blue-500/10 text-blue-400"
         />
         <MetricCard
           icon={TrendingUp}
           label="Avg engagement rate"
           value={`${(stats.avg_engagement_rate * 100).toFixed(2)}%`}
           sub="across all platforms"
-          color="bg-neon-green/10 text-neon-green"
+          color="bg-emerald-500/10 text-emerald-500"
         />
         <MetricCard
           icon={BarChart2}
           label="Posts analyzed"
           value={stats.total_posts_analyzed.toString()}
-          color="bg-neon-purple/10 text-neon-purple"
+          color="bg-blue-400/10 text-blue-400"
         />
         <MetricCard
           icon={Zap}
@@ -93,14 +93,14 @@ export default function MetricsGrid({ stats, accounts, className }: Props) {
           icon={Target}
           label="Niche"
           value={stats.niche ?? "—"}
-          color="bg-neon-cyan/10 text-neon-cyan"
+          color="bg-blue-400/10 text-blue-400"
         />
         <MetricCard
           icon={Calendar}
           label="Platforms"
           value={stats.connected_accounts.toString()}
           sub="connected"
-          color="bg-neon-pink/10 text-neon-pink"
+          color="bg-rose-400/10 text-rose-400"
         />
       </div>
     </div>

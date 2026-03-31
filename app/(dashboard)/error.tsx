@@ -28,13 +28,13 @@ export default function DashboardError({
       <div className="flex items-center gap-3">
         <button
           onClick={reset}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Try again
         </button>
         <a
           href="/dashboard"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 hover:border-white/20 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-white/20 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Back to dashboard
         </a>

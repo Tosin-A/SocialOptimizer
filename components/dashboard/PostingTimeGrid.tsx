@@ -44,7 +44,7 @@ export default function PostingTimeGrid({ recommendations, loading }: Props) {
   return (
     <div className="glass rounded-2xl p-3 sm:p-4 md:p-6 space-y-4">
       <h3 className="font-semibold text-sm flex items-center gap-2">
-        <Clock className="w-4 h-4 text-brand-400" />
+        <Clock className="w-4 h-4 text-blue-400" />
         Best posting times
       </h3>
       <p className="text-xs text-muted-foreground">
@@ -66,10 +66,10 @@ export default function PostingTimeGrid({ recommendations, loading }: Props) {
                     className={cn(
                       "text-xs font-mono px-2.5 py-1 rounded-lg border",
                       slot.label === "Best"
-                        ? "bg-neon-green/10 border-neon-green/20 text-neon-green"
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                         : slot.label === "Good"
                         ? "bg-yellow-400/10 border-yellow-400/20 text-yellow-400"
-                        : "bg-white/5 border-white/10 text-muted-foreground"
+                        : "bg-muted border-border text-muted-foreground"
                     )}
                   >
                     {slot.hour.toString().padStart(2, "0")}:00

@@ -118,7 +118,7 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
                     variant="outline"
                     onClick={() => connect(p.id)}
                     disabled={!!connecting || !!disconnecting}
-                    className="flex-1 gap-1.5 text-xs border-white/10 bg-white/5 hover:bg-white/10 text-slate-300"
+                    className="flex-1 gap-1.5 text-xs border-border bg-muted hover:bg-muted text-slate-300"
                   >
                     {connecting === p.id ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
