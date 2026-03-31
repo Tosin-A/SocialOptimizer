@@ -8,6 +8,108 @@ alwaysApply: true
 Internal engineering reference. Read this before touching any code.
 
 ---
+ SocialOptimizer is a data-driven content analysis platform for creators and marketing agencies. It        
+  connects to your social media accounts (TikTok, Instagram, YouTube, Facebook), pulls post-level        
+  performance data, runs it through a multi-stage AI analysis pipeline, and returns specific, metric-backed 
+  growth recommendations.
+
+  It is not a scheduler, not a vanity dashboard, not a generic AI chatbot. It's an analysis engine.
+
+  ---
+  Core Output: The Analysis Report
+
+  The central product artifact is the AnalysisReport — a structured document containing:
+
+  - Growth scores — Quantified ratings across key dimensions (hook quality, engagement rate, posting
+  consistency, content mix, etc.) displayed as circular progress indicators
+  - Platform signals — Raw performance metrics pulled directly from connected accounts
+  - Ranked fix list — A prioritized list of the highest-impact improvements, ordered by expected ROI
+  - Posting time analysis — Optimal posting windows derived from actual engagement data, displayed as a time
+   grid
+  - Competitor comparison — Gap analysis against scraped competitor profiles showing where the user
+  underperforms and outperforms
+  - AI coaching — An interactive chat interface (Claude-powered) that answers follow-up questions grounded
+  in the user's actual data
+
+  Every insight references a specific metric (e.g., "your CTA usage rate of 23% is below the platform median
+   of 61%") and states a concrete recommendation (e.g., "post 3x per week on Tuesday, Thursday, and
+  Saturday"). No motivational filler. No vague advice.
+
+  ---
+  How It Works
+
+  1. Connect accounts — OAuth integration with TikTok (primary focus), Instagram, YouTube, and Facebook
+  2. Data ingestion — Post-level metrics are fetched via platform APIs and stored in PostgreSQL (Supabase)
+  3. Analysis pipeline — A multi-stage engine (lib/analysis/engine.ts) orchestrates:
+    - Metric aggregation and scoring
+    - NLP/sentiment analysis (Python service using VADER)
+    - Video transcript analysis (Whisper via Python service)
+    - Competitor scraping and gap analysis (httpx-based, no headless browser)
+    - Claude AI synthesis — takes all structured data and produces the final scored report with
+  recommendations
+  4. Async processing — Analyses take 15–30 seconds, so they run through BullMQ/Redis. The API returns a
+  job_id immediately (202 Accepted), and the client polls for completion.
+  5. Report delivery — Structured JSON rendered as an interactive dashboard with charts (Recharts), scores,
+  and actionable lists
+
+  ---
+  Target Users
+
+  ┌───────────────────────────┬─────────────────────────────────────────────────────────────────────────┐
+  │          Segment          │                                Use Case                                 │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ Serious individual        │ Treat their channel as a business; want data-backed decisions, not      │
+  │ creators                  │ motivation                                                              │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ Marketing agencies        │ Run analysis across multiple client accounts; need structured,          │
+  │                           │ shareable reports                                                       │
+  ├───────────────────────────┼─────────────────────────────────────────────────────────────────────────┤
+  │ Growth-focused operators  │ Want specific metrics and deltas, not "post more consistently"          │
+  └───────────────────────────┴─────────────────────────────────────────────────────────────────────────┘
+
+  ---
+  Monetization
+
+  Four tiers via Stripe subscriptions:
+
+  ┌─────────┬─────────┬─────────────┬───────────┬─────────────┬─────────────────────┬───────────────────┐
+  │  Plan   │  Price  │ Analyses/mo │ Platforms │ Competitors │ Content Generations │ AI Coach Messages │
+  ├─────────┼─────────┼─────────────┼───────────┼─────────────┼─────────────────────┼───────────────────┤
+  │ Free    │ $0      │ 1           │ 1         │ 0           │ 3                   │ Locked            │
+  ├─────────┼─────────┼─────────────┼───────────┼─────────────┼─────────────────────┼───────────────────┤
+  │ Starter │ $19/mo  │ 10          │ 2         │ 0           │ 50                  │ 50/mo             │
+  ├─────────┼─────────┼─────────────┼───────────┼─────────────┼─────────────────────┼───────────────────┤
+  │ Pro     │ $49/mo  │ 20          │ 4         │ 3           │ Unlimited           │ 200/mo            │
+  ├─────────┼─────────┼─────────────┼───────────┼─────────────┼─────────────────────┼───────────────────┤
+  │ Agency  │ $199/mo │ 50          │ 10        │ 50          │ Unlimited           │ Unlimited         │
+  └─────────┴─────────┴─────────────┴───────────┴─────────────┴─────────────────────┴───────────────────┘
+
+  Gated features show blurred teaser previews (not blank lock walls) so free users can see exactly what
+  they'd unlock. A share-based growth loop lets users earn 3 bonus scans per shared report.
+
+  ---
+  Tech Stack Summary
+
+  - Frontend: Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui, Recharts, Framer Motion
+  - Backend: Next.js API routes, BullMQ + Redis job queue, Supabase (PostgreSQL + Auth + RLS)
+  - AI: Anthropic Claude API (Opus model) for analysis synthesis, coaching, and content generation
+  - Python microservice: FastAPI — handles NLP (VADER sentiment), transcription (Whisper), and httpx-based
+  competitor scraping
+  - Payments: Stripe (checkout, subscriptions, webhooks)
+  - Deployment: Vercel (frontend), Railway (Python service), Supabase (DB), Upstash (Redis)
+
+  ---
+  Design Philosophy
+
+  - Dark, professional UI — slate-900/950 background, indigo accents, Inter font. Feels like a tool a
+  professional paid for, not a marketing page.
+  - Information-dense — No gratuitous whitespace or decorative illustrations. Scores, percentages, and
+  deltas front and center.
+  - Confident product voice — If the hook score is 34/100, it says that. Error messages are direct and
+  specific, never "Oops! Something went wrong."
+  - Analysis product, not a social media tool — No scheduling, no content calendar, no vanity metrics
+  dashboard. Every feature traces back to the core loop: connect → analyze → improve.
+
 
 ## 1. Project Overview
 
