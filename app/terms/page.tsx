@@ -102,7 +102,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="14. Contact">
-          <p>Questions about these terms: <a href="mailto:hi@cloutai.co.uk" className="text-brand-400 hover:text-brand-300 transition-colors">hi@cloutai.co.uk</a></p>
+          <p>Questions about these terms: <a href="mailto:cloutai.support@gmail.com" className="text-brand-400 hover:text-brand-300 transition-colors">cloutai.support@gmail.com</a></p>
         </Section>
       </article>
 
@@ -128,6 +128,7 @@ function Footer() {
         <div className="flex gap-6 text-xs">
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
           <Link href="/terms" className="text-foreground font-medium">Terms</Link>
+          <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
         </div>
       </div>
     </footer>

@@ -725,7 +725,7 @@ function SettingsContent() {
                     await supabase.auth.signOut();
                     window.location.href = "/";
                   } catch {
-                    toast({ title: "Deletion failed", description: "Try again or contact support.", variant: "destructive" });
+                    toast({ title: "Deletion failed", description: "Try again or contact support at cloutai.support@gmail.com", variant: "destructive" });
                   }
                 }}
               >

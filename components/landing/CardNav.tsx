@@ -52,6 +52,7 @@ const NAV_ITEMS: NavCardItem[] = [
     links: [
       { label: "Privacy policy", href: "/privacy", ariaLabel: "Privacy policy" },
       { label: "Terms of service", href: "/terms", ariaLabel: "Terms of service" },
+      { label: "Contact us", href: "/contact", ariaLabel: "Contact us" },
     ],
   },
 ];

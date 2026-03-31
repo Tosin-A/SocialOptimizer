@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             <li><strong>Delete</strong> your data. Delete your entire account from Settings. This is permanent.</li>
             <li><strong>Disconnect</strong> platforms. Revoke our access at any time from Settings.</li>
           </ul>
-          <p>If you have questions about your data, email <a href="mailto:hi@cloutai.co.uk" className="text-brand-400 hover:text-brand-300 transition-colors">hi@cloutai.co.uk</a>.</p>
+          <p>If you have questions about your data, email <a href="mailto:cloutai.support@gmail.com" className="text-brand-400 hover:text-brand-300 transition-colors">cloutai.support@gmail.com</a>.</p>
         </Section>
 
         <Section title="9. Changes to this policy">
@@ -114,6 +114,7 @@ function Footer() {
         <div className="flex gap-6 text-xs">
           <Link href="/privacy" className="text-foreground font-medium">Privacy</Link>
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+          <Link href="/contact" className="hover:text-foreground transition-colors">Contact</Link>
         </div>
       </div>
     </footer>
