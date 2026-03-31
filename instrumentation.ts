@@ -10,7 +10,7 @@ export async function register() {
       dsn,
       environment: process.env.NODE_ENV,
       tracesSampleRate: 0.1,
-      beforeSend(event: { request?: { headers?: Record<string, string> } }) {
+      beforeSend(event) {
         if (event.request?.headers) {
           delete event.request.headers["authorization"];
           delete event.request.headers["x-service-secret"];

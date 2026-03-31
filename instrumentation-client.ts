@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "production") {
             blockAllMedia: true,
           }),
         ],
-        beforeSend(event: { request?: { headers?: Record<string, string> } }) {
+        beforeSend(event) {
           if (event.request?.headers) {
             delete event.request.headers["authorization"];
             delete event.request.headers["x-service-secret"];
