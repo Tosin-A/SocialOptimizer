@@ -21,12 +21,6 @@ export async function register() {
     });
   }
 
-  if (process.env.NEXT_RUNTIME === "edge") {
-    const mod = await import(/* webpackIgnore: true */ "@sentry/nextjs");
-    mod.init({
-      dsn,
-      environment: process.env.NODE_ENV,
-      tracesSampleRate: 0.1,
-    });
-  }
+  // Edge runtime (middleware) — skip Sentry init.
+  // @sentry/nextjs is not supported in Vercel Edge Functions.
 }
