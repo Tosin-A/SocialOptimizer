@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "predev": "node -e \"const m=+process.versions.node.split('.')[0]; if(m<20||m>22){console.error('Unsupported Node.js '+process.versions.node+'. Use Node 20-22 LTS (recommended: 22).'); process.exit(1)}\"",
+    "predev": "node -e \"const m=+process.versions.node.split('.')[0]; if(m<20){console.error('Unsupported Node.js '+process.versions.node+'. Use Node 20+ LTS (recommended: 22).'); process.exit(1)}\"",
     "dev": "next dev",
     "dev:clean": "npm run clean && npm run dev",
     "clean": "rm -rf .next",
-    "prebuild": "node -e \"const m=+process.versions.node.split('.')[0]; if(m<20||m>22){console.error('Unsupported Node.js '+process.versions.node+'. Use Node 20-22 LTS (recommended: 22).'); process.exit(1)}\"",
+    "prebuild": "node -e \"const m=+process.versions.node.split('.')[0]; if(m<20){console.error('Unsupported Node.js '+process.versions.node+'. Use Node 20+ LTS (recommended: 22).'); process.exit(1)}\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
