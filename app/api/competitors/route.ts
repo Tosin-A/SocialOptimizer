@@ -31,6 +31,41 @@ interface ResearchUserInfo {
   niche: string | null;
 }
 
+/** TikTok Open API: OAuth errors use string `error` + `error_description`. Research endpoints use `error: { code, message, log_id }` with `code === "ok"` on success. */
+function isTikTokResearchResponseOk(json: unknown): boolean {
+  if (!json || typeof json !== "object") return false;
+  const j = json as Record<string, unknown>;
+  if (!("error" in j)) return true;
+  const err = j.error;
+  if (typeof err === "string") return false;
+  if (err && typeof err === "object") {
+    const code = (err as { code?: string }).code;
+    return code === "ok" || code === "OK";
+  }
+  return true;
+}
+
+function extractTikTokApiErrorMessage(json: unknown, fallback: string): string {
+  if (!json || typeof json !== "object") return fallback;
+  const j = json as Record<string, unknown>;
+  if (typeof j.error === "string") {
+    const desc = typeof j.error_description === "string" ? j.error_description : "";
+    return desc ? `${j.error}: ${desc}` : j.error;
+  }
+  if (j.error && typeof j.error === "object" && j.error !== null) {
+    const e = j.error as Record<string, unknown>;
+    const code = e.code;
+    const msg = typeof e.message === "string" ? e.message : "";
+    const logId = typeof e.log_id === "string" ? e.log_id : "";
+    if (code !== "ok" && code !== "OK") {
+      const parts = [String(code), msg].filter(Boolean);
+      if (logId) parts.push(`log_id=${logId}`);
+      return parts.length > 0 ? parts.join(" — ") : fallback;
+    }
+  }
+  return fallback;
+}
+
 function formatDateYYYYMMDD(date: Date): string {
   const y = date.getUTCFullYear();
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -58,11 +93,18 @@ async function getResearchAccessToken(): Promise<string> {
   });
 
   const raw = await res.json().catch(() => null);
-  if (!res.ok) {
-    throw new Error("Failed to authenticate with TikTok Research API.");
+  if (!res.ok || !isTikTokResearchResponseOk(raw)) {
+    throw new Error(
+      extractTikTokApiErrorMessage(
+        raw,
+        "Failed to authenticate with TikTok Research API. Ensure TIKTOK_RESEARCH_CLIENT_KEY / TIKTOK_RESEARCH_CLIENT_SECRET are set for an app with Research API access."
+      )
+    );
   }
 
-  const token = (raw?.data?.access_token as string | undefined) ?? (raw?.access_token as string | undefined);
+  const token =
+    (raw as { data?: { access_token?: string } })?.data?.access_token ??
+    (raw as { access_token?: string })?.access_token;
   if (!token) {
     throw new Error("TikTok Research API did not return an access token.");
   }
@@ -100,11 +142,17 @@ async function queryResearchVideos(
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    throw new Error("TikTok Research API video query failed.");
+  const json = await res.json().catch(() => ({} as Record<string, unknown>));
+
+  if (!res.ok || !isTikTokResearchResponseOk(json)) {
+    throw new Error(
+      extractTikTokApiErrorMessage(
+        json,
+        `TikTok Research API video query failed (${res.status}). Your app may need the research.data.basic scope and Research API approval.`
+      )
+    );
   }
 
-  const json = await res.json().catch(() => ({} as Record<string, unknown>));
   const videos = (json?.data?.videos as ResearchVideo[] | undefined) ?? [];
   return videos;
 }
@@ -125,10 +173,12 @@ async function queryResearchUserInfo(
     }
   );
 
-  if (!res.ok) return null;
-
   const json = await res.json().catch(() => null);
-  const data = json?.data as {
+  if (!res.ok || !isTikTokResearchResponseOk(json)) {
+    return null;
+  }
+
+  const data = (json as { data?: unknown })?.data as {
     username?: string;
     display_name?: string;
     bio_description?: string;
