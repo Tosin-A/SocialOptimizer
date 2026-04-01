@@ -92,14 +92,14 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {PLATFORMS.map((p) => {
           const connected = connectedAccounts.find((a) => a.platform === p.id);
 
           return (
             <div
               key={p.id}
-              className={`bg-gradient-to-br ${p.color} border rounded-xl p-3 sm:p-5 space-y-3`}
+              className={`bg-gradient-to-br ${p.color} border rounded-xl p-4 sm:p-5 space-y-3`}
             >
               <div className="flex items-center gap-3">
                 <PlatformIcon platform={p.id} size={24} />
@@ -107,8 +107,8 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
                   <h3 className="font-semibold">{p.name}</h3>
                   {connected ? (
                     <p className="text-xs text-emerald-400 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
-                      @{connected.username}
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      <span className="truncate">@{connected.username}</span>
                     </p>
                   ) : (
                     <p className="text-xs text-muted-foreground truncate">{p.desc}</p>
@@ -117,20 +117,20 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
               </div>
 
               {connected ? (
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => connect(p.id)}
                     disabled={!!connecting || !!disconnecting}
-                    className="flex-1 gap-1.5 text-xs border-border bg-muted hover:bg-muted text-slate-300"
+                    className="gap-1.5 text-xs border-border bg-muted hover:bg-muted text-slate-300"
                   >
                     {connecting === p.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                     ) : (
-                      <RefreshCw className="w-3.5 h-3.5" />
+                      <RefreshCw className="w-3.5 h-3.5 shrink-0" />
                     )}
-                    Switch account
+                    <span className="truncate">Switch</span>
                   </Button>
                   <Button
                     size="sm"
@@ -140,11 +140,11 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
                     className="gap-1.5 text-xs border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400"
                   >
                     {disconnecting === p.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
                     ) : (
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
                     )}
-                    Disconnect
+                    <span className="truncate">Disconnect</span>
                   </Button>
                 </div>
               ) : (
