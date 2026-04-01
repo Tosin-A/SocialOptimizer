@@ -170,12 +170,13 @@ export async function GET(
     // Invalidate dashboard cache so the UI shows the new account immediately
     revalidateTag(`dashboard:${dbUser.id}`);
 
-    // Clear OAuth cookies
+    // Clear OAuth cookies — add cache-busting timestamp to ensure fresh page load
     const response = NextResponse.redirect(
-      `${appUrl}/dashboard/settings?connected=${platform}`
+      `${appUrl}/dashboard/settings?connected=${platform}&_t=${Date.now()}`
     );
     response.cookies.delete("oauth_state");
     response.cookies.delete("oauth_platform");
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
     return response;
   } catch (err) {
     console.error(`OAuth callback error for ${platform}:`, err);

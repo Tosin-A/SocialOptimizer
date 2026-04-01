@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw, Bell } from "lucide-react";
 import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
@@ -127,6 +127,7 @@ function SettingsContent() {
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const autoCheckoutTriggered = useRef(false);
 
   const fetchPlanData = async (): Promise<UserPlan | null> => {
@@ -135,7 +136,9 @@ function SettingsContent() {
       headers: { "Cache-Control": "no-cache" },
     });
     const accountsData = await accountsRes.json();
-    setAccounts(accountsData.data ?? []);
+    const fetchedAccounts: Account[] = accountsData.data ?? [];
+    console.log("[Settings] fetchPlanData accounts:", JSON.stringify(fetchedAccounts.map(a => ({ id: a.id, platform: a.platform, username: a.username }))));
+    setAccounts(fetchedAccounts);
     setAccountsLoaded(true);
     if (accountsData.user_plan) {
       setUserPlan(accountsData.user_plan);
@@ -209,9 +212,6 @@ function SettingsContent() {
       // Handle return from OAuth connection
       const connectedPlatform = searchParams.get("connected");
       if (connectedPlatform) {
-        // Force a fresh re-fetch after a short delay to ensure DB write has committed
-        await new Promise((r) => setTimeout(r, 500));
-        await fetchPlanData();
         const platformName = connectedPlatform.charAt(0).toUpperCase() + connectedPlatform.slice(1);
         toast({ title: `${platformName} connected`, description: "Your account is linked and ready for analysis" });
         window.history.replaceState({}, "", "/dashboard/settings");
