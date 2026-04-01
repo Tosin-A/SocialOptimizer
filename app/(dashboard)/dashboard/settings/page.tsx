@@ -187,6 +187,14 @@ function SettingsContent() {
         }
       } catch {}
 
+      // Handle return from OAuth connection
+      const connectedPlatform = searchParams.get("connected");
+      if (connectedPlatform) {
+        const platformName = connectedPlatform.charAt(0).toUpperCase() + connectedPlatform.slice(1);
+        toast({ title: `${platformName} connected`, description: "Your account is linked and ready for analysis" });
+        window.history.replaceState({}, "", "/dashboard/settings");
+      }
+
       // Handle return from Stripe checkout — poll until webhook updates the plan
       const upgradedTo = searchParams.get("upgraded");
       if (

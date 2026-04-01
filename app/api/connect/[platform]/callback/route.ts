@@ -131,6 +131,14 @@ export async function GET(
       ? new Date(Date.now() + tokens.expires_in * 1000).toISOString()
       : null;
 
+    // Deactivate any existing rows for this user+platform to prevent duplicates
+    // (handles reconnect after disconnect, or switching to a different account on the same platform)
+    await serviceClient
+      .from("connected_accounts")
+      .update({ is_active: false })
+      .eq("user_id", dbUser.id)
+      .eq("platform", platform as Platform);
+
     // Upsert the connected account
     await serviceClient.from("connected_accounts").upsert(
       {
@@ -156,7 +164,7 @@ export async function GET(
 
     // Clear OAuth cookies
     const response = NextResponse.redirect(
-      `${appUrl}/dashboard?connected=${platform}`
+      `${appUrl}/dashboard/settings?connected=${platform}`
     );
     response.cookies.delete("oauth_state");
     response.cookies.delete("oauth_platform");
