@@ -130,7 +130,7 @@ function SettingsContent() {
   const autoCheckoutTriggered = useRef(false);
 
   const fetchPlanData = async (): Promise<UserPlan | null> => {
-    const accountsRes = await fetch("/api/accounts", {
+    const accountsRes = await fetch(`/api/accounts?_t=${Date.now()}`, {
       cache: "no-store",
       headers: { "Cache-Control": "no-cache" },
     });
@@ -209,27 +209,9 @@ function SettingsContent() {
       // Handle return from OAuth connection
       const connectedPlatform = searchParams.get("connected");
       if (connectedPlatform) {
-        // Re-fetch accounts — retry a few times in case DB write hasn't propagated yet
-        let found = false;
-        for (let attempt = 0; attempt < 5; attempt++) {
-          const freshRes = await fetch("/api/accounts", {
-            cache: "no-store",
-            headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-          });
-          const freshData = await freshRes.json();
-          const freshAccounts: Account[] = freshData.data ?? [];
-          if (freshAccounts.some((a) => a.platform === connectedPlatform && a.is_active)) {
-            setAccounts(freshAccounts);
-            if (freshData.user_plan) setUserPlan(freshData.user_plan);
-            found = true;
-            break;
-          }
-          await new Promise((r) => setTimeout(r, 800));
-        }
-        if (!found) {
-          // Fallback: set whatever we got from the last fetch
-          await fetchPlanData();
-        }
+        // Force a fresh re-fetch after a short delay to ensure DB write has committed
+        await new Promise((r) => setTimeout(r, 500));
+        await fetchPlanData();
         const platformName = connectedPlatform.charAt(0).toUpperCase() + connectedPlatform.slice(1);
         toast({ title: `${platformName} connected`, description: "Your account is linked and ready for analysis" });
         window.history.replaceState({}, "", "/dashboard/settings");
