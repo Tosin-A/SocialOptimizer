@@ -133,14 +133,18 @@ export async function GET(
 
     // Deactivate any existing rows for this user+platform to prevent duplicates
     // (handles reconnect after disconnect, or switching to a different account on the same platform)
-    await serviceClient
+    const { error: deactivateErr } = await serviceClient
       .from("connected_accounts")
       .update({ is_active: false })
       .eq("user_id", dbUser.id)
       .eq("platform", platform as Platform);
 
+    if (deactivateErr) {
+      console.error("Failed to deactivate existing accounts:", deactivateErr);
+    }
+
     // Upsert the connected account
-    await serviceClient.from("connected_accounts").upsert(
+    const { error: upsertErr } = await serviceClient.from("connected_accounts").upsert(
       {
         user_id: dbUser.id,
         platform: platform as Platform,
@@ -158,6 +162,10 @@ export async function GET(
       },
       { onConflict: "user_id,platform,platform_user_id" }
     );
+
+    if (upsertErr) {
+      throw new Error(`Failed to save account: ${upsertErr.message}`);
+    }
 
     // Invalidate dashboard cache so the UI shows the new account immediately
     revalidateTag(`dashboard:${dbUser.id}`);

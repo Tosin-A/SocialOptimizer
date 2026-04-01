@@ -119,6 +119,7 @@ function SettingsContent() {
   const [pillarInput, setPillarInput] = useState("");
   const [savingPillars, setSavingPillars] = useState(false);
   const [syncingPillars, setSyncingPillars] = useState(false);
+  const [accountsLoaded, setAccountsLoaded] = useState(false);
   const [pillarsLoaded, setPillarsLoaded] = useState(false);
   const [emailAnalysis, setEmailAnalysis] = useState(true);
   const [emailDigest, setEmailDigest] = useState(true);
@@ -135,6 +136,7 @@ function SettingsContent() {
     });
     const accountsData = await accountsRes.json();
     setAccounts(accountsData.data ?? []);
+    setAccountsLoaded(true);
     if (accountsData.user_plan) {
       setUserPlan(accountsData.user_plan);
       return accountsData.user_plan;
@@ -187,9 +189,28 @@ function SettingsContent() {
         }
       } catch {}
 
+      // Handle OAuth error redirects
+      const oauthError = searchParams.get("error");
+      if (oauthError) {
+        const messages: Record<string, string> = {
+          oauth_denied: "You declined the authorization request.",
+          no_code: "No authorization code received from the platform.",
+          invalid_state: "Session expired. Try connecting again.",
+          connection_failed: "Could not connect your account. Try again.",
+        };
+        toast({
+          title: "Connection failed",
+          description: messages[oauthError] ?? "Something went wrong. Try again.",
+          variant: "destructive",
+        });
+        window.history.replaceState({}, "", "/dashboard/settings");
+      }
+
       // Handle return from OAuth connection
       const connectedPlatform = searchParams.get("connected");
       if (connectedPlatform) {
+        // Re-fetch accounts to ensure the newly connected account shows up
+        await fetchPlanData();
         const platformName = connectedPlatform.charAt(0).toUpperCase() + connectedPlatform.slice(1);
         toast({ title: `${platformName} connected`, description: "Your account is linked and ready for analysis" });
         window.history.replaceState({}, "", "/dashboard/settings");
@@ -603,10 +624,21 @@ function SettingsContent() {
           <Link2 className="w-4 h-4" /> Connected platforms
         </h2>
 
-        <PlatformConnect
-          mode={accounts.length === 0 ? "initial" : "add"}
-          connectedAccounts={accounts}
-        />
+        {!accountsLoaded ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+          </div>
+        ) : (
+          <PlatformConnect
+            mode={accounts.length === 0 ? "initial" : "add"}
+            connectedAccounts={accounts}
+            embedded
+            onDisconnect={(id) => {
+              setAccounts((prev) => prev.filter((a) => a.id !== id));
+              toast({ title: "Platform disconnected" });
+            }}
+          />
+        )}
       </div>
 
       {/* Email notifications */}

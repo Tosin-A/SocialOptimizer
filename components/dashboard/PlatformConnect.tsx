@@ -50,9 +50,11 @@ interface PlatformConnectProps {
   mode?: "initial" | "add";
   connectedAccounts?: ConnectedAccount[];
   onDisconnect?: (id: string) => void;
+  /** When true, skips the outer card wrapper (use when already inside a card) */
+  embedded?: boolean;
 }
 
-export default function PlatformConnect({ mode = "initial", connectedAccounts = [], onDisconnect }: PlatformConnectProps) {
+export default function PlatformConnect({ mode = "initial", connectedAccounts = [], onDisconnect, embedded = false }: PlatformConnectProps) {
   const [connecting, setConnecting] = useState<string | null>(null);
   const [disconnecting, setDisconnecting] = useState<string | null>(null);
 
@@ -65,8 +67,11 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
     setDisconnecting(platform);
     try {
       await fetch(`/api/accounts?id=${accountId}`, { method: "DELETE" });
-      onDisconnect?.(accountId);
-      window.location.reload();
+      if (onDisconnect) {
+        onDisconnect(accountId);
+      } else {
+        window.location.reload();
+      }
     } finally {
       setDisconnecting(null);
     }
@@ -75,7 +80,7 @@ export default function PlatformConnect({ mode = "initial", connectedAccounts = 
   const isAdd = mode === "add";
 
   return (
-    <div className="glass rounded-2xl p-4 sm:p-6 lg:p-8">
+    <div className={embedded ? "" : "glass rounded-2xl p-4 sm:p-6 lg:p-8"}>
       <div className={`${isAdd ? "mb-6" : "text-center mb-8"}`}>
         <h2 className={`font-bold mb-2 ${isAdd ? "text-base" : "text-xl"}`}>
           {isAdd ? "Connect another platform" : "Connect your social media account"}
