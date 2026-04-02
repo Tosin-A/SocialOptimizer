@@ -56,7 +56,6 @@ function LoginContent() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
       router.push("/dashboard");
-      router.refresh();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Sign in failed";
       toast({ title: "Sign in failed", description: msg, variant: "destructive" });

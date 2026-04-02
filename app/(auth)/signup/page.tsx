@@ -61,7 +61,6 @@ function SignupContent() {
       if (data.session) {
         // Email confirmation is OFF — session created immediately
         router.push(postSignupPath);
-        router.refresh();
       } else {
         // Email confirmation is ON — show check-your-email screen
         setEmailSent(true);
