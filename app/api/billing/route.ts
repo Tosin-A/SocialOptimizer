@@ -33,49 +33,58 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
 
-  // ── Portal ────────────────────────────────────────────────────────────────────
-  if (parsed.data.action === "portal") {
-    if (!dbUser.stripe_customer_id) {
-      return NextResponse.json({ error: "No billing account found" }, { status: 404 });
+  try {
+    // ── Portal ──────────────────────────────────────────────────────────────────
+    if (parsed.data.action === "portal") {
+      if (!dbUser.stripe_customer_id) {
+        return NextResponse.json({ error: "No billing account found" }, { status: 404 });
+      }
+      const session = await getStripe().billingPortal.sessions.create({
+        customer: dbUser.stripe_customer_id,
+        return_url: `${appUrl}/dashboard/settings`,
+      });
+      return NextResponse.json({ url: session.url });
     }
-    const session = await getStripe().billingPortal.sessions.create({
-      customer: dbUser.stripe_customer_id,
-      return_url: `${appUrl}/dashboard/settings`,
+
+    // ── Checkout ────────────────────────────────────────────────────────────────
+    const { plan } = parsed.data;
+    if (dbUser.plan === plan) {
+      return NextResponse.json({ error: "Already on this plan" }, { status: 409 });
+    }
+
+    const planConfig = PLANS[plan];
+    if (!planConfig.stripe_price_id) {
+      return NextResponse.json({ error: "Plan not configured for billing" }, { status: 500 });
+    }
+
+    let customerId = dbUser.stripe_customer_id;
+    if (!customerId) {
+      const customer = await getStripe().customers.create({
+        email: user.email,
+        metadata: { user_id: dbUser.id, auth_id: user.id },
+      });
+      customerId = customer.id;
+      await serviceClient
+        .from("users")
+        .update({ stripe_customer_id: customerId })
+        .eq("id", dbUser.id);
+    }
+
+    const session = await getStripe().checkout.sessions.create({
+      customer: customerId,
+      mode: "subscription",
+      line_items: [{ price: planConfig.stripe_price_id, quantity: 1 }],
+      success_url: `${appUrl}/dashboard/settings?upgraded=${plan}`,
+      cancel_url: `${appUrl}/dashboard/settings?checkout=cancelled`,
+      metadata: { user_id: dbUser.id, plan },
+      subscription_data: { metadata: { user_id: dbUser.id, plan } },
+      allow_promotion_codes: true,
     });
+
     return NextResponse.json({ url: session.url });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Billing request failed";
+    console.error("[billing]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-
-  // ── Checkout ──────────────────────────────────────────────────────────────────
-  const { plan } = parsed.data;
-  if (dbUser.plan === plan) {
-    return NextResponse.json({ error: "Already on this plan" }, { status: 409 });
-  }
-
-  const planConfig = PLANS[plan];
-
-  let customerId = dbUser.stripe_customer_id;
-  if (!customerId) {
-    const customer = await getStripe().customers.create({
-      email: user.email,
-      metadata: { user_id: dbUser.id, auth_id: user.id },
-    });
-    customerId = customer.id;
-    await serviceClient
-      .from("users")
-      .update({ stripe_customer_id: customerId })
-      .eq("id", dbUser.id);
-  }
-
-  const session = await getStripe().checkout.sessions.create({
-    customer: customerId,
-    mode: "subscription",
-    line_items: [{ price: planConfig.stripe_price_id, quantity: 1 }],
-    success_url: `${appUrl}/dashboard/settings?upgraded=${plan}`,
-    cancel_url: `${appUrl}/dashboard/settings?checkout=cancelled`,
-    metadata: { user_id: dbUser.id, plan },
-    subscription_data: { metadata: { user_id: dbUser.id, plan } },
-    allow_promotion_codes: true,
-  });
-
-  return NextResponse.json({ url: session.url });
 }
