@@ -14,7 +14,11 @@ const VALID_PLANS = ["starter", "pro", "agency"] as const;
 
 export default function SignupPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+      </div>
+    }>
       <SignupContent />
     </Suspense>
   );
@@ -47,7 +51,10 @@ function SignupContent() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name } },
+        options: {
+          data: { full_name: name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (error) throw error;
 

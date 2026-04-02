@@ -12,7 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+      </div>
+    }>
       <LoginContent />
     </Suspense>
   );
@@ -28,12 +32,18 @@ function LoginContent() {
   const { toast }    = useToast();
   const supabase     = getSupabaseBrowserClient();
 
-  // Show error toast if redirected here from the auth callback with an error
   useEffect(() => {
-    if (searchParams.get("error") === "auth_callback_failed") {
+    const error = searchParams.get("error");
+    if (error === "auth_callback_failed") {
       toast({
         title: "Authentication failed",
         description: "The sign-in link expired or was already used. Please try again.",
+        variant: "destructive",
+      });
+    } else if (error === "profile_error") {
+      toast({
+        title: "Account setup failed",
+        description: "We couldn't set up your account. Please sign in again — this usually resolves itself.",
         variant: "destructive",
       });
     }
