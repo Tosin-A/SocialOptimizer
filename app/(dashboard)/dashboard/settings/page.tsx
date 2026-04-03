@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw, Bell } from "lucide-react";
+import { Settings, User, CreditCard, Link2, Trash2, Loader2, CheckCircle2, AlertTriangle, ArrowUpRight, Check, Minus, Sparkles, X, RefreshCw, Bell, Video, Copy } from "lucide-react";
 import PlatformConnect from "@/components/dashboard/PlatformConnect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +124,13 @@ function SettingsContent() {
   const [emailAnalysis, setEmailAnalysis] = useState(true);
   const [emailDigest, setEmailDigest] = useState(true);
   const [savingNotifs, setSavingNotifs] = useState(false);
+  const [creatorApp, setCreatorApp] = useState<{
+    status: string;
+    referral_code: string | null;
+    total_earnings: number;
+    pending_payout: number;
+    conversions: number;
+  } | null | undefined>(undefined); // undefined = loading, null = no app
   const { toast } = useToast();
   const supabase = getSupabaseBrowserClient();
   const searchParams = useSearchParams();
@@ -191,6 +198,15 @@ function SettingsContent() {
           setEmailDigest(notifsData.data.email_weekly_digest);
         }
       } catch {}
+
+      // Fetch creator program application status
+      try {
+        const creatorRes = await fetch("/api/creator-program");
+        const creatorData = await creatorRes.json();
+        setCreatorApp(creatorData.data ?? null);
+      } catch {
+        setCreatorApp(null);
+      }
 
       // Handle OAuth error redirects
       const oauthError = searchParams.get("error");
@@ -725,6 +741,104 @@ function SettingsContent() {
             </button>
           </label>
         </div>
+      </div>
+
+      {/* Creator Partner Program */}
+      <div className="glass rounded-2xl p-6 space-y-4">
+        <h2 className="font-semibold flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
+          <Video className="w-4 h-4" /> Creator Partner Program
+        </h2>
+
+        {creatorApp === undefined && (
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+          </div>
+        )}
+
+        {creatorApp === null && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium">Earn from your content</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Create a video about CLOUT and earn $5–$50 per creator you refer. No follower minimum.
+              </p>
+            </div>
+            <a href="/advertise" className="shrink-0">
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-500 text-white whitespace-nowrap">
+                <ArrowUpRight className="w-3.5 h-3.5" /> Apply now
+              </Button>
+            </a>
+          </div>
+        )}
+
+        {creatorApp?.status === "pending" && (
+          <div className="flex items-start gap-3">
+            <span className="text-xs font-semibold text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-2.5 py-0.5 mt-0.5 shrink-0">Under review</span>
+            <p className="text-sm text-muted-foreground">
+              Your application is being reviewed. We'll email you within 3–5 business days.
+            </p>
+          </div>
+        )}
+
+        {creatorApp?.status === "rejected" && (
+          <div className="flex items-start gap-3">
+            <span className="text-xs font-semibold text-red-400 bg-red-400/10 border border-red-400/20 rounded-full px-2.5 py-0.5 mt-0.5 shrink-0">Not approved</span>
+            <p className="text-sm text-muted-foreground">
+              Your application wasn't approved this time. Questions? Email cloutai.support@gmail.com
+            </p>
+          </div>
+        )}
+
+        {creatorApp?.status === "approved" && creatorApp.referral_code && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-sm font-medium text-emerald-400">Partner active</span>
+            </div>
+
+            {/* Referral link */}
+            <div className="space-y-1.5">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Your referral link</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xs font-mono bg-white/5 border border-border rounded-lg px-3 py-2 truncate">
+                  {typeof window !== "undefined" ? window.location.origin : "https://www.cloutai.co.uk"}/?ref={creatorApp.referral_code}
+                </code>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 gap-1.5"
+                  onClick={() => {
+                    const url = `${window.location.origin}/?ref=${creatorApp.referral_code}`;
+                    navigator.clipboard.writeText(url);
+                    toast({ title: "Referral link copied" });
+                  }}
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copy
+                </Button>
+              </div>
+            </div>
+
+            {/* Earnings stats */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Conversions</p>
+                <p className="font-mono font-semibold text-lg">{creatorApp.conversions}</p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Total earned</p>
+                <p className="font-mono font-semibold text-lg text-emerald-400">${Number(creatorApp.total_earnings).toFixed(2)}</p>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Pending payout</p>
+                <p className="font-mono font-semibold text-lg text-blue-400">${Number(creatorApp.pending_payout).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground">
+              Payouts processed monthly (min. $20). Reach out at cloutai.support@gmail.com to arrange payment.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Danger zone */}

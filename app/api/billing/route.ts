@@ -2,9 +2,11 @@
 // { action: "checkout", plan: "pro" }  → creates Checkout session
 // { action: "portal" }                 → creates billing portal session
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { getSupabaseServerClient, getSupabaseServiceClient } from "@/lib/supabase/server";
 import { getStripe, PLANS } from "@/lib/stripe";
 import { z } from "zod";
+import { REFERRAL_COOKIE } from "@/lib/referral";
 
 const BillingSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("checkout"), plan: z.enum(["starter", "pro", "agency"]) }),
@@ -70,14 +72,21 @@ export async function POST(req: NextRequest) {
         .eq("id", dbUser.id);
     }
 
+    // Attach referral code if present in cookie
+    const cookieStore = await cookies();
+    const refCode = cookieStore.get(REFERRAL_COOKIE)?.value ?? null;
+
+    const sessionMetadata: Record<string, string> = { user_id: dbUser.id, plan };
+    if (refCode) sessionMetadata.referral_code = refCode;
+
     const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: planConfig.stripe_price_id, quantity: 1 }],
       success_url: `${appUrl}/dashboard/settings?upgraded=${plan}`,
       cancel_url: `${appUrl}/dashboard/settings?checkout=cancelled`,
-      metadata: { user_id: dbUser.id, plan },
-      subscription_data: { metadata: { user_id: dbUser.id, plan } },
+      metadata: sessionMetadata,
+      subscription_data: { metadata: sessionMetadata },
       allow_promotion_codes: true,
     });
 

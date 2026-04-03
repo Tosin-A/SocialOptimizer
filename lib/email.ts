@@ -105,6 +105,16 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
       <p style="font-size:12px;color:#64748b;margin:8px 0 0;text-align:center;">
         You can also find all generated reports in your Reports tab: <a href="${APP_URL}/dashboard/reports" style="color:#4f46e5;text-decoration:none;">View all reports</a>.
       </p>
+
+      <div style="margin-top:24px;padding:16px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;">
+        <p style="font-size:12px;font-weight:600;color:#0369a1;margin:0 0 4px;">Earn from your content</p>
+        <p style="font-size:12px;color:#334155;margin:0 0 10px;line-height:1.5;">
+          Create a video about CLOUT and earn up to $50 per creator you refer. Join our creator partner program.
+        </p>
+        <a href="${APP_URL}/advertise" style="font-size:12px;font-weight:600;color:#4f46e5;text-decoration:none;">
+          Join the creator program →
+        </a>
+      </div>
     </div>
 
     <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
@@ -121,6 +131,59 @@ export async function sendAnalysisReady(opts: AnalysisReadyOptions) {
     from: FROM,
     to: opts.to,
     subject: `Your ${opts.platform} analysis is ready — Growth Score: ${opts.growthScore}/100`,
+    html,
+  });
+}
+
+// ─── Creator program application confirmation ─────────────────────────────────
+
+interface CreatorConfirmationOptions {
+  to: string;
+  name: string;
+}
+
+export async function sendCreatorApplicationConfirmation(opts: CreatorConfirmationOptions) {
+  const name = escapeHtml(opts.name);
+  const advertiseUrl = `${APP_URL}/advertise`;
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:#f8fafc;margin:0;padding:32px 16px;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+
+    <div style="background:#000;padding:28px 32px;">
+      <img src="${APP_URL}/logo.png" alt="CLOUT" width="120" height="36" style="display:block;" />
+      <div style="color:#c7d2fe;font-size:13px;margin-top:8px;">Creator program application received</div>
+    </div>
+
+    <div style="padding:28px 32px;">
+      <p style="font-size:15px;font-weight:600;color:#0f172a;margin:0 0 12px;">Hey ${name},</p>
+      <p style="font-size:14px;color:#334155;margin:0 0 16px;line-height:1.6;">
+        We've got your application for the CLOUT Creator Program. We review all applications manually and will get back to you within 3–5 business days.
+      </p>
+      <p style="font-size:14px;color:#334155;margin:0 0 24px;line-height:1.6;">
+        If approved, you'll receive a personal referral link. Every creator who signs up and upgrades through your link earns you a commission — <strong>$5 for Starter, $15 for Pro, $50 for Agency</strong>.
+      </p>
+
+      <a href="${advertiseUrl}" style="display:block;background:#4f46e5;color:#fff;text-decoration:none;text-align:center;padding:13px 24px;border-radius:8px;font-weight:600;font-size:14px;margin-bottom:10px;">
+        View program details →
+      </a>
+    </div>
+
+    <div style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+      <p style="font-size:11px;color:#94a3b8;margin:0;">
+        Questions? Reply to this email or reach us at cloutai.support@gmail.com
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  return getTransporter().sendMail({
+    from: FROM,
+    to: opts.to,
+    subject: "CLOUT Creator Program — application received",
     html,
   });
 }

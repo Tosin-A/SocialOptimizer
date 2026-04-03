@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/toaster";
 import QueryProvider from "@/components/providers/QueryProvider";
 import DarkVeil from "@/components/landing/DarkVeil";
+import RefCapture from "@/components/RefCapture";
 
 const sans = localFont({
   src: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
@@ -125,6 +127,9 @@ export default function RootLayout({
           <div className="absolute inset-0 bg-background/60" />
         </div>
         <QueryProvider>
+          <Suspense fallback={null}>
+            <RefCapture />
+          </Suspense>
           {children}
           <Toaster />
           <Analytics />

@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, planFromPriceId, analysesLimitForPlan } from "@/lib/stripe";
 import { getSupabaseServiceClient } from "@/lib/supabase/server";
+import { commissionForPlan } from "@/lib/referral";
 import type { PlanType } from "@/types";
 
 export async function POST(req: NextRequest) {
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
       const session = event.data.object;
       const userId = session.metadata?.user_id;
       const plan = session.metadata?.plan as PlanType | undefined;
+      const referralCode = session.metadata?.referral_code ?? null;
 
       if (!userId || !plan) break;
 
@@ -50,6 +52,38 @@ export async function POST(req: NextRequest) {
         event_type: "plan_upgraded",
         metadata: { plan, session_id: session.id },
       });
+
+      // Credit referral commission if this checkout was attributed to a creator
+      if (referralCode) {
+        const { data: creatorApp } = await supabase
+          .from("creator_applications")
+          .select("id, total_earnings")
+          .eq("referral_code", referralCode)
+          .eq("status", "approved")
+          .maybeSingle();
+
+        if (creatorApp) {
+          const commission = commissionForPlan(plan);
+
+          // Idempotent insert — stripe_session_id is UNIQUE
+          const { error: convError } = await supabase
+            .from("referral_conversions")
+            .insert({
+              creator_application_id: creatorApp.id,
+              referred_user_id: userId,
+              plan,
+              commission_amount: commission,
+              stripe_session_id: session.id,
+            });
+
+          if (!convError) {
+            await supabase
+              .from("creator_applications")
+              .update({ total_earnings: Number(creatorApp.total_earnings) + commission })
+              .eq("id", creatorApp.id);
+          }
+        }
+      }
 
       break;
     }

@@ -349,6 +349,62 @@ CREATE TABLE niche_benchmarks (
   UNIQUE (platform, niche)
 );
 
+-- ─── CREATOR AMBASSADOR PROGRAM ───────────────────────────────────────────────
+
+-- Approved status → referral_code is generated and program is active
+CREATE TABLE creator_applications (
+  id                 UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id            UUID REFERENCES users(id) ON DELETE SET NULL,
+  email              TEXT NOT NULL,
+  name               TEXT NOT NULL,
+  tiktok_handle      TEXT,
+  instagram_handle   TEXT,
+  youtube_handle     TEXT,
+  followers_est      INT,                         -- self-reported reach
+  content_pitch      TEXT,                        -- what they plan to create
+  status             TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected
+  referral_code      TEXT UNIQUE,                 -- set on approval, used in checkout
+  total_earnings     DECIMAL(10,2) NOT NULL DEFAULT 0,
+  paid_out           DECIMAL(10,2) NOT NULL DEFAULT 0,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE creator_applications ENABLE ROW LEVEL SECURITY;
+-- Users can read/insert their own application; service role manages updates
+CREATE POLICY "creator_app_owner" ON creator_applications
+  FOR SELECT USING (user_id = (SELECT id FROM users WHERE auth_id = auth.uid()));
+CREATE POLICY "creator_app_insert" ON creator_applications
+  FOR INSERT WITH CHECK (true);  -- open — validated server-side
+
+CREATE INDEX idx_creator_apps_user ON creator_applications(user_id);
+CREATE INDEX idx_creator_apps_code ON creator_applications(referral_code);
+
+CREATE TRIGGER creator_applications_updated_at
+  BEFORE UPDATE ON creator_applications FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- One row per paid conversion attributed to a creator
+CREATE TABLE referral_conversions (
+  id                       UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  creator_application_id   UUID NOT NULL REFERENCES creator_applications(id),
+  referred_user_id         UUID REFERENCES users(id) ON DELETE SET NULL,
+  plan                     TEXT NOT NULL,
+  commission_amount        DECIMAL(10,2) NOT NULL,
+  stripe_session_id        TEXT UNIQUE NOT NULL,
+  created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE referral_conversions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "referral_conv_owner" ON referral_conversions
+  FOR SELECT USING (
+    creator_application_id IN (
+      SELECT id FROM creator_applications
+      WHERE user_id = (SELECT id FROM users WHERE auth_id = auth.uid())
+    )
+  );
+
+CREATE INDEX idx_referral_conv_app ON referral_conversions(creator_application_id);
+
 -- ─── AUDIT / USAGE LOG ────────────────────────────────────────────────────────
 
 CREATE TABLE usage_events (
